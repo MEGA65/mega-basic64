@@ -25,6 +25,7 @@ tools:	$(TOOLS)
 	$(CA65) $< -l $*.list
 
 $(BINDIR)/megabasic64.prg:       $(MEGABASICOBJS)
+	mkdir -p $(BINDIR)
 	$(LD65) $< --mapfile $*.map -o $(BINDIR)/megabasic64.prg
 
 $(TOOLDIR)/pngtoscreens:	$(TOOLDIR)/pngtoscreens.c Makefile
