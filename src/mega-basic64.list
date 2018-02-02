@@ -1,0 +1,26 @@
+ca65 V2.16 - Git 6002e59
+Main file   : src/mega-basic64.s
+Current file: src/mega-basic64.s
+
+000000r 1               ;-------------------------------------------------------------------------------
+000000r 1               ;BASIC interface
+000000r 1               ;-------------------------------------------------------------------------------
+000000r 1               	.code
+000000r 1               	.org		$07FF			;start 2 before load address so
+0007FF  1               						;we can inject it into the binary
+0007FF  1               
+0007FF  1  01 08        	.byte		$01, $08		;load address
+000801  1               
+000801  1  0B 08 0A 00  	.word		_basNext, $000A		;BASIC next addr and this line #
+000805  1  9E           	.byte		$9E			;SYS command
+000806  1  32 30 36 31  	.asciiz		"2061"			;2061 and line end
+00080A  1  00           
+00080B  1               _basNext:
+00080B  1  00 00        	.word		$0000			;BASIC prog terminator
+00080D  1               	.assert         * = $080D, error, "BASIC Loader incorrect!"
+00080D  1               bootstrap:
+00080D  1  4C 10 08     		JMP	init
+000810  1               ;-------------------------------------------------------------------------------
+000810  1               init:
+000810  1  60           		rts
+000810  1               
