@@ -67,6 +67,7 @@ megabasic_enable:
 		cpx	#$ff
 		bne @tokenisecopy
 
+.if 1
 		;;  Copy C64 tokens to start of our token list
 		;; (but don't copy end of token list)
 		LDX	#(($A19C -1) - $A09E + 1)
@@ -76,6 +77,7 @@ megabasic_enable:
 		dex
 		cpx 	#$ff
 		bne 	@tokencopy
+.endif
 		
 		;; install vector
 		lda #<c64_tokenise
@@ -171,14 +173,12 @@ mega_a5bc:
 		bit token_hi_page_flag
 		bne @readfromhi
 
-		;; XXX - DEBUG
-		STX $0400
-		STY $0401
-		
+		SEC
 		SBC tokenlist,y
+		
 		jmp addr_of_a5bc+3
 @readfromhi:
-
+		SEC
 		SBC tokenlist+$100,y
 		jmp addr_of_a5bc+3
 
@@ -220,8 +220,10 @@ tokenlist:
 		;; Reserve space for C64 BASIC token list, less the end $00 marker
 		.res ($A19C - $A09E + 1), $00
 		;; Have a 1 letter token, so that no token crosses the page boundary
-		.byte $DC	; GBP symbol (now a token :)
+		;; .byte $DC	; GBP symbol (now a token :)
+		.byte $00	
 		;; Now we have our new tokens
+		.byte $53,$43,$52,$45,$45,$CE ; "SCREEN"
 		;; And the end byte
 		.byte $00
 		
