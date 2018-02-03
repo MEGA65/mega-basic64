@@ -267,6 +267,12 @@ megabasic_detokenise:
 		;; Y is used as the offset in the token list, and gets pre-incremented
 		;; so we start with it equal to $00 - $01 = $FF
 		LDY	#$FF
+		;; Set token_hi_page_flag to $FF, so that when Y increments for the first
+		;; time, it increments token_hi_page_flag, making it $00 for the first page of
+		;; the token list.
+		STY	token_hi_page_flag
+
+		
 @detokeniseSearchLoop:
 		;; Decrement token index by 1
 		DEX
@@ -274,17 +280,12 @@ megabasic_detokenise:
 		beq	@thisIsTheToken
 		;; Since it is not this token, we need to skip over it
 @detokeniseSkipLoop:
-		INY 		; point to next byte in token list
-		;; Read the next byte, and see if bit 7 is set, to indicate end of
-		;; token string.  If bit 7 is clear, loop until we find it
-		LDA	tokenlist, Y
+		jsr advance_and_read_token_byte
 		BPL	@detokeniseSkipLoop
 		;; Found end of token, loop to see if the next token is it
 		BMI	@detokeniseSearchLoop
 @thisIsTheToken:
-		;; Advance to first byte of the token
-		INY
-		LDA	tokenlist, Y
+		jsr advance_and_read_token_byte
 		;; If it is the last byte of the token, return control to the LIST
 		;; command routine from the BASIC ROM
 		BMI	jump_list_command_finish_printing_token_a6ef
@@ -309,8 +310,6 @@ megabasic_detokenise:
 		;; actually run code. While still not a very strong form of source
 		;; protection, it could have been a rather fun thing to try.
 
-		INC	$D020
-		
 		;; Instead of having this error, we will just cause the character to
 		;; be printed normally.
 		LDY	$49
@@ -318,3 +317,28 @@ jump_to_a6f3:
 		JMP 	$A6F3
 jump_list_command_finish_printing_token_a6ef:
 		JMP	$A6EF
+
+advance_and_read_token_byte:
+		;; Skip the patch byte at offset $0FF in the token list
+		CPY	#$FE
+		BNE	@nopatch
+		INY
+@nopatch:
+		;; Check if we are crossing to the 2nd page of the token list
+		;; (The INC works here, because we initialise token_hi_page_flag to $FF)
+		CPY	#$FF
+		bne	@notTokenPageWrap
+		inc	token_hi_page_flag
+@notTokenPageWrap:
+		INY 		; point to next byte in token list
+		
+		;; Read the next byte, and see if bit 7 is set, to indicate end of
+		;; token string.  If bit 7 is clear, loop until we find it
+		BIT	token_hi_page_flag
+		BNE	@tokenFromSecondPage
+		LDA	tokenlist, Y
+		JMP	@gotTokenByte
+@tokenFromSecondPage:
+		LDA	tokenlist+$100, Y
+@gotTokenByte:
+		RTS
