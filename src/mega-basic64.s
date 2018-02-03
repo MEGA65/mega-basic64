@@ -81,6 +81,11 @@ megabasic_enable:
 		lda #>megabasic_detokenise
 		sta untokenise_vector+1
 
+		;; Install new execute routine
+		lda #<megabasic_execute
+		sta execute_vector
+		lda #>megabasic_execute
+		sta execute_vector+1
 		
 		RTS
 
@@ -111,14 +116,15 @@ tokenlist:
 		;; End of list marker (remove to enable new tokens)
 				;.byte $00
 		;; Now we have our new tokens
-		.if 1
+		;; extra_token_count must be correctly set to the number of tokens
+		extra_token_count = 3
 		.byte "SCREE",'N'+$80 
 		.byte "BORDE",'R'+$80
 		.byte "TILESE",'T'+$80
-		.endif
 		;; And the end byte
 		.byte $00
 
+		
 megabasic_tokenise:
 
 		;; Get hi page flag for tokenlist scanning, so that if we INC it, it will
@@ -453,13 +459,16 @@ jump_to_a6f3:
 jump_list_command_finish_printing_token_a6ef:
 		JMP	$A6EF
 
-megabasic_execute:
+megabasic_execute:		
 		JSR	$0073
 		CMP	#$CC
 		BCC	@basic2_token
 		CMP	#$CC + extra_token_count
 		BCC	megabasic_execute_token
-@basic2_token:	JMP	$A7E7
+@basic2_token:
+		;; $A7E7 expects Z flag set if ==$00, so update it
+		CMP	#$00
+		JMP	$A7E7
 
 megabasic_execute_token:
 		INC $D020
