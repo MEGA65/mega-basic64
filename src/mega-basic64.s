@@ -129,7 +129,12 @@ megabasic_tokenise:
 		PHA
 		LDA 	#$FF
 		STA	token_hi_page_flag
-		INC	$0427
+		;; XXX - Why on earth do we need these 3 NOPs here for parsing the extra tokens
+		;; to work? If you remove one, then the first extra token doesn't parse, and the
+		;; others are out by one, so token2 parses as though it were token1.
+		NOP
+		NOP
+		NOP
 		PLA
 
 		;; Get the basic execute pointer low byte
@@ -217,6 +222,12 @@ megabasic_tokenise:
 		;; A = $80, so if we add the token number stored in $0B, we get the actual
 		;; token number
 		ORA	$0B
+		;; XXX Why on earth do we need these three NOPs here to correctly parse the extra
+		;; tokens? If you remove one, then the first token no longer parses, and the later
+		;; ones get parsed with token number one less than it should be!
+		NOP
+		NOP
+		NOP
 @tokeniseNextProgramCharacter:
 		;; Restore the saved index into the BASIC program line
 		LDY	$71
@@ -275,7 +286,6 @@ megabasic_tokenise:
 @advanceToNextTokenLoop:
 		jsr 	tokenListAdvancePointer
 		jsr 	tokenListReadByteMinus1
-		STA	$0600,Y
 		BPL	@advanceToNextTokenLoop
 		;; Check if we have reached the end of the token list
 		jsr	tokenListReadByte
@@ -307,7 +317,12 @@ tokenListAdvancePointer:
 		LDA	token_hi_page_flag
 		EOR	#$FF
 		STA	token_hi_page_flag
-		STA 	$0400+999
+		;; XXX Why on earth do we need these three NOPs here to correctly parse the extra
+		;; tokens? If you remove one, then the first token no longer parses, and the later
+		;; ones get parsed with token number one less than it should be!
+		NOP
+		NOP
+		NOP
 		PLA
 		PLP
 @dontAdvanceTokenListPage:
@@ -318,9 +333,9 @@ tokenListAdvancePointer:
 		tax
 		bit	token_hi_page_flag
 		bmi	@page2
-		inc	$0400,x
+		;; inc	$0400,x
 		jmp	@done
-@page2:		inc	$0500,x
+@page2:				; inc	$0500,x
 		@done:
 		.if 0
 		LDA	#$FF
@@ -438,3 +453,14 @@ jump_to_a6f3:
 jump_list_command_finish_printing_token_a6ef:
 		JMP	$A6EF
 
+megabasic_execute:
+		JSR	$0073
+		CMP	#$CC
+		BCC	@basic2_token
+		CMP	#$CC + extra_token_count
+		BCC	megabasic_execute_token
+@basic2_token:	JMP	$A7E7
+
+megabasic_execute_token:
+		INC $D020
+		jmp megabasic_execute_token
