@@ -109,11 +109,12 @@ tokenlist:
 		;; Reserve space for C64 BASIC token list, less the end $00 marker
 		.res ($A19C - $A09E + 1), $00
 		;; End of list marker (remove to enable new tokens)
-		.byte $00
-		;; Have a 1 letter token, so that no token crosses the page boundary
-		 .byte $DC	; GBP symbol (now a token :)
+				;.byte $00
 		;; Now we have our new tokens
-		.byte $53,$43,$52,$45,$45,$CE ; "SCREEN"
+		.if 0
+		.byte "SCREE",'N'+$80 
+		.byte "BORDE",'R'+$80
+		.endif
 		;; And the end byte
 		.byte $00
 
