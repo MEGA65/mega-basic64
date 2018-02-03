@@ -58,16 +58,7 @@ c000block:
 		.org $C000
 
 megabasic_enable:
-		;; Copy C64 tokenise routine
-		LDX #($A612-$A57C+1-1)
-@tokenisecopy:
-		lda $a57c,x
-		sta c64_tokenise,x
-		dex
-		cpx	#$ff
-		bne @tokenisecopy
 
-.if 1
 		;;  Copy C64 tokens to start of our token list
 		;; (but don't copy end of token list)
 		LDX	#(($A19C -1) - $A09E + 1)
@@ -77,56 +68,12 @@ megabasic_enable:
 		dex
 		cpx 	#$ff
 		bne 	@tokencopy
-.endif
 		
 		;; install vector
-		lda #<c64_tokenise
+		lda #<megabasic_tokenise
 		sta tokenise_vector
-		lda #>c64_tokenise
+		lda #>megabasic_tokenise
 		sta tokenise_vector+1
-
-		;; Patch the tokenise routine
-		
-		;; $A5AE resets Y to 0 (start of token list), and stores it also in $0B
-		;; 		LDY #$00
-		;; 		STY $0B
-		lda	#$4c
-		sta 	addr_of_a5ae+0
-		lda	#<mega_a5ae
-		sta 	addr_of_a5ae+1
-		lda	#>mega_a5ae
-		sta 	addr_of_a5ae+2
-		
-		
-		;; $A5BC does SBC tokenlist,Y
-		;; 		SBC $A09E,Y
-		lda	#$4c
-		sta 	addr_of_a5bc+0
-		lda	#<mega_a5bc
-		sta 	addr_of_a5bc+1
-		lda	#>mega_a5bc
-		sta 	addr_of_a5bc+2
-
-		;; $A5F9 skips to the next word in the token list.
-		;; 	@l	INY
-		;; 		LDA tokenlist-1,y
-		;; 		BPL @l
-		lda	#$4c
-		sta 	addr_of_a5f9+0
-		lda	#<mega_a5f9
-		sta 	addr_of_a5f9+1
-		lda	#>mega_a5f9
-		sta 	addr_of_a5f9+2
-
-		;; $A5FF branches to $A5B8 if the end of the token list has not yet been reached.
-		;; 		LDA tokenlist,y
-		;; 		BNE $A5B8
-		lda	#$4c
-		sta 	addr_of_a5ff+0
-		lda	#<mega_a5ff
-		sta 	addr_of_a5ff+1
-		lda	#>mega_a5ff
-		sta 	addr_of_a5ff+2
 
 		;; Install new detokenise routine
 		lda #<megabasic_detokenise
@@ -140,7 +87,6 @@ megabasic_enable:
 megabasic_disable:
 		RTS
 
-megabasic_tokenise:
 		;; Works on modified version of the ROM tokeniser, but with extended
 		;; token list.
 		;; Original C64 ROM routine is from $A57C to $A612.
@@ -154,70 +100,7 @@ megabasic_tokenise:
 
 		;; We will need two pages of tokens, so $A5AE needs to reset access to the low-page
 		;; of tokens, as well as Y=0, $0B=0
-		addr_of_a5ae	=	c64_tokenise + $A5AE - $A57C
-		addr_of_a5b8	=	c64_tokenise + $A5B8 - $A57C
-		addr_of_a5bc	=	c64_tokenise + $A5BC - $A57C
-		addr_of_a5f9	=	c64_tokenise + $A5F9 - $A57C
-		addr_of_a5ff	=	c64_tokenise + $A5FF - $A57C
 
-mega_a5ae:
-		LDY #$00
-		STY $0B
-		STY token_hi_page_flag
-		jmp addr_of_a5ae+4
-
-mega_a5bc:
-		;; XXX - This routine assumes that no token crosses the page boundary.
-		;; We purposely structure our token list to ensure this is true.
-
-		;; Make sure we don't try to go over the end of the page
-		cpy #$ff
-		bne @notendofpage
-		sty token_hi_page_flag
-		ldy #$00
-@notendofpage:
-		bit token_hi_page_flag
-		bne @readfromhi
-
-		SEC
-		SBC tokenlist,y
-		
-		jmp addr_of_a5bc+3
-@readfromhi:
-		SEC
-		SBC tokenlist+$100,y
-		jmp addr_of_a5bc+3
-
-mega_a5f9:
-@l:
-		INY
-		beq @readfromhi
-		bit token_hi_page_flag
-		bne @readfromhi
- 		LDA tokenlist-1,y
- 		BPL @l
-		jmp addr_of_a5ff
-@readfromhi:
-		;; Set token high page flag if we stepped over
-		LDA #$01
-		sta token_hi_page_flag
- 		LDA tokenlist+$100-1,y
- 		BPL @l
-		jmp addr_of_a5ff		
-
-mega_a5ff:
-		bit token_hi_page_flag
-		bne @readfromhi
-		LDA tokenlist,y
-		BNE jmp_to_addr_of_A5B8
-		jmp addr_of_a5ff+3
-@readfromhi:
-		LDA tokenlist+$100,y
-		BNE jmp_to_addr_of_A5B8
-		jmp addr_of_a5ff+3
-
-jmp_to_addr_of_A5B8:
-		jmp addr_of_a5b8
 
 token_hi_page_flag:
 		.byte $00
@@ -225,15 +108,184 @@ token_hi_page_flag:
 tokenlist:
 		;; Reserve space for C64 BASIC token list, less the end $00 marker
 		.res ($A19C - $A09E + 1), $00
+		;; End of list marker (remove to enable new tokens)
+		.byte $00
 		;; Have a 1 letter token, so that no token crosses the page boundary
 		 .byte $DC	; GBP symbol (now a token :)
 		;; Now we have our new tokens
 		.byte $53,$43,$52,$45,$45,$CE ; "SCREEN"
 		;; And the end byte
 		.byte $00
+
+megabasic_tokenise:
+
+		;; Get hi page flag for tokenlist scanning, so that if we INC it, it will
+		;; point back to the first page.  As we start with offset = $FF, the first
+		;; increment will do this. Since offsets are pre-incremented, this means
+		;; that it will switch to the low page at the outset, and won't switch again
+		;; until a full page has been stepped through.
+		PHA
+		LDA 	#$FF
+		STA	token_hi_page_flag
+		INC	$0427
+		PLA
+
+		;; Get the basic execute pointer low byte
+		LDX	$7A
+		;; Set the save index
+		LDY	#$04
+		;; Clear the quote/data flag
+		STY	$0F
+
+@tokeniseNextChar:
+		;; Read a byte from the input buffer
+		LDA	$0200,X
+		;; If bit 7 is clear, try to tokenise
+		BPL	@tryTokenise
+		;; Now check for PI (char $FF)
+		CMP	#$FF 	; = PI
+		BEQ	@gotToken_a5c9
+		;; Not PI, but bit 7 is set, so just skip over it, and don't store
+		INX
+		BNE	@tokeniseNextChar
+@tryTokenise:
+		;; Now look for some common things
+		;; Is it a space?
+		CMP	#$20	; space
+		BEQ	@gotToken_a5c9
+		;; Not space, so save byte as search character
+		STA	$08
+		CMP	#$22	; quote marks
+		BEQ	@foundQuotes_a5ee
+		BIT	$0F	; Check quote/data mode
+		BVS	@gotToken_a5c9 ; If data mode, accept as is
+		CMP	#$3F	       ; Is it a "?" (short cut for PRINT)
+		BNE	@notQuestionMark
+		LDA	#$99	; Token for PRINT
+		BNE	@gotToken_a5c9 ; Accept the print token (branch always taken, because $99 != $00)
+@notQuestionMark:
+		;; Check for 0-9, : or ;
+		CMP 	#$30
+		BCC	@notADigit
+		CMP	#$3C
+		BCC	@gotToken_a5c9
+@notADigit:
+		;; Remember where we are upto in the BASIC line of text
+		STY	$71
+		;; Now reset the pointer into tokenlist
+		LDY	#$00
+		;; And the word index
+		STY	$0B
+		;; Decrement Y from $00 to $FF, because the inner loop increments before processing
+		DEY
+		;; Save BASIC execute pointer
+		STX	$7A
+		;; Decrement X also, because the inner loop pre-increments
+		DEX
+@compareNextChar_a5b6:
+		;; Advance pointer in tokenlist
+		INY
+		;; Advance pointer in BASIC text
+		INX
+		;; Read byte of basic program
+		LDA	$0200, X
+@compareProgramTextAndToken:
+		;; Now subtract the byte from the token list.
+		;; If the character matches, we will get $00 as result.
+		;; If the character matches, but was ORd with $80, then $80 will be the
+		;; result.  This allows efficient detection of whether we have found the
+		;; end of a keyword.
+		SEC
+		SBC	tokenlist, Y
+		;; If zero, then compare the next character
+		BEQ	@compareNextChar_a5b6
+		;; If $80, then it is the end of the token, and we have matched the token
+		CMP	#$80
+		BNE	@tokenDoesntMatch
+		;; A = $80, so if we add the token number stored in $0B, we get the actual
+		;; token number
+		ORA	$0B
+@tokeniseNextProgramCharacter:
+		;; Restore the saved index into the BASIC program line
+		LDY	$71
+@gotToken_a5c9:
+		;; We have worked out the token, so record it.
+		INX
+		INY
+		STA	$01FB, Y
+		;; Now check for end of line (token == $00)
+		LDA	$01FB, Y
+		BEQ @tokeniseEndOfLine_a609
+
+		;; Now think about what we have to do with the token
+		SEC
+		SBC	#$3A
+		BEQ	@tokenIsColon_a5dc
+		CMP	#($83 - $3A) ; (=$49) Was it the token for DATA?
+		BNE	@tokenMightBeREM_a5de
+@tokenIsColon_a5dc:
+		;; Token was DATA
+		STA	$0F	; Store token - $3A (why?)
+@tokenMightBeREM_a5de:
+		SEC
+		SBC	#($8F - $3A) ; (=$55) Was it the token for REM?
+		BNE	@tokeniseNextChar
+		;; Was REM, so say we are searching for end of line (== $00)
+		;; (which is conveniently in A now) 
+		STA	$08	
+@label_a5e5:
+		;; Read the next BASIC program byte
+		LDA	$0200, X
+		BEQ	@gotToken_a5c9
+		;; Does the next character match what we are searching for?
+		CMP	$08
+		;; Yes, it matches, so indicate we have the token
+		BEQ	@gotToken_a5c9
+
+@foundQuotes_a5ee:
+		;; Not a match yet, so advance index for tokenised output
+		INY
+		;; And write token to output
+		STA	$0200 - 5, Y
+		;; Increment read index of basic program
+		INX
+		;; Read the next BASIC byte (X should never be zero)
+		BNE	@label_a5e5
+
+@tokenDoesntMatch:
+		;; Restore BASIC execute pointer to start of the token we are looking at,
+		;; so that we can see if the next token matches
+		LDX	$7A
+		;; Increase the token ID number, since the last one didn't match
+		INC	$0B
+		;; Advance pointer in tokenlist from the end of the last token to the start
+		;; of the next token, ready to compare the BASIC program text with this token.
+@advanceToNextTokenLoop:
+		INY		
+		LDA	tokenlist-1, Y
+		BPL	@advanceToNextTokenLoop
+		;; Check if we have reached the end of the token list
+		LDA	tokenlist, Y
+		;; If not, see if the program text matches this token
+		BNE	@compareProgramTextAndToken
+
+		;; We reached the end of the token list without a match,
+		;; so copy this character to the output, and 
+		LDA	$0200, X
+		;; Then advance to the next character of the BASIC text
+		;; (BPL acts as unconditional branch, because only bytes with bit 7
+		;; cleared can get here).
+		BPL	@tokeniseNextProgramCharacter
+@tokeniseEndOfLine_a609:
+		;; Write end of line marker (== $00), which is conveniently in A already
+		STA	$0200 - 3, Y
+		;; Decrement BASIC execute pointer high byte
+		DEC	$7B
+		;; ... and set low byte to $FF
+		LDA	#$FF
+		STA	$7A
+		RTS
 		
-c64_tokenise:
-		.res ($A612 - $A57C + 1), $EA
 		
 megabasic_detokenise:
 		;; The C64 detokenise routine lives at $A71A-$A741.
