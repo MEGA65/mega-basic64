@@ -117,13 +117,18 @@ tokenlist:
 				;.byte $00
 		;; Now we have our new tokens
 		;; extra_token_count must be correctly set to the number of tokens
-		extra_token_count = 3
+		extra_token_count = 5
 		.byte "SCREE",'N'+$80 
 		.byte "BORDE",'R'+$80
 		.byte "TILESE",'T'+$80
+		.if 1
+		.byte "FAS",'T'+$80
+		.byte "SLO",'W'+$80
+		.endif
 		;; And the end byte
-		.byte $00
+		.byte $00		
 
+		.res $FF,$00
 		
 megabasic_tokenise:
 
@@ -150,8 +155,6 @@ megabasic_tokenise:
 		NOP
 		NOP
 		PLA
-
-
 		
 		;; Read a byte from the input buffer
 		LDA	$0200,X
@@ -491,14 +494,24 @@ newtoken_jumptable:
 		.word	megabasic_perform_screen
 		.word	megabasic_perform_border
 		.word	megabasic_perform_tileset
-		.word 	megabasic_perform_syntax_error
-		.word 	megabasic_perform_syntax_error
+		.word 	megabasic_perform_fast
+		.word 	megabasic_perform_slow
 		.word 	megabasic_perform_syntax_error
 		.word 	megabasic_perform_syntax_error
 		.word 	megabasic_perform_syntax_error
 
 		basic2_main_loop 	=	$A7AE
 
+megabasic_perform_fast:
+		LDA	#65
+		STA	$00
+		JMP	basic2_main_loop		
+		
+megabasic_perform_slow:
+		LDA	#64
+		STA	$00
+		JMP	basic2_main_loop		
+		
 megabasic_perform_border:
 		;; Evaluate expression
 		JSR	$AD8A
