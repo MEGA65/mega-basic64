@@ -148,12 +148,6 @@ megabasic_tokenise:
 		PHA
 		LDA 	#$FF
 		STA	token_hi_page_flag
-		;; XXX - Why on earth do we need these 3 NOPs here for parsing the extra tokens
-		;; to work? If you remove one, then the first extra token doesn't parse, and the
-		;; others are out by one, so token2 parses as though it were token1.
-		NOP
-		NOP
-		NOP
 		PLA
 		
 		;; Read a byte from the input buffer
@@ -233,12 +227,6 @@ megabasic_tokenise:
 		;; A = $80, so if we add the token number stored in $0B, we get the actual
 		;; token number
 		ORA	$0B
-		;; XXX Why on earth do we need these three NOPs here to correctly parse the extra
-		;; tokens? If you remove one, then the first token no longer parses, and the later
-		;; ones get parsed with token number one less than it should be!
-		NOP
-		NOP
-		NOP
 @tokeniseNextProgramCharacter:
 		;; Restore the saved index into the BASIC program line
 		LDY	$71
