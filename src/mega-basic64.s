@@ -59,7 +59,7 @@ c000block:
 
 megabasic_enable:
 		;; Copy C64 tokenise routine
-		LDX #($A612-$A57C+1)
+		LDX #($A612-$A57C+1-1)
 @tokenisecopy:
 		lda $a57c,x
 		sta c64_tokenise,x
@@ -127,6 +127,12 @@ megabasic_enable:
 		sta 	addr_of_a5ff+1
 		lda	#>mega_a5ff
 		sta 	addr_of_a5ff+2
+
+		;; Install new detokenise routine
+		lda #<megabasic_detokenise
+		sta untokenise_vector
+		lda #>megabasic_detokenise
+		sta untokenise_vector+1
 
 		
 		RTS
@@ -229,3 +235,86 @@ tokenlist:
 c64_tokenise:
 		.res ($A612 - $A57C + 1), $EA
 		
+megabasic_detokenise:
+		;; The C64 detokenise routine lives at $A71A-$A741.
+		;; The routine is quite simple, reading through the token list,
+		;; decrementing the token number each time the end of at token is
+		;; found.  The only complications for us, is that we need to change
+		;; the parts where the token bytes are read from the list to allow
+		;; the list to be two pages long.
+
+		;; Print non-tokens directly
+		bpl 	jump_to_a6f3
+		;; Print PI directly
+		cmp	#$ff
+		beq	jump_to_a6f3
+		;; If in quote mode, print directly
+		bit	$0f
+		bmi 	jump_to_a6f3
+
+		;; At this point, we know it to be a token
+
+		;; Tokens are $80-$FE, so subtract #$7F, to renormalise them
+		;; to the range $01-$7F
+		SEC
+		SBC	#$7F
+		;; Put the normalised token number into the X register, so that
+		;; we can easily count down
+		TAX
+		STY	$49 	; and store it somewhere necessary, apparently
+
+		;; Now get ready to find the string and output it.
+		;; Y is used as the offset in the token list, and gets pre-incremented
+		;; so we start with it equal to $00 - $01 = $FF
+		LDY	#$FF
+@detokeniseSearchLoop:
+		;; Decrement token index by 1
+		DEX
+		;; If X = 0, this is the token, so read the bytes out
+		beq	@thisIsTheToken
+		;; Since it is not this token, we need to skip over it
+@detokeniseSkipLoop:
+		INY 		; point to next byte in token list
+		;; Read the next byte, and see if bit 7 is set, to indicate end of
+		;; token string.  If bit 7 is clear, loop until we find it
+		LDA	tokenlist, Y
+		BPL	@detokeniseSkipLoop
+		;; Found end of token, loop to see if the next token is it
+		BMI	@detokeniseSearchLoop
+@thisIsTheToken:
+		;; Advance to first byte of the token
+		INY
+		LDA	tokenlist, Y
+		;; If it is the last byte of the token, return control to the LIST
+		;; command routine from the BASIC ROM
+		BMI	jump_list_command_finish_printing_token_a6ef
+		;; As it is not the end of the token, print it out
+		JSR	$AB47
+		BNE	@thisIsTheToken
+
+		;; This can only be reached if the next byte in the token list is $00
+		;; This could only happen in C64 BASIC if the token ID following the
+		;; last is attempted to be detokenised.
+		;; This is the source of the REM SHIFT+L bug, as SHIFT+L gives the
+		;; character code $CC, which is exactly the token ID required, and
+		;; the C64 BASIC ROM code here simply fell through the FOR routine.
+		;; Actually, understanding this, makes it possible to write a program
+		;; that when LISTed, actually causes code to be executed!
+		;; However, this vulnerability appears not possible to be exploited,
+		;; because $0201, the next byte to be read from the input buffer during
+		;; the process, always has $00 in it when the FOR routine is run,
+		;; causing a failure when attempting to execute the FOR command.
+		;; Were this not the case, REM (SHIFT+L)I=1TO10:GOTO100, when listed
+		;; would actually cause GOTO100 to be run, thus allowing LIST to
+		;; actually run code. While still not a very strong form of source
+		;; protection, it could have been a rather fun thing to try.
+
+		INC	$D020
+		
+		;; Instead of having this error, we will just cause the character to
+		;; be printed normally.
+		LDY	$49
+jump_to_a6f3:	
+		JMP 	$A6F3
+jump_list_command_finish_printing_token_a6ef:
+		JMP	$A6EF
