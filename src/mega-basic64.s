@@ -471,5 +471,54 @@ megabasic_execute:
 		JMP	$A7E7
 
 megabasic_execute_token:
-		INC $D020
-		jmp megabasic_execute_token
+		;; Normalise index of new token
+		SEC
+		SBC 	#$CC
+		ASL
+		;; Clip it to make sure we don't have any overflow of the jump table
+		AND	#$0E
+		TAX
+		PHX
+		;; Get next token/character ready
+		JSR	$0073
+		PLX
+		JMP 	(newtoken_jumptable,X)
+
+		;; Tokens are $CC-$FE, so to be safe, we need to have a jump
+newtoken_jumptable:
+		.word	megabasic_perform_screen
+		.word	megabasic_perform_border
+		.word	megabasic_perform_tileset
+		.word 	megabasic_perform_syntax_error
+		.word 	megabasic_perform_syntax_error
+		.word 	megabasic_perform_syntax_error
+		.word 	megabasic_perform_syntax_error
+		.word 	megabasic_perform_syntax_error
+
+		basic2_main_loop 	=	$A7AE
+
+megabasic_perform_border:
+		;; Evaluate expression
+		JSR	$AD8A
+		;; Convert FAC to integer in $14-$15
+		JSR	$B7F7
+		JSR	enable_viciv
+		LDA	$14
+		STA	$D020
+
+		JMP	basic2_main_loop
+		
+megabasic_perform_screen:
+megabasic_perform_tileset:	
+		
+megabasic_perform_syntax_error:
+		LDX	#$0B
+		JMP	$A437
+
+
+enable_viciv:
+		LDA	#$47
+		STA	$D02F
+		LDA	#$53
+		STA	$D02F
+		RTS
