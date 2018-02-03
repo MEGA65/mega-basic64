@@ -174,9 +174,11 @@ megabasic_tokenise:
 		STY	$71
 		;; Now reset the pointer into tokenlist
 		LDY	#$00
-		;; And the word index
+		;; And the token number minus $80 we are currently considering.
+		;; We start with token #0, since we search from the beginning.
 		STY	$0B
 		;; Decrement Y from $00 to $FF, because the inner loop increments before processing
+		;; (Y here represents the offset in the tokenlist)
 		DEY
 		;; Save BASIC execute pointer
 		STX	$7A
@@ -184,7 +186,7 @@ megabasic_tokenise:
 		DEX
 @compareNextChar_a5b6:
 		;; Advance pointer in tokenlist
-		INY
+		jsr tokenListAdvancePointer
 		;; Advance pointer in BASIC text
 		INX
 		;; Read byte of basic program
@@ -195,8 +197,16 @@ megabasic_tokenise:
 		;; If the character matches, but was ORd with $80, then $80 will be the
 		;; result.  This allows efficient detection of whether we have found the
 		;; end of a keyword.
+		bit token_hi_page_flag
+		bmi	@useTokenListHighPage
 		SEC
 		SBC	tokenlist, Y
+		jmp	@foo
+@useTokenListHighPage:
+		SEC
+		SBC	tokenlist+$100,Y
+@foo:
+		
 		;; If zero, then compare the next character
 		BEQ	@compareNextChar_a5b6
 		;; If $80, then it is the end of the token, and we have matched the token
@@ -261,11 +271,13 @@ megabasic_tokenise:
 		;; Advance pointer in tokenlist from the end of the last token to the start
 		;; of the next token, ready to compare the BASIC program text with this token.
 @advanceToNextTokenLoop:
-		INY		
-		LDA	tokenlist-1, Y
+		jsr 	tokenListReadByte
+		pha
+		jsr 	tokenListAdvancePointer
+		pla
 		BPL	@advanceToNextTokenLoop
 		;; Check if we have reached the end of the token list
-		LDA	tokenlist, Y
+		jsr	tokenListReadByte
 		;; If not, see if the program text matches this token
 		BNE	@compareProgramTextAndToken
 
@@ -285,7 +297,22 @@ megabasic_tokenise:
 		LDA	#$FF
 		STA	$7A
 		RTS
-		
+
+tokenListAdvancePointer:	
+		INY
+		BNE	@dontAdvanceTokenListPage
+		inc	token_hi_page_flag
+@dontAdvanceTokenListPage:
+		RTS
+
+tokenListReadByte:	
+		bit token_hi_page_flag
+		bmi	@useTokenListHighPage
+		LDA	tokenlist, Y
+		RTS
+@useTokenListHighPage:
+		LDA	tokenlist+$100,Y
+		RTS		
 		
 megabasic_detokenise:
 		;; The C64 detokenise routine lives at $A71A-$A741.
@@ -332,12 +359,14 @@ megabasic_detokenise:
 		beq	@thisIsTheToken
 		;; Since it is not this token, we need to skip over it
 @detokeniseSkipLoop:
-		jsr advance_and_read_token_byte
+		jsr tokenListAdvancePointer
+		jsr tokenListReadByte
 		BPL	@detokeniseSkipLoop
 		;; Found end of token, loop to see if the next token is it
 		BMI	@detokeniseSearchLoop
 @thisIsTheToken:
-		jsr advance_and_read_token_byte
+		jsr tokenListAdvancePointer
+		jsr tokenListReadByte
 		;; If it is the last byte of the token, return control to the LIST
 		;; command routine from the BASIC ROM
 		BMI	jump_list_command_finish_printing_token_a6ef
@@ -370,27 +399,3 @@ jump_to_a6f3:
 jump_list_command_finish_printing_token_a6ef:
 		JMP	$A6EF
 
-advance_and_read_token_byte:
-		;; Skip the patch byte at offset $0FF in the token list
-		CPY	#$FE
-		BNE	@nopatch
-		INY
-@nopatch:
-		;; Check if we are crossing to the 2nd page of the token list
-		;; (The INC works here, because we initialise token_hi_page_flag to $FF)
-		CPY	#$FF
-		bne	@notTokenPageWrap
-		inc	token_hi_page_flag
-@notTokenPageWrap:
-		INY 		; point to next byte in token list
-		
-		;; Read the next byte, and see if bit 7 is set, to indicate end of
-		;; token string.  If bit 7 is clear, loop until we find it
-		BIT	token_hi_page_flag
-		BNE	@tokenFromSecondPage
-		LDA	tokenlist, Y
-		JMP	@gotTokenByte
-@tokenFromSecondPage:
-		LDA	tokenlist+$100, Y
-@gotTokenByte:
-		RTS
