@@ -127,6 +127,14 @@ tokenlist:
 		
 megabasic_tokenise:
 
+		;; Get the basic execute pointer low byte
+		LDX	$7A
+		;; Set the save index
+		LDY	#$04
+		;; Clear the quote/data flag
+		STY	$0F
+
+@tokeniseNextChar:
 		;; Get hi page flag for tokenlist scanning, so that if we INC it, it will
 		;; point back to the first page.  As we start with offset = $FF, the first
 		;; increment will do this. Since offsets are pre-incremented, this means
@@ -143,14 +151,8 @@ megabasic_tokenise:
 		NOP
 		PLA
 
-		;; Get the basic execute pointer low byte
-		LDX	$7A
-		;; Set the save index
-		LDY	#$04
-		;; Clear the quote/data flag
-		STY	$0F
 
-@tokeniseNextChar:
+		
 		;; Read a byte from the input buffer
 		LDA	$0200,X
 		;; If bit 7 is clear, try to tokenise
@@ -241,9 +243,9 @@ megabasic_tokenise:
 		;; We have worked out the token, so record it.
 		INX
 		INY
-		STA	$01FB, Y
+		STA	$0200 - 5, Y
 		;; Now check for end of line (token == $00)
-		LDA	$01FB, Y
+		LDA	$0200 - 5, Y
 		BEQ @tokeniseEndOfLine_a609
 
 		;; Now think about what we have to do with the token
