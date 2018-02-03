@@ -111,9 +111,10 @@ tokenlist:
 		;; End of list marker (remove to enable new tokens)
 				;.byte $00
 		;; Now we have our new tokens
-		.if 0
+		.if 1
 		.byte "SCREE",'N'+$80 
 		.byte "BORDE",'R'+$80
+		.byte "TILESE",'T'+$80
 		.endif
 		;; And the end byte
 		.byte $00
@@ -198,7 +199,7 @@ megabasic_tokenise:
 		;; If the character matches, but was ORd with $80, then $80 will be the
 		;; result.  This allows efficient detection of whether we have found the
 		;; end of a keyword.
-		bit token_hi_page_flag
+		bit 	token_hi_page_flag
 		bmi	@useTokenListHighPage
 		SEC
 		SBC	tokenlist, Y
@@ -272,10 +273,9 @@ megabasic_tokenise:
 		;; Advance pointer in tokenlist from the end of the last token to the start
 		;; of the next token, ready to compare the BASIC program text with this token.
 @advanceToNextTokenLoop:
-		jsr 	tokenListReadByte
-		pha
 		jsr 	tokenListAdvancePointer
-		pla
+		jsr 	tokenListReadByteMinus1
+		STA	$0600,Y
 		BPL	@advanceToNextTokenLoop
 		;; Check if we have reached the end of the token list
 		jsr	tokenListReadByte
@@ -302,17 +302,55 @@ megabasic_tokenise:
 tokenListAdvancePointer:	
 		INY
 		BNE	@dontAdvanceTokenListPage
-		inc	token_hi_page_flag
+		PHP
+		PHA
+		LDA	token_hi_page_flag
+		EOR	#$FF
+		STA	token_hi_page_flag
+		STA 	$0400+999
+		PLA
+		PLP
 @dontAdvanceTokenListPage:
+		PHP
+		PHX
+		PHA
+		tya
+		tax
+		bit	token_hi_page_flag
+		bmi	@page2
+		inc	$0400,x
+		jmp	@done
+@page2:		inc	$0500,x
+		@done:
+		.if 0
+		LDA	#$FF
+@delay:		CMP	$D012
+		BNE	@delay
+		.endif
+		
+		PLA
+		PLX
+		PLP
 		RTS
 
 tokenListReadByte:	
-		bit token_hi_page_flag
+		bit 	token_hi_page_flag
 		bmi	@useTokenListHighPage
 		LDA	tokenlist, Y
 		RTS
 @useTokenListHighPage:
 		LDA	tokenlist+$100,Y
+		RTS		
+
+tokenListReadByteMinus1:	
+		bit 	token_hi_page_flag
+		bmi	@useTokenListHighPage
+		CPY	#$FF
+		beq	@useTokenListHighPage
+		LDA	tokenlist - 1, Y
+		RTS
+@useTokenListHighPage:
+		LDA	tokenlist - 1 + $100,Y
 		RTS		
 		
 megabasic_detokenise:
