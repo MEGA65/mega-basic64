@@ -190,9 +190,9 @@ megabasic_tokenise:
 		jsr tokenListAdvancePointer
 		;; Advance pointer in BASIC text
 		INX
+@compareProgramTextAndToken:
 		;; Read byte of basic program
 		LDA	$0200, X
-@compareProgramTextAndToken:
 		;; Now subtract the byte from the token list.
 		;; If the character matches, we will get $00 as result.
 		;; If the character matches, but was ORd with $80, then $80 will be the
