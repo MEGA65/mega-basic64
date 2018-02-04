@@ -21,62 +21,6 @@
 
 /* ============================================================= */
 
-char *vhdl_prefix=
-  "library IEEE;\n"
-  "use IEEE.STD_LOGIC_1164.ALL;\n"
-  "use ieee.numeric_std.all;\n"
-  "use work.debugtools.all;\n"
-  "\n"
-  "--\n"
-  "entity charrom is\n"
-  "port (Clk : in std_logic;\n"
-  "        address : in integer range 0 to 4095;\n"
-  "        -- chip select, active low       \n"
-  "        cs : in std_logic;\n"
-  "        data_o : out std_logic_vector(7 downto 0);\n"
-  "\n"
-  "        writeclk : in std_logic;\n"
-  "        -- Yes, we do have a write enable, because we allow modification of ROMs\n"
-  "        -- in the running machine, unless purposely disabled.  This gives us\n"
-  "        -- something like the WOM that the Amiga had.\n"
-  "        writecs : in std_logic;\n"
-  "        we : in std_logic;\n"
-  "        writeaddress : in unsigned(11 downto 0);\n"
-  "        data_i : in std_logic_vector(7 downto 0)\n"
-  "      );\n"
-  "end charrom;\n"
-  "\n"
-  "architecture Behavioral of charrom is\n"
-  "\n"
-  "-- 4K x 8bit pre-initialised RAM for character ROM\n"
-  "\n"
-  "type ram_t is array (0 to 4095) of std_logic_vector(7 downto 0);\n"
-  "signal ram : ram_t := (\n"
-  "\n";
-
-char *vhdl_suffix=
-  ");\n"
-  "\n"
-  "begin\n"
-  "\n"
-  "--process for read and write operation.\n"
-  "PROCESS(Clk,ram,writeclk)\n"
-  "BEGIN\n"
-  "  data_o <= ram(address);          \n"
-  "\n"
-  "  if(rising_edge(writeClk)) then \n"
-  "    if writecs='1' then\n"
-  "      if(we='1') then\n"
-  "        ram(to_integer(writeaddress)) <= data_i;\n"
-  "      end if;\n"
-  "    end if;\n"
-  "  end if;\n"
-  "END PROCESS;\n"
-  "\n"
-  "end Behavioral;\n";
-
-/* ============================================================= */
-
 int x, y;
 
 int width, height;
@@ -427,6 +371,8 @@ int main(int argc, char **argv)
     printf("Reading %s\n",argv[i]);
     read_png_file(argv[i]);
     image_tiles+=width*height/64;
+    // We start with screen ID 1, as screen ID 0 is reserved to refer to the
+    // current displayed screen.
     struct screen *s = png_to_screen(i-1,ts);
     screen_list[screen_count++]=s;
   }

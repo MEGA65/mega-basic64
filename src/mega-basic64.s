@@ -29,7 +29,7 @@ init:
 		lda	#$53
 		sta 	$d02f
 		
-		;; Install $C000 block
+		;; Install $C000 block (and preloaded tiles)		
 		lda 	#>c000blockdmalist
 		sta	$d701
 		lda	#<c000blockdmalist
@@ -37,20 +37,39 @@ init:
 
 		;; enable wedge
 		jsr megabasic_enable
+
+		;; Then make the demo tile set available for use
+		jsr tileset_validate
+		
 		rts
 
 c000blockdmalist:
 		.byte $0A,$00 	; F011A list follows
 		;; Normal F011A list
-		.byte $00 ; copy + last request in chain
-		.word $1000 ; size of copy is 16KB
-		.word c000block ; starting at $4000
+		.byte $04 ; copy + chained request
+		.word preloaded_tiles_length ; set size
+		.word preloaded_tiles  ; starting at $4000
 		.byte $00   ; of bank $0
-		.word $C000 ; destination address is $8000
-		.byte $00   ; of bank $F
+		.word $2000 ; destination address is $2000
+		.byte $01   ; of bank $1 ( = $12000)
+		.word $0000 ; modulo (unused)		
+		
+		.byte $0A,$00 	; F011A list follows
+		;; Normal F011A list
+		.byte $00 ; copy + end of list chain
+		.word $1000 ; size of copy is 4KB
+		.word c000block ; source address
+		.byte $00   ; of bank $0
+		.word $C000 ; destination address is $C000
+		.byte $00   ; of bank $0
 		.word $0000 ; modulo (unused)		
 
 
+preloaded_tiles:	
+		.incbin "bin/megabanner.tiles"
+preloaded_tiles_end:	
+		preloaded_tiles_length = preloaded_tiles_end - preloaded_tiles
+		
 ;-------------------------------------------------------------------------------
 		;; Routines that get installed at $C000
 ;-------------------------------------------------------------------------------
@@ -519,7 +538,26 @@ tokenlist:
 		.byte $00		
 
 
+megabasic_perform_tile:
+		;; Valid syntax options:
+		;; TILE SET LOAD <"filename"> [,device]
+		CMP	#token_set
+		bne	megabasic_perform_syntax_error
+		JSR	$0073
+		CMP	#$93 	; Token for "LOAD" keyword
+		bne	megabasic_perform_syntax_error
+		JSR	$0073
+		;; Convienently the LOAD command has a routine we
+		;; can call that gets the filename and device + ,1
+		;; options.
+		LDA	#$00 	; Set LOAD/VERIFY flag for LOAD
+		STA	$0A
+		JSR	$E1D4
+
+		;; XXX - Not yet implemented
 		
+		jmp	basic2_main_loop
+
 megabasic_perform_fast:
 		LDA	#65
 		STA	$00
@@ -584,7 +622,6 @@ set_vic_register:
 
 		
 megabasic_perform_screen:
-megabasic_perform_tileset:	
 		
 megabasic_perform_syntax_error:
 		LDX	#$0B
@@ -594,27 +631,6 @@ megabasic_perform_illegal_direct_error:
 		LDX	#$15
 		JMP	$A437
 
-megabasic_perform_tile:
-		;; Valid syntax options:
-		;; TILE SET LOAD <"filename"> [,device]
-		CMP	#token_set
-		bne	megabasic_perform_syntax_error
-		JSR	$0073
-		CMP	#$93 	; Token for "LOAD" keyword
-		bne	megabasic_perform_syntax_error
-		JSR	$0073
-		;; Convienently the LOAD command has a routine we
-		;; can call that gets the filename and device + ,1
-		;; options.
-		LDA	#$00 	; Set LOAD/VERIFY flag for LOAD
-		STA	$0A
-		JSR	$E1D4
-
-		;; XXX - Not yet implemented
-		
-		jmp	basic2_main_loop
-
-		
 megabasic_perform_canvas:
 		;; FALL THROUGH for unimplemented commands
 megabasic_perform_undefined_function:
@@ -631,6 +647,54 @@ enable_viciv:
 		STA	$D031
 		RTS
 
+; -------------------------------------------------------------
+; Tileset operations
+; -------------------------------------------------------------
+
+tileset_validate:
+		;; Sanity check the tile set that is in memory at $12000-$127FF
+		;; We do memory access via flat-32 adressing, using $03-$06 as our
+		;; 32-bit vector
+		;; All graphics memory is currently in bank 1, so that part of the
+		;; address can be fixed
+		LDA 	#$00
+		STA 	$06
+		LDA 	#$01
+		STA 	$05
+
+		;; Lower 16 bits we start with pointing at $2000
+		LDA 	#$20
+		STA 	$04
+		LDA 	#$00
+		STA 	$03
+
+		;; Check magic string
+		LDZ 	#$00
+		LDX	#$00
+@magicCheckLoop:
+		NOP
+		NOP		
+		LDA 	($03),Z
+		beq	@magicOk
+		CMP 	tileset_magic,X
+		bne	@magicBad
+		INZ
+		INX
+		CPX	#$10
+		BNE	@magicCheckLoop
+		BEQ	@magicOk
+@magicBad:
+		INC	$D020
+		RTS		
+@magicOk:
+		
+		RTS
+
+		
+tileset_magic:
+		.byte "MEGA65 TILESET00",0
+		
+		
 
 ; -------------------------------------------------------------
 ; Variables and scratch space	

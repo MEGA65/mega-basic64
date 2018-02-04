@@ -24,18 +24,18 @@ all:	$(TOOLS) $(BINDIR)/MEGABAS.D81
 # c-programs
 tools:	$(TOOLS)
 
-%.o:	%.s
+%.o:	%.s	$(BINDIR)/megabanner.tiles
 	$(CA65) $< -l $*.list
 
-$(BINDIR)/megabasic64.prg:       $(MEGABASICOBJS)
+$(BINDIR)/megabanner.tiles:	$(TOOLDIR)/pngtoscreens $(ASSETS)/mega65_320x64.png
+	$(TOOLDIR)/pngtoscreens $(BINDIR)/megabanner.tiles $(ASSETS)/mega65_320x64.png
+
+$(BINDIR)/megabasic64.prg:       $(MEGABASICOBJS) $(BINDIR)/megabanner.tiles
 	mkdir -p $(BINDIR)
 	$(LD65) $< --mapfile $*.map -o $(BINDIR)/megabasic64.prg
 
 $(TOOLDIR)/pngtoscreens:	$(TOOLDIR)/pngtoscreens.c Makefile
 	$(CC) $(COPT) -I/usr/local/include -L/usr/local/lib -o $(TOOLDIR)/pngtoscreens $(TOOLDIR)/pngtoscreens.c -lpng
-
-$(BINDIR)/megabanner.tiles:	$(TOOLDIR)/pngtoscreens $(ASSETS)/mega65_320x64.png
-	$(TOOLDIR)/pngtoscreens $(BINDIR)/megabanner.tiles $(ASSETS)/mega65_320x64.png
 
 $(BINDIR)/MEGABAS.D81:	$(BINARIES)
 	rm -f $(BINDIR)/MEGABAS.D81
