@@ -29,11 +29,38 @@ init:
 		LDA	#$53
 		STA	$D02F
 		
-		;; Install $C000 block (and preloaded tiles)		
+		;; Install $C000 block (and preloaded tiles)
+		;; (This also does most of the work initialising the screen)
 		lda 	#>c000blockdmalist
 		sta	$d701
 		lda	#<c000blockdmalist
 		sta	$d705
+		;; Now patch the screen update by filling the canvas display
+		;; with spaces. The canvas screen is 80*50 * 2 bytes per char,
+		;; so 8000 bytes in total.  We only need to fill the top 25 rows,
+		;; however.
+		LDA	#$20
+		LDX	#$00
+@spaceLoop:
+		STA	$E000, X
+		STA	$E100, X
+		STA	$E200, X
+		STA 	$E300, X
+		STA	$E400, X
+		STA	$E500, X
+		STA	$E600, X
+		STA	$E700, X
+		STA	$E800, X
+		STA	$E900, X
+		STA	$EA00, X
+		STA	$EB00, X
+		STA 	$EC00, X
+		STA	$ED00, X
+		STA	$EE00, X
+		STA	$EF00, X
+		INX
+		INX
+		BNE	@spaceLoop
 
 		;; enable wedge
 		jsr 	megabasic_enable
@@ -1063,19 +1090,30 @@ raster_irq:
 		;; to control things in BASIC.  This means SLOW and FAST must use
 		;; the VIC-IV speed control register, not the POKE0,65 trick, since
 		;; there is no way to READ that, and thus restore it after.
-
+		
 		;; Remember current speed setting
 		LDA	$D054
 		PHA
 		;; Enable 50MHz fast mode
 		LDA	#$40
 		TSB	$D054
+		TSB	$D031	
 
 		;; Clear raster IRQ
 		INC	$D019
 
-		;; Force 80 character virtual lines
-		LDA	#<80
+		;; Copy CANVAS 0 stored copy to display copy
+		lda 	#>canvas0copylist
+		STA	$D701
+		LDA	#<canvas0copylist
+		STA	$D705
+		;; Go through BASIC screen, and copy and non-space
+		;; characters, and also overwrite any characters <$100
+
+		jsr 	merge_basic_screen_to_display_canvas
+		
+		;; Force 80 character virtual lines (80*2 for 16-bit char mode)
+		LDA	#<80*2
 		STA	$D058
 		LDA	#>80
 		STA	$D059
@@ -1097,14 +1135,190 @@ raster_irq:
 		;; Restore CPU speed and set $D054 video settings
 		PLA
 		AND	#$EA
-		ORA	d054_bits
+		ORA	d054_bits		
 		STA	$D054
 
 		;; Chain to normal IRQ routine
 		JMP	$EA31
-		
-		
 
+canvas0copylist:	
+		;; Copy CANVAS 0 screen RAM from $E000 to $A000 for combining with BASIC scree
+		.byte $0A,$00 	; F011A list follows		
+		;; Normal F011A list
+		.byte $04 ; fill + chained
+		.word 80*50*2 ; size of copy 
+		.word $E000 ; source address = fill value
+		.byte $00   ; of bank $0
+		.word $A000 ; destination address is $A000
+		.byte $00   ; of bank $0
+		.word $0000 ; modulo (unused)
+
+		;; Copy colour RAM from $FF82800 down to $FF80800
+		.byte $80,$FF  	; source is $FFxxxxx
+		.byte $81,$FF  	; destination is $FFxxxxx
+		.byte $0A,$00 	; F011A list follows
+		;; Normal F011A list
+		.byte $00 ; copy + end of chain
+		.word 80*50*2 ; size of copy is 4000 bytes
+		.word $2800 ; source address = fill value
+		.byte $08   ; of bank $0
+		.word $0800 ; destination address is $0800
+		.byte $08   ; of bank $0
+		.word $0000 ; modulo (unused)
+
+merge_basic_screen_to_display_canvas:
+		;; Merge BASIC screen onto display canvas.
+		;; Because of the expansion of bytes this is a bit fiddly.
+		;; Ideally we need to copy line by line, because the line steppings are different
+		;; from source to destination
+
+		;; Thus we need 4 pointers:
+		;; 1. BASIC 2 screen RAM ($0B-$0C)
+		;; 2. BASIC 2 colour RAM ($09-$0A)
+		;; 3. MEGA BASIC display canvas screen RAM  ($07-$08)
+		;; 4. MEGA BASIC display canvas colour RAM  ($03-$06)
+		;; We need to thus first save $03-$0C to a scratch space
+		LDX	#$00
+@c:		LDA	$03, X
+		STA	merge_scratch, X
+		INX
+		CPX	#($0C-$03+1)
+		BNE	@c
+
+		;; We also need to bank out the BASIC ROM
+		LDA	$01
+		AND	#$FE
+		STA	$01
+
+		;; 16-bit pointer to BASIC screen RAM
+		LDA	#$00
+		STA	$0B
+		LDA	#$04
+		STA	$0C
+		;; 16-bit pointer to canvas screen RAM
+		LDA	#$00
+		STA	$07
+		LDA	#$A0
+		STA	$08
+		;; 16-bit pointer to BASIC 2 colour RAM
+		LDA	#$00
+		STA	$09
+		LDA	#$D8
+		STA	$0A
+		;; Set 32-bit pointer to canvas colour RAM
+		LDA 	#$00
+		STA	$03
+		LDA	#$08
+		STA	$04
+		LDA	#$F8
+		STA	$05
+		LDA 	#$0F
+		STA	$06
+
+.if 1
+		
+		;;  X = line number
+		LDX	#$00
+@screenLineLoop:
+		;; Y = BASIC 2 position on line
+		LDY	#$00
+		;; Z = Display canvas position on line ( = Y * 2)
+		LDZ	#$00		
+@screenCopyCheckLoop:
+		;; Is BASIC 2 char other than space?
+		;; If not space, then it should replace the tile
+		LDA	($0B), Y
+		CMP	#$20
+		BEQ	@dontReplaceTile
+@replaceTileWithChar:
+		;; Replace screen RAM bytes
+		;; low byte = char
+		LDA	($0B), Y
+		STA	($07), Z
+		;; high byte = more char bits (must be zero), and some VIC-IV attributes, that
+		;; are zero for bytes copied from BASIC 2 screeen
+		LDA	#$00
+		INZ
+		STA	($07), Z
+		DEZ
+		;; Replace colour RAM bytes (trickier as not direct mapped)
+		;; Extended attributes in first byte (zero when copied from BASIC 2 screen)
+		LDA	#$00
+		NOP
+		NOP
+		STA	($03),Z
+		;; Colour goes in 2nd byte
+		INZ
+		LDA	($09), Y
+		NOP
+		NOP
+		STA	($03),Z
+		DEZ
+@dontReplaceTile:
+		INZ
+		INZ
+		INY
+		;; At end of BASIC 2 line?
+		CPY	#40
+		BNE	@screenCopyCheckLoop
+		;; Advance the various pointers
+		;; canvas display colour RAM
+		LDA	$03
+		CLC
+		ADC	#80*2
+		STA	$03
+		LDA	$04
+		ADC	#$00
+		STA	$04
+		;; Display canvas screen RAM
+		LDA	$07
+		CLC
+		ADC	#80*2
+		STA	$07
+		LDA	$08
+		ADC	#0
+		STA	$08
+		;; BASIC 2 colour RAM
+		LDA	$09
+		CLC
+		ADC	#40
+		STA	$09
+		LDA	$0A
+		ADC	#0
+		STA	$0A
+		;; BASIC 2 screen RAM
+		LDA	$0B
+		CLC
+		ADC	#40
+		STA	$0B
+		LDA	$0C
+		ADC	#0
+		STA	$0C
+				
+		INX
+		CPX	#25
+		BNE	@screenLineLoop
+
+.endif
+		
+		;; Always end with Z=0, to avoid crazy behaviour from 6502 code
+		LDZ	#$00
+		
+		;; Restore ZP bytes
+		LDX	#$00
+@c2:		LDA	merge_scratch, X
+		STA	$03, X
+		INX
+		CPX	#($0C-$03+1)
+		BNE	@c2
+
+		;; Put BASIC ROM back
+		LDA	$01
+		ORA	#$01
+		STA	$01
+		
+		RTS
+		
 ; -------------------------------------------------------------
 ; Variables and scratch space	
 ; -------------------------------------------------------------
@@ -1129,3 +1343,6 @@ section_size:
 		;; Temporary storage for a 32-bit pointer
 stashed_pointer:
 		.byte 0,0,0,0
+
+merge_scratch:
+		.byte 0,0,0,0,0,0,0,0,0,0
