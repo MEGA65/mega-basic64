@@ -747,7 +747,83 @@ tileset_install_section:
 		;; of the tileset file.)
 		RTS
 @magicOk:
+		;; Now we have the CANVAS, we need to add the first tile number
+		;; to all tile numbers in the screen RAM section
+		;; so we need to look through *(unsigned short *)header[25] bytes
+		;; at section + (header + 0x40) bytes, and add the first tile number
+		;; (for now hardcoded at $12340/$40 = $048D) to them.
+		LDZ	#25
+		NOP
+		NOP
+		LDA	($03),Z
+		STA	section_size+0
+		INZ
+		NOP
+		NOP
+		LDA	($03),Z
+		STA	section_size+1
 		LDZ	#$00
+		jsr	tileset_stash_pointer		
+		jsr	tileset_advance_by_64
+@patchTileNumberLoop:
+		;; It is nice to allow canvases to contain
+		;; references to text characters when loaded. To do this
+		;; we need to patch the values to be <$100, so that they
+		;; aren't interpretted as full-colour character tiles.
+		;; We do this by checking the bottom nybl of the hibh byte
+		;; of the tile number. If zero, we don't patch it. If non-zero,
+		;; we assume it is a tile number, and then patch it by $48D - $100
+		;; (since the $100 offset was there already)
+
+		;; Peek to see if we need to patch this tile
+		INZ
+		NOP
+		NOP
+		LDA	($03),Z
+		INX
+		AND	#$1F
+		CMP	#$00
+		bne	@doPatchTile
+		INZ
+		jmp	@donePatchingTile
+@doPatchTile:
+		
+		NOP
+		NOP
+		LDA	($03),Z
+		CLC
+		ADC	#<($048D-$100)
+		NOP
+		NOP
+		STA	($03),Z
+		INZ
+		NOP
+		NOP
+		LDA	($03),Z
+		ADC	#>($048D-$100)
+		NOP
+		NOP
+		STA	($03),Z
+@donePatchingTile:
+		;; IF Z has wrapped to 0, then inc $04
+		CPZ	#$00
+		bne	@pointerOk
+		inc	$04
+@pointerOk:
+		
+		;; Decrement count of remaining bytes by 2
+		lda	section_size+0
+		SEC
+		SBC	#$02
+		STA	section_size+0
+		LDA	section_size+1
+		SBC	#$00
+		STA	section_size+1
+		ORA	section_size+0
+		BNE	@patchTileNumberLoop
+
+		;; When done, rewind back to where we were
+		jsr	tileset_restore_pointer
 		
 		RTS
 		
@@ -787,6 +863,22 @@ tileset_point_to_start_of_area:
 		LDA 	#$00
 		STA 	$03
 		RTS
+
+tileset_stash_pointer:
+		LDX	#$03
+@l1:		LDA	$03,X
+		STA	stashed_pointer,X
+		DEX
+		BPL	@l1
+		RTS
+
+tileset_restore_pointer:
+		LDX	#$03
+@l1:		LDA	stashed_pointer,X
+		STA	$03,X
+		DEX
+		BPL	@l1
+		RTS
 		
 tileset_follow_pointer:
 		;; Follow the pointer in the section, by adding
@@ -810,6 +902,22 @@ tileset_advance_by_section_size:
 		STA	$05
 		RTS
 
+tileset_advance_by_64:
+		;; Add length to current pointer
+		;; (Offsets are 24 bit, so we don't bother touching the
+		;; 4th byte of the pointer.)
+		lda	#$40
+		CLC
+		ADC	$03
+		STA	$03
+		lda	#$00
+		ADC	$04
+		STA	$04
+		lda	#$00
+		ADC	$05
+		STA	$05
+		RTS
+		
 tileset_retreat_by_section_size:	
 		;; Add length to current pointer
 		;; (Offsets are 24 bit, so we don't bother touching the
@@ -901,3 +1009,6 @@ colour_target:
 		;; 24-bit length of a tileset section
 section_size:
 		.byte 0,0,0
+		;; Temporary storage for a 32-bit pointer
+stashed_pointer:
+		.byte 0,0,0,0

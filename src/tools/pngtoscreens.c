@@ -255,6 +255,9 @@ struct screen *png_to_screen(int id,struct tile_set *ts)
 	  // Block has non-transparent pixels, so add to tileset,
 	  // or lookup to see if it is already there.
 	  int tile_number=tile_lookup(ts,&t);
+	  // Add $100 to tile number to mark it as non-text
+	  tile_number+=0x100;
+	  // Then store it
 	  s->screen_rows[y/8][x/8*2+0]=tile_number&0xff;
 	  s->screen_rows[y/8][x/8*2+1]=(tile_number>>8)&0xff;
 	  s->colourram_rows[y/8][x/8*2+0]=0x00;
@@ -436,6 +439,8 @@ int main(int argc, char **argv)
     header + 18-20 = offset of screenram rows
     header + 21-24 = offset of colourram rows
 
+    header + 25-26 = length of screenram/colourram row slabs
+
     header + 61-63 = size of section in bytes
 
     screenram bytes (2 bytes x width) x height [get resolved to absolute tile numbers after loading]
@@ -452,9 +457,11 @@ int main(int argc, char **argv)
       header[17]=screen_list[i]->height;
       unsigned int screenram_rows_offset
 	= 64;
-      unsigned int colourram_rows_offset
-	= screenram_rows_offset + (2*screen_list[i]->width)*screen_list[i]->height;
-      unsigned int size = colourram_rows_offset + (2*screen_list[i]->width)*screen_list[i]->height;
+      unsigned int slab_size=(2*screen_list[i]->width)*screen_list[i]->height;
+      header[25]=(slab_size>>0)&0xff;
+      header[26]=(slab_size>>8)&0xff;
+      unsigned int colourram_rows_offset=screenram_rows_offset + slab_size;
+      unsigned int size = colourram_rows_offset + slab_size;
       header[61]=(size>>0)&0xff;
       header[62]=(size>>8)&0xff;
       header[63]=(size>>16)&0xff;
