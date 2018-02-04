@@ -727,17 +727,20 @@ megabasic_perform_illegal_quantity_error:
 megabasic_perform_canvas:
 
 		;; All CANVAS statement variants require a canvas number
-
+		inc $0400
+		
 		;; Evaluate expression
 		JSR	$AD8A
 		;; Convert FAC to integer in $14-$15
 		JSR	$B7F7
+		inc $0401
 		LDA	$15
 		BEQ	@canvasIDNotInvalid
 		jmp	megabasic_perform_illegal_quantity_error
 		LDA	$14
 		sta	source_canvas
 @canvasIDNotInvalid:
+		inc $0402
 		;; Get next token 
 		JSR	$0073
 		CMP	#token_stamp
@@ -754,11 +757,13 @@ megabasic_perform_canvas:
 megabasic_perform_canvas_stamp:
 		;; CANVAS s STAMP [from x1,y1 TO x2,y2] ON CANVAS t [AT x3,y3]
 		;; At this point we have only CANVAS STAMP
+		inc $0403
 		LDA	source_canvas
 		jsr	canvas_find
 		BCS	@foundCanvas
 		jmp	megabasic_perform_illegal_quantity_error
 @foundCanvas:
+		inc $0404
 		;; $03-$06 pointer now points to canvas header
 		;; (unless special case of canvas 0)
 		;; Get dimensions of canvas
@@ -791,14 +796,16 @@ megabasic_perform_canvas_stamp:
 		STA	source_canvas_y2
 		LDZ	#$00
 @gotCanvasSize:		
+		inc $0405
 		JSR	$0073
 		cmp	#token_from
-		bne	@stampAll
+		lbne	@stampAll
 		;; We are being given a region to copy
 		JSR	$0073
 		;; get X1
 		JSR	$AD8A
 		JSR	$B7F7
+		inc $0406
 		LDA	$15
 		LBNE	megabasic_perform_illegal_quantity_error
 		LDA	$14
@@ -806,12 +813,15 @@ megabasic_perform_canvas_stamp:
 		lbcs	megabasic_perform_illegal_quantity_error
 		STA	source_canvas_x1
 		;; get comma between X1 and Y1
+		inc $0407
 		jsr 	$0073
 		CMP	#$2C
 		LBNE	megabasic_perform_syntax_error
 		;; get Y1
+		inc $0408
 		JSR	$AD8A
 		JSR	$B7F7
+		inc $0409
 		LDA	$15
 		LBNE	megabasic_perform_illegal_quantity_error
 		LDA	$14
@@ -819,9 +829,11 @@ megabasic_perform_canvas_stamp:
 		lbcs	megabasic_perform_illegal_quantity_error
 		STA	source_canvas_y1
 		;; Check for TO keyword between coordinate pairs
+		inc $040a
 		JSR	$0073
 		CMP	#token_to
 		LBNE	megabasic_perform_syntax_error
+		inc $040b
 		JSR	$0073
 		;; get X2
 		JSR	$AD8A
@@ -833,10 +845,12 @@ megabasic_perform_canvas_stamp:
 		lbcs	megabasic_perform_illegal_quantity_error
 		STA	source_canvas_x2
 		;; get comma between X2 and Y2
+		inc $040c
 		jsr 	$0073
 		CMP	#$2C
 		LBNE	megabasic_perform_syntax_error
 		;; get Y2
+		inc $040d
 		JSR	$AD8A
 		JSR	$B7F7
 		LDA	$15
@@ -847,22 +861,27 @@ megabasic_perform_canvas_stamp:
 		STA	source_canvas_y2
 
 		;; Get next token ready (should be TO)
+		inc $040e
 		JSR	$0073
 @stampAll:
 		;; check that next tokens are ON CANVAS (or just CANVAS to save space and typing)
-		jsr 	$0073
+		STA	$0427
+		inc $040f
 		CMP	#token_canvas
 		BEQ	@skipOn
 		CMP	#token_on
 		LBNE	megabasic_perform_syntax_error
+		inc $0410
 		jsr 	$0073
 		CMP	#token_canvas
 		LBNE	megabasic_perform_syntax_error
 @skipOn:
 		;; Next should be the destination canvas
+		inc $0411
 		JSR	$0073
 		JSR	$AD8A
 		JSR	$B7F7
+		inc $0412
 		LDA	$15
 		LBNE	megabasic_perform_illegal_quantity_error
 		LDA	$14
