@@ -689,16 +689,15 @@ megabasic_perform_colour:
 
 		;; For now just say undefined function
 		JMP	megabasic_perform_undefined_function
-
+		
 set_vic_register:	
 		JSR	enable_viciv
 		LDA	$14
 		STA	$D000,X
+		;; Re-force video mode in case it was a hot register
+		JSR	update_viciv_registers
 
 		JMP	basic2_main_loop
-
-		
-megabasic_perform_screen:
 
 megabasic_perform_load_error:
 		LDX	#$1D
@@ -723,11 +722,39 @@ enable_viciv:
 		STA	$D02F
 		LDA	#$53
 		STA	$D02F
-		;; Enable extended attributes / 8-bit colour register values
-		LDA	#$20
-		STA	$D031
+
 		RTS
 
+update_viciv_registers:	
+
+		;; Enable extended attributes / 8-bit colour register values
+		LDA	#$20
+		TSB	$D031
+		
+		;; Force 80 character virtual lines (80*2 for 16-bit char mode)
+		LDA	#<80*2
+		STA	$D058
+		LDA	#>80
+		STA	$D059
+		;; Screen RAM start address ($0000A000)
+		LDA	#$A0
+		STA	$D061
+		LDA	#$00
+		STA	$D060
+		STA	$D062
+		STA	$D063
+		;; Colour RAM start address ($0800)
+		STA	$D064
+		LDA	#$08
+		STA	$D065
+		;; Update $D054 bits
+		LDA	$D054
+		AND	#$EA
+		ORA	d054_bits
+		STA	$D054
+		RTS
+				
+		
 ; -------------------------------------------------------------
 ; Tileset operations
 ; -------------------------------------------------------------
@@ -1111,23 +1138,8 @@ raster_irq:
 		;; characters, and also overwrite any characters <$100
 
 		jsr 	merge_basic_screen_to_display_canvas
-		
-		;; Force 80 character virtual lines (80*2 for 16-bit char mode)
-		LDA	#<80*2
-		STA	$D058
-		LDA	#>80
-		STA	$D059
-		;; Screen RAM start address ($0000A000)
-		LDA	#$A0
-		STA	$D061
-		LDA	#$00
-		STA	$D060
-		STA	$D062
-		STA	$D063
-		;; Colour RAM start address ($0800)
-		STA	$D064
-		LDA	#$08
-		STA	$D065
+
+		jsr	update_viciv_registers
 
 		;; XXX $D06B - sprite 16 colour enables
 		;; XXX $D06C-E - sprite pointer address
