@@ -730,23 +730,21 @@ megabasic_perform_illegal_quantity_error:
 megabasic_perform_canvas:
 
 		;; All CANVAS statement variants require a canvas number
-		inc $0400
+		jsr	$0079
 		
 		;; Evaluate expression
 		JSR	$AD8A
 		;; Convert FAC to integer in $14-$15
 		JSR	$B7F7
-		inc $0401
 		LDA	$15
 		BEQ	@canvasIDNotInvalid
 		jmp	megabasic_perform_illegal_quantity_error
+@canvasIDNotInvalid:
 		LDA	$14
 		sta	source_canvas
-@canvasIDNotInvalid:
-		inc $0402
+
 		;; Get current token 
 		JSR	$0079
-		STA	$0423
 		CMP	#token_stamp
 		LBEQ	megabasic_perform_canvas_stamp
 		CMP	#token_delete
@@ -767,18 +765,13 @@ megabasic_perform_canvas_stamp:
 		;; (with default tileset, should display MEGA65 banner at top of screen)
 
 		;; Get the token after "STAMP"
-		STA	$0424
-		JSR	$0073
-		STA	$0425
-		
+				
 		;; At this point we have only CANVAS STAMP
-		inc $0403
 		LDA	source_canvas
 		jsr	canvas_find
 		BCS	@foundCanvas
 		jmp	megabasic_perform_illegal_quantity_error
 @foundCanvas:
-		inc $0404
 		;; $03-$06 pointer now points to canvas header
 		;; (unless special case of canvas 0)
 		;; Get dimensions of canvas
@@ -810,10 +803,9 @@ megabasic_perform_canvas_stamp:
 		SBC	#$01
 		STA	source_canvas_y2
 		LDZ	#$00
-@gotCanvasSize:		
+@gotCanvasSize:
+		;; Get token following STAMP
 		JSR	$0073
-		STA	$0426
-		inc $0405
 		cmp	#token_from
 		lbne	@stampAll
 		;; We are being given a region to copy
@@ -821,7 +813,6 @@ megabasic_perform_canvas_stamp:
 		;; get X1
 		JSR	$AD8A
 		JSR	$B7F7
-		inc $0406
 		LDA	$15
 		LBNE	megabasic_perform_illegal_quantity_error
 		LDA	$14
@@ -829,15 +820,13 @@ megabasic_perform_canvas_stamp:
 		lbcs	megabasic_perform_illegal_quantity_error
 		STA	source_canvas_x1
 		;; get comma between X1 and Y1
-		inc $0407
 		jsr 	$0079
 		CMP	#$2C
 		LBNE	megabasic_perform_syntax_error
+		jsr	$0073
 		;; get Y1
-		inc $0408
 		JSR	$AD8A
 		JSR	$B7F7
-		inc $0409
 		LDA	$15
 		LBNE	megabasic_perform_illegal_quantity_error
 		LDA	$14
@@ -845,11 +834,9 @@ megabasic_perform_canvas_stamp:
 		lbcs	megabasic_perform_illegal_quantity_error
 		STA	source_canvas_y1
 		;; Check for TO keyword between coordinate pairs
-		inc $040a
 		JSR	$0079
 		CMP	#token_to
 		LBNE	megabasic_perform_syntax_error
-		inc $040b
 		JSR	$0073
 		;; get X2
 		JSR	$AD8A
@@ -861,12 +848,11 @@ megabasic_perform_canvas_stamp:
 		lbcs	megabasic_perform_illegal_quantity_error
 		STA	source_canvas_x2
 		;; get comma between X2 and Y2
-		inc $040c
 		jsr 	$0079
 		CMP	#$2C
 		LBNE	megabasic_perform_syntax_error
+		jsr	$0073
 		;; get Y2
-		inc $040d
 		JSR	$AD8A
 		JSR	$B7F7
 		LDA	$15
@@ -877,28 +863,21 @@ megabasic_perform_canvas_stamp:
 		STA	source_canvas_y2
 
 		;; Get next token ready (should be TO)
-		inc $040e
 		JSR	$0079
 @stampAll:
 		;; check that next tokens are ON CANVAS (or just CANVAS to save space and typing)
-		STA	$0427
-		inc $040f
-		jmp	@stampAll
 		CMP	#token_canvas
 		BEQ	@skipOn
 		CMP	#token_on
 		LBNE	megabasic_perform_syntax_error
-		inc $0410
 		jsr 	$0073
 		CMP	#token_canvas
 		LBNE	megabasic_perform_syntax_error
 @skipOn:
 		;; Next should be the destination canvas
-		inc $0411
 		JSR	$0073
 		JSR	$AD8A
 		JSR	$B7F7
-		inc $0412
 		LDA	$15
 		LBNE	megabasic_perform_illegal_quantity_error
 		LDA	$14
@@ -911,7 +890,7 @@ megabasic_perform_canvas_stamp:
 		LDA	#$00
 		STA	target_canvas_x
 		STA	target_canvas_y
-		jsr	$0073
+		jsr	$0079
 		CMP	#token_at
 		BNE	@noAt
 		;; Parse AT X,y
@@ -924,9 +903,10 @@ megabasic_perform_canvas_stamp:
 		LDA	$14
 		STA	target_canvas_x
 		;; get comma between X1 and Y1
-		jsr 	$0073
+		jsr 	$0079
 		CMP	#$2C
 		LBNE	megabasic_perform_syntax_error
+		jsr	$0073
 		;; get Y
 		JSR	$AD8A
 		JSR	$B7F7
@@ -935,8 +915,6 @@ megabasic_perform_canvas_stamp:
 		LDA	$14
 		STA	target_canvas_y
 @noAt:
-		;; Strip last token
-		JSR	$0073
 
 		;; We now have all that we need to do a token stamping
 		;; 1. We know the source and target canvases exist
@@ -946,7 +924,7 @@ megabasic_perform_canvas_stamp:
 		;; Now we need to get pointers to the various structures,
 		;; and iterate through the copy.
 
-		RTS
+		JMP	basic2_main_loop
 		
 megabasic_perform_canvas_new:
 megabasic_perform_canvas_delete:
@@ -1055,6 +1033,8 @@ canvas_find:
 		LDA	($03),Z
 		STA	canvas_width
 		INZ
+		NOP
+		NOP
 		LDA	($03),Z
 		STA	canvas_height
 		LDZ	#$00
@@ -1453,6 +1433,11 @@ raster_irq:
 		STA	$D054
 
 		;; Chain to normal IRQ routine
+		;; XXX - We should do this first, so that changing case with SHIFT-C=
+		;; happens first, so that when it messes up the VIC-IV registers via touching
+		;; hot reg $D016, we can fix it up without waiting for a whole frame.
+		;; Else, we need two IRQ routines, the other at top of screen that all it does
+		;; is fix the VIC-IV registers.
 		JMP	$EA31
 
 canvas0copylist:	
