@@ -41,6 +41,24 @@ init:
 		;; Then make the demo tile set available for use
 		jsr 	tileset_point_to_start_of_area
 		jsr 	tileset_install
+
+		;; Finally, set up the raster interrupt to happen at raster
+		;; $100 (just below bottom of text area).
+		SEI	
+		LDA	#<raster_irq
+		STA	$0314
+		LDA	#>raster_irq
+		STA	$0315
+		LDA	#$7F
+		STA	$DC0D
+		STA	$DC0E
+		LDA	#$9B
+		STA	$D011
+		LDA	#$00
+		STA	$D012
+		LDA	#$81
+		STA	$D01A
+		CLI
 		
 		rts
 
@@ -62,12 +80,26 @@ c000blockdmalist:
 		.byte $0A,$00 	; F011A list follows		
 		;; Normal F011A list
 		.byte $07 ; fill + chained
-		.word $10000-$A000 ; size of copy is 4KB
+		.word $10000-$A000 ; size of copy 
 		.word $0000 ; source address = fill value
 		.byte $00   ; of bank $0
-		.word $A000 ; destination address is $C000
+		.word $A000 ; destination address is $A000
 		.byte $00   ; of bank $0
 		.word $0000 ; modulo (unused)
+
+		;; Clear colour RAM at $FF80800-$FF847FF to go with the above
+		.byte $81,$FF  	; destination is $FFxxxxx
+		.byte $0A,$00 	; F011A list follows
+		;; Normal F011A list
+		.byte $07 ; fill + chained
+		.word $4000 ; size of copy is 16KB
+		.word $0000 ; source address = fill value
+		.byte $00   ; of bank $0
+		.word $0800 ; destination address is $0800
+		.byte $08   ; of bank $0
+		.word $0000 ; modulo (unused)
+		;;  Clear option $81 from above
+		.byte $81,$00
 		
 		;; Copy MEGA BASIC code to $C000+
 		.byte $0A,$00 	; F011A list follows		
@@ -575,13 +607,15 @@ megabasic_perform_tile:
 		jmp	basic2_main_loop
 
 megabasic_perform_fast:
-		LDA	#65
-		STA	$00
+		jsr	enable_viciv
+		LDA	#$40
+		TSB	$D054
 		JMP	basic2_main_loop		
 		
 megabasic_perform_slow:
-		LDA	#64
-		STA	$00
+		jsr	enable_viciv
+		LDA	#$40
+		TRB	$D054
 		JMP	basic2_main_loop		
 		
 megabasic_perform_colour:
@@ -1006,6 +1040,68 @@ tileset_install_palette:
 		
 tileset_magic:
 		.byte "MEGA65 TILESET00",0
+
+raster_irq:
+		;; MEGA BASIC raster IRQ
+		;; This happens at the bottom of the screen,
+		;; and copies $E000-$FFFF to $A000 for screen RAM,
+		;; and also the colour RAM from $FF82800-$FF847FF to
+		;; $FF80800, and then merges in any required changes
+		;; from the BASIC screen (char data from $0400 and
+		;; colour data from $FF80000).
+		;; We need to know if the MEGA BASIC screen is in 40 or
+		;; 80 column mode, so that we know how to arrange memory.
+		;; (Later we will allow the BASIC screen to be 80x50 also,
+		;; which will obviate that, but we aren't there just yet).
+
+		;; Do the initial copies using DMA
+		;; (Oh, I am so glad we have DMA, and that we have the
+		;; options header to allow setting all the source and destination
+		;; locations etc.)
+		;; XXX - This DMA *MUST* happen at 50MHz, or there won't be enough
+		;; raster time.  But we allow people to use SLOW and FAST commands
+		;; to control things in BASIC.  This means SLOW and FAST must use
+		;; the VIC-IV speed control register, not the POKE0,65 trick, since
+		;; there is no way to READ that, and thus restore it after.
+
+		;; Remember current speed setting
+		LDA	$D054
+		PHA
+		;; Enable 50MHz fast mode
+		LDA	#$40
+		TSB	$D054
+
+		;; Clear raster IRQ
+		INC	$D019
+
+		;; Force 80 character virtual lines
+		LDA	#<80
+		STA	$D058
+		LDA	#>80
+		STA	$D059
+		;; Screen RAM start address ($0000A000)
+		LDA	#$A0
+		STA	$D061
+		LDA	#$00
+		STA	$D060
+		STA	$D062
+		STA	$D063
+		;; Colour RAM start address ($0800)
+		STA	$D064
+		LDA	#$08
+		STA	$D065
+
+		;; XXX $D06B - sprite 16 colour enables
+		;; XXX $D06C-E - sprite pointer address
+		
+		;; Restore CPU speed and set $D054 video settings
+		PLA
+		AND	#$EA
+		ORA	d054_bits
+		STA	$D054
+
+		;; Chain to normal IRQ routine
+		JMP	$EA31
 		
 		
 
@@ -1013,6 +1109,12 @@ tileset_magic:
 ; Variables and scratch space	
 ; -------------------------------------------------------------
 
+d054_bits:
+		;; $01 = sixteen bit character mode
+		;; $04 = full colour for chars >$FF
+		;; $10 = sprite H640
+		.byte $05
+		
 		;; Flag to indicate which half of token list we are in.
 token_hi_page_flag:
 		.byte $00
