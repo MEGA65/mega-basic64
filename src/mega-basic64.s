@@ -623,6 +623,10 @@ set_vic_register:
 
 		
 megabasic_perform_screen:
+
+megabasic_perform_load_error:
+		LDX	#$1D
+		JMP	$A437
 		
 megabasic_perform_syntax_error:
 		LDX	#$0B
@@ -691,16 +695,66 @@ tileset_install:
 		NOP
 		NOP
 		STA ($03),Z
+		LDZ	#$00
 
 		;; Install the supplied palette.
 		jsr tileset_install_palette
 
+@sectionPrepareLoop:
 		;; Then follow pointer to next section
-		jsr tileset_follow_pointer
+		jsr 	tileset_follow_pointer
+		LDA	section_size+0
+		ORA	section_size+1
+		ORA	section_size+2
+		BEQ	@endOfSectionList
 
-		LDZ	#$00
+		;; There is another section to prepare
+		jsr	tileset_install_section
+
+		;; See if there are any more
+		jmp	@sectionPrepareLoop
+		
+@endOfSectionList:
+
 		RTS
 
+tileset_install_section:
+		;; At the moment the only sections that are allowed are
+		;; screens (called CANVASes in MEGA BASIC)
+		;; We thus must check for the magic string "MEGA65 SCREEN00",
+		;; and can complain if it isn't found
+
+		LDZ	#$00
+		LDX	#$00
+@magicCheckLoop:
+		NOP
+		NOP
+		LDA	($03),Z
+		beq	@emptySection
+		CMP	canvas_magicstring,X
+		bne	@badMagic
+		INZ
+		INX
+		CPX	#15
+		bne	@magicCheckLoop
+		beq	@magicOk
+@badMagic:
+		;; Bad section - give a LOAD ERROR
+		jmp	megabasic_perform_load_error
+@emptySection:
+		;; Empty section, so nothing to do
+		;; (This relies on having an empty 64 byte block at end
+		;; of the tileset file.)
+		RTS
+@magicOk:
+		LDZ	#$00
+		
+		RTS
+		
+
+canvas_magicstring:
+		.byte "MEGA65 SCREEN00",0
+		
 tileset_read_section_size:	
 		LDZ	#61
 		NOP
@@ -817,9 +871,10 @@ tileset_install_palette:
 		bne 	@blueloop
 
 		;; Now step back to start of section.
-		lda	#$40
+		;; (We have stepped forward $40 for header, and over 2x $100 for palettes)
+		lda	#<$240
 		sta	section_size
-		lda	#$03
+		lda	#>$240
 		sta	section_size+1
 		jsr 	tileset_retreat_by_section_size
 
