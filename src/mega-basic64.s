@@ -86,9 +86,18 @@ megabasic_enable:
 		sta execute_vector
 		lda #>megabasic_execute
 		sta execute_vector+1
+
+		lda 	#<welcomeText
+		ldy 	#>welcomeText
+		JSR	$AB1E
 		
 		RTS
 
+welcomeText:	
+		.byte $93,$11,"    **** MEGA65 MEGA BASIC V0.1 ****",$0D
+		.byte $11," 75776 GRAPHIC 38911 PROGRAM BYTES FREE",$0D
+		.byte $00
+		
 megabasic_disable:
 		RTS
 
@@ -105,29 +114,7 @@ megabasic_disable:
 
 		;; We will need two pages of tokens, so $A5AE needs to reset access to the low-page
 		;; of tokens, as well as Y=0, $0B=0
-
-
-token_hi_page_flag:
-		.byte $00
 		
-tokenlist:
-		;; Reserve space for C64 BASIC token list, less the end $00 marker
-		.res ($A19C - $A09E + 1), $00
-		;; End of list marker (remove to enable new tokens)
-				;.byte $00
-		;; Now we have our new tokens
-		;; extra_token_count must be correctly set to the number of tokens
-		extra_token_count = 5
-		.byte "SCREE",'N'+$80 
-		.byte "BORDE",'R'+$80
-		.byte "TILESE",'T'+$80
-		.if 1
-		.byte "FAS",'T'+$80
-		.byte "SLO",'W'+$80
-		.endif
-		;; And the end byte
-		.byte $00		
-
 megabasic_tokenise:
 
 		;; Get the basic execute pointer low byte
@@ -443,10 +430,17 @@ jump_list_command_finish_printing_token_a6ef:
 
 megabasic_execute:		
 		JSR	$0073
+		;; Is it a MEGA BASIC primary keyword?
 		CMP	#$CC
 		BCC	@basic2_token
-		CMP	#$CC + extra_token_count
+		CMP	#token_first_sub_command
 		BCC	megabasic_execute_token
+		;; Handle PI
+		CMP	#$FF
+		BEQ	@basic2_token
+		;; Else, it must be a MEGA BASIC secondary keyword
+		;; You can't use those alone, so ILLEGAL DIRECT ERROR
+		jmp megabasic_perform_illegal_direct_error
 @basic2_token:
 		;; $A7E7 expects Z flag set if ==$00, so update it
 		CMP	#$00
@@ -468,17 +462,64 @@ megabasic_execute_token:
 
 		;; Tokens are $CC-$FE, so to be safe, we need to have a jump
 newtoken_jumptable:
-		.word	megabasic_perform_screen
-		.word	megabasic_perform_border
-		.word	megabasic_perform_tileset
 		.word 	megabasic_perform_fast
 		.word 	megabasic_perform_slow
+		.word	megabasic_perform_canvas ; canvas operations, including copy/stamping, clearing, creating new
+		.word	megabasic_perform_colour ; set colours
+		.word	megabasic_perform_tile ; "TILE" command, used for TILESET and other purposes
+		.word	megabasic_perform_syntax_error ; "SET" SYNTAXERROR: Used only with TILE to make TILESET
 		.word 	megabasic_perform_syntax_error
 		.word 	megabasic_perform_syntax_error
 		.word 	megabasic_perform_syntax_error
 
 		basic2_main_loop 	=	$A7AE
 
+tokenlist:
+		;; Reserve space for C64 BASIC token list, less the end $00 marker
+		.res ($A19C - $A09E + 1), $00
+		;; End of list marker (remove to enable new tokens)
+				;.byte $00
+		;; Now we have our new tokens
+		;; extra_token_count must be correctly set to the number of tokens
+		extra_token_count = 5
+		token_fast = $CC + 0
+		.byte "FAS",'T'+$80
+		token_slow = $CC + 1
+		.byte "SLO",'W'+$80
+
+		token_canvas = $CC + 2
+		.byte "CANVA",'S'+$80
+		token_colour = $CC + 3
+		.byte "COLOU",'R'+$80
+		token_tile = $CC + 4
+		.byte "TIL",'E'+$80
+
+		token_first_sub_command = token_tile + 1
+		
+		;; These tokens are keywords used within other
+		;; commands, not as executable commands. These
+		;; will all generate syntax errors.
+		token_text = token_first_sub_command + 0
+		.byte "TEX",'T'+$80
+		token_sprite = token_first_sub_command + 1
+		.byte "SPRIT",'E'+$80
+		token_screen = token_first_sub_command + 2
+		.byte "SCREE",'N'+$80 
+		token_border = token_first_sub_command + 3
+		.byte "BORDE",'R'+$80
+		token_set = token_first_sub_command + 4
+		.byte "SE",'T'+$80
+		token_delete = token_first_sub_command + 5
+		.byte "DELET",'E'+$80
+		token_stamp = token_first_sub_command + 6
+		.byte "STAM",'P'+$80
+		token_at = token_first_sub_command + 7
+		.byte "A",'T'+$80
+		;; And the end byte
+		.byte $00		
+
+
+		
 megabasic_perform_fast:
 		LDA	#65
 		STA	$00
@@ -489,16 +530,58 @@ megabasic_perform_slow:
 		STA	$00
 		JMP	basic2_main_loop		
 		
-megabasic_perform_border:
+megabasic_perform_colour:
+		;; What are we being asked to colour?
+		SEC
+		SBC	#token_text
+		BMI	megabasic_perform_undefined_function
+		CMP	#token_stamp-token_text
+		BCS	megabasic_perform_undefined_function
+		;; Okey, we have a valid colour target
+		STA	colour_target
+		;; Advance to next token
+		JSR	$0073
+		
+		;; All options then require a colour number,
+		;; how it is interpretted depends on the target
+
 		;; Evaluate expression
 		JSR	$AD8A
 		;; Convert FAC to integer in $14-$15
 		JSR	$B7F7
+
+		;; Handle the simple cases
+		LDA	colour_target
+		LDX	#$20
+		CMP	#(token_border-token_text)
+		BEQ	set_vic_register
+		LDX	#$21
+		CMP	#(token_screen-token_text)
+		BEQ	set_vic_register
+		CMP	#(token_text-token_text)
+		BNE	@mustBeSpriteColour
+@settingTextColour:
+		;; Here we are setting the text colour
+		;; (this is just a convenience from using CHR$
+		;; codes to set the text colour)
+		LDA	$14
+		STA	$286
+		JMP	basic2_main_loop
+@mustBeSpriteColour:
+		;; Syntax is:
+		;; COLOUR SPRITE <n> COLOUR <m> = <r>,<g>,<b>
+		;; Where, n is the sprite #, m is the colour ID (0-15), and R,G and B are the RGB values
+
+		;; For now just say undefined function
+		JMP	megabasic_perform_undefined_function
+
+set_vic_register:	
 		JSR	enable_viciv
 		LDA	$14
-		STA	$D020
+		STA	$D000,X
 
 		JMP	basic2_main_loop
+
 		
 megabasic_perform_screen:
 megabasic_perform_tileset:	
@@ -507,6 +590,16 @@ megabasic_perform_syntax_error:
 		LDX	#$0B
 		JMP	$A437
 
+megabasic_perform_illegal_direct_error:
+		LDX	#$15
+		JMP	$A437
+
+megabasic_perform_tile:
+megabasic_perform_canvas:
+		;; FALL THROUGH for unimplemented commands
+megabasic_perform_undefined_function:
+		LDX	#$1B
+		JMP	$A437		
 
 enable_viciv:
 		LDA	#$47
@@ -514,3 +607,14 @@ enable_viciv:
 		LDA	#$53
 		STA	$D02F
 		RTS
+
+
+; -------------------------------------------------------------
+; Variables and scratch space	
+; -------------------------------------------------------------
+
+token_hi_page_flag:
+		.byte $00
+colour_target:
+		.byte $00
+		
