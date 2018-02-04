@@ -128,8 +128,6 @@ tokenlist:
 		;; And the end byte
 		.byte $00		
 
-		.res $FF,$00
-		
 megabasic_tokenise:
 
 		;; Get the basic execute pointer low byte
@@ -213,12 +211,11 @@ megabasic_tokenise:
 		bmi	@useTokenListHighPage
 		SEC
 		SBC	tokenlist, Y
-		jmp	@foo
+		jmp	@dontUseHighPage
 @useTokenListHighPage:
 		SEC
 		SBC	tokenlist+$100,Y
-@foo:
-		
+@dontUseHighPage:
 		;; If zero, then compare the next character
 		BEQ	@compareNextChar_a5b6
 		;; If $80, then it is the end of the token, and we have matched the token
@@ -332,15 +329,9 @@ tokenListAdvancePointer:
 		tax
 		bit	token_hi_page_flag
 		bmi	@page2
-		;; inc	$0400,x
 		jmp	@done
-@page2:				; inc	$0500,x
+@page2:		
 		@done:
-		.if 0
-		LDA	#$FF
-@delay:		CMP	$D012
-		BNE	@delay
-		.endif
 		
 		PLA
 		PLX
@@ -359,8 +350,6 @@ tokenListReadByte:
 tokenListReadByteMinus1:	
 		bit 	token_hi_page_flag
 		bmi	@useTokenListHighPage
-		CPY	#$FF
-		beq	@useTokenListHighPage
 		LDA	tokenlist - 1, Y
 		RTS
 @useTokenListHighPage:
