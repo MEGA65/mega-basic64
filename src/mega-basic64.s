@@ -575,6 +575,8 @@ tokenlist:
 				;.byte $00
 		;; Now we have our new tokens
 		;; extra_token_count must be correctly set to the number of tokens
+		;; (This lists only the number of tokens that are good for direct use.
+		;; Keywords found only within statements are not in this tally.)
 		extra_token_count = 5
 		token_fast = $CC + 0
 		.byte "FAS",'T'+$80
@@ -609,9 +611,16 @@ tokenlist:
 		.byte "STAM",'P'+$80
 		token_at = token_first_sub_command + 7
 		.byte "A",'T'+$80
+		token_from = token_first_sub_command + 8
+		.byte "FRO",'M'+$80
 		;; And the end byte
 		.byte $00		
 
+		;; Quick reference to C64 BASIC tokens
+		token_clr	=	$9C
+		token_new	=	$A2
+		token_on	=	$91
+		token_to	=	$A4
 
 megabasic_perform_tile:
 		;; Valid syntax options:
@@ -649,9 +658,9 @@ megabasic_perform_colour:
 		;; What are we being asked to colour?
 		SEC
 		SBC	#token_text
-		BMI	megabasic_perform_undefined_function
+		LBMI	megabasic_perform_undefined_function
 		CMP	#token_stamp-token_text
-		BCS	megabasic_perform_undefined_function
+		LBCS	megabasic_perform_undefined_function
 		;; Okey, we have a valid colour target
 		STA	colour_target
 		;; Advance to next token
@@ -711,8 +720,203 @@ megabasic_perform_illegal_direct_error:
 		LDX	#$15
 		JMP	$A437
 
+megabasic_perform_illegal_quantity_error:
+		LDX	#$0E
+		JMP	$A437
+		
 megabasic_perform_canvas:
-		;; FALL THROUGH for unimplemented commands
+
+		;; All CANVAS statement variants require a canvas number
+
+		;; Evaluate expression
+		JSR	$AD8A
+		;; Convert FAC to integer in $14-$15
+		JSR	$B7F7
+		LDA	$15
+		BEQ	@canvasIDNotInvalid
+		jmp	megabasic_perform_illegal_quantity_error
+		LDA	$14
+		sta	source_canvas
+@canvasIDNotInvalid:
+		;; Get next token 
+		JSR	$0073
+		CMP	#token_stamp
+		LBEQ	megabasic_perform_canvas_stamp
+		CMP	#token_delete
+		LBEQ	megabasic_perform_canvas_delete
+		CMP	#token_clr
+		LBEQ	megabasic_perform_canvas_clear
+		CMP	#token_new
+		LBEQ	megabasic_perform_canvas_new
+		CMP	#token_set
+		LBEQ	megabasic_perform_canvas_settile
+
+megabasic_perform_canvas_stamp:
+		;; CANVAS s STAMP [from x1,y1 TO x2,y2] ON CANVAS t [AT x3,y3]
+		;; At this point we have only CANVAS STAMP
+		LDA	source_canvas
+		jsr	canvas_find
+		BCS	@foundCanvas
+		jmp	megabasic_perform_illegal_quantity_error
+@foundCanvas:
+		;; $03-$06 pointer now points to canvas header
+		;; (unless special case of canvas 0)
+		;; Get dimensions of canvas
+		LDA	#0
+		sta	source_canvas_x1
+		sta	source_canvas_y1
+		LDA	source_canvas
+		BNE	@notCanvas0
+		;; Is canvas 0, so dimensions are fixed: 80x50
+		lda	#80-1
+		sta	source_canvas_x2
+		lda	#50-1
+		sta	source_canvas_y2
+		jmp	@gotCanvasSize
+@notCanvas0:
+		;; Read canvas size from canvas header block
+		LDZ	#16
+		NOP
+		NOP
+		LDA	($03),Z
+		SEC
+		SBC	#$01
+		STA	source_canvas_x2
+		INZ
+		NOP
+		NOP
+		LDA	($03),Z
+		SEC
+		SBC	#$01
+		STA	source_canvas_y2
+		LDZ	#$00
+@gotCanvasSize:		
+		JSR	$0073
+		cmp	#token_from
+		bne	@stampAll
+		;; We are being given a region to copy
+		JSR	$0073
+		;; get X1
+		JSR	$AD8A
+		JSR	$B7F7
+		LDA	$15
+		LBNE	megabasic_perform_illegal_quantity_error
+		LDA	$14
+		cmp	source_canvas_x2
+		lbcs	megabasic_perform_illegal_quantity_error
+		STA	source_canvas_x1
+		;; get comma between X1 and Y1
+		jsr 	$0073
+		CMP	#$2C
+		LBNE	megabasic_perform_syntax_error
+		;; get Y1
+		JSR	$AD8A
+		JSR	$B7F7
+		LDA	$15
+		LBNE	megabasic_perform_illegal_quantity_error
+		LDA	$14
+		cmp	source_canvas_y2
+		lbcs	megabasic_perform_illegal_quantity_error
+		STA	source_canvas_y1
+		;; Check for TO keyword between coordinate pairs
+		JSR	$0073
+		CMP	#token_to
+		LBNE	megabasic_perform_syntax_error
+		JSR	$0073
+		;; get X2
+		JSR	$AD8A
+		JSR	$B7F7
+		LDA	$15
+		LBNE	megabasic_perform_illegal_quantity_error
+		LDA	$14
+		cmp	source_canvas_x2
+		lbcs	megabasic_perform_illegal_quantity_error
+		STA	source_canvas_x2
+		;; get comma between X2 and Y2
+		jsr 	$0073
+		CMP	#$2C
+		LBNE	megabasic_perform_syntax_error
+		;; get Y2
+		JSR	$AD8A
+		JSR	$B7F7
+		LDA	$15
+		LBNE	megabasic_perform_illegal_quantity_error
+		LDA	$14
+		cmp	source_canvas_y2
+		lbcs	megabasic_perform_illegal_quantity_error
+		STA	source_canvas_y2
+
+		;; Get next token ready (should be TO)
+		JSR	$0073
+@stampAll:
+		;; check that next tokens are ON CANVAS (or just CANVAS to save space and typing)
+		jsr 	$0073
+		CMP	#token_canvas
+		BEQ	@skipOn
+		CMP	#token_on
+		LBNE	megabasic_perform_syntax_error
+		jsr 	$0073
+		CMP	#token_canvas
+		LBNE	megabasic_perform_syntax_error
+@skipOn:
+		;; Next should be the destination canvas
+		JSR	$0073
+		JSR	$AD8A
+		JSR	$B7F7
+		LDA	$15
+		LBNE	megabasic_perform_illegal_quantity_error
+		LDA	$14
+		STA	target_canvas
+		jsr	canvas_find
+		BCS	@foundCanvas2
+		jmp	megabasic_perform_illegal_quantity_error
+@foundCanvas2:
+		;; Finally, look for optional AT X,Y
+		LDA	#$00
+		STA	target_canvas_x
+		STA	target_canvas_y
+		jsr	$0073
+		CMP	#token_at
+		BNE	@noAt
+		;; Parse AT X,y
+		JSR	$0073
+		;; get X
+		JSR	$AD8A
+		JSR	$B7F7
+		LDA	$15
+		LBNE	megabasic_perform_illegal_quantity_error
+		LDA	$14
+		STA	target_canvas_x
+		;; get comma between X1 and Y1
+		jsr 	$0073
+		CMP	#$2C
+		LBNE	megabasic_perform_syntax_error
+		;; get Y
+		JSR	$AD8A
+		JSR	$B7F7
+		LDA	$15
+		LBNE	megabasic_perform_illegal_quantity_error
+		LDA	$14
+		STA	target_canvas_y
+@noAt:
+		;; Strip last token
+		JSR	$0073
+
+		;; We now have all that we need to do a token stamping
+		;; 1. We know the source and target canvases exist
+		;; 2. We know the source region to copy from
+		;; 3. We know the target location to draw into
+
+		;; Now we need to get pointers to the various structures,
+		;; and iterate through the copy.
+
+		RTS
+		
+megabasic_perform_canvas_new:
+megabasic_perform_canvas_delete:
+megabasic_perform_canvas_clear:
+megabasic_perform_canvas_settile:
+		;; FALL THROUGH
 megabasic_perform_undefined_function:
 		LDX	#$1B
 		JMP	$A437		
@@ -758,6 +962,68 @@ update_viciv_registers:
 ; -------------------------------------------------------------
 ; Tileset operations
 ; -------------------------------------------------------------
+
+canvas_find:
+		sta	search_canvas
+		;; Are we looking for canvas 0?
+		;; If yes, this is the special case. Always direct
+		;; mapped at $E000, 80x50, and has no header structure
+		CMP	#$00
+		BNE	@canvasSearchLoop
+		;; Set pointer to start of data
+		LDA	#$00
+		STA	$03
+		STA	$05
+		STA	$06
+		LDA	#$E0
+		STA	$04
+
+		;; Set canvas size
+		LDA	#80
+		STA	canvas_width
+		LDA	#50
+		STA	canvas_height
+		
+		SEC
+		RTS
+@canvasSearchLoop:
+		;; Find the next canvas (or first, skipping tileset header)
+		jsr 	tileset_point_to_start_of_area
+		jsr 	tileset_follow_pointer
+
+		;; (We assume all following sections are valid, after having been installed.
+		;; XXX - We sould check the magic string, just be to safe, anyway, though.)
+		LDA	section_size+0
+		ORA	section_size+1
+		ORA	section_size+2
+		BEQ	@endOfSectionList
+
+		;; Found a section. Is the the one we want?
+		LDZ	#15
+		NOP
+		NOP
+		LDA	($03),Z
+		LDZ	#0
+		CMP	search_canvas
+		BNE	@canvasSearchLoop
+		BEQ	@foundCanvas
+@endOfSectionList:		
+		CLC
+		RTS
+@foundCanvas:
+		;; Okay, we found it.
+		;; Copy width and height out
+		LDZ	#16
+		NOP
+		NOP
+		LDA	($03),Z
+		STA	canvas_width
+		INZ
+		LDA	($03),Z
+		STA	canvas_height
+		LDZ	#$00
+		SEC
+		RTS		
 		
 tileset_install:
 		;; Sanity check the tile set that is in memory at 32-bit pointer
@@ -1358,3 +1624,18 @@ stashed_pointer:
 
 merge_scratch:
 		.byte 0,0,0,0,0,0,0,0,0,0
+
+
+		;; For CANVAS stamping (copying)
+source_canvas:	.byte 0
+source_canvas_x1:	.byte 0
+source_canvas_y1:	.byte 0
+source_canvas_x2:	.byte 0
+source_canvas_y2:	.byte 0
+target_canvas:	.byte 0
+target_canvas_x:	.byte 0
+target_canvas_y:	.byte 0
+
+search_canvas:		.byte 0
+canvas_width:		.byte 0
+canvas_height:		.byte 0
