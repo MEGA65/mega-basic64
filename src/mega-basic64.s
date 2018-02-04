@@ -45,6 +45,7 @@ init:
 		rts
 
 c000blockdmalist:
+		;; Install pre-prepared tileset @ $12000+
 		.byte $0A,$00 	; F011A list follows
 		;; Normal F011A list
 		.byte $04 ; copy + chained request
@@ -54,8 +55,22 @@ c000blockdmalist:
 		.word $2000 ; destination address is $2000
 		.byte $01   ; of bank $1 ( = $12000)
 		.word $0000 ; modulo (unused)		
+
+		;; Clear $A000-$FFFF out (so that we can put screen data
+		;; at $A000-$BFFF and $E000-$FFFF). This obviously has to
+		;; happen BEFORE we copy our code into $C000 :)
+		.byte $0A,$00 	; F011A list follows		
+		;; Normal F011A list
+		.byte $07 ; fill + chained
+		.word $10000-$A000 ; size of copy is 4KB
+		.word $0000 ; source address = fill value
+		.byte $00   ; of bank $0
+		.word $A000 ; destination address is $C000
+		.byte $00   ; of bank $0
+		.word $0000 ; modulo (unused)
 		
-		.byte $0A,$00 	; F011A list follows
+		;; Copy MEGA BASIC code to $C000+
+		.byte $0A,$00 	; F011A list follows		
 		;; Normal F011A list
 		.byte $00 ; copy + end of list chain
 		.word $1000 ; size of copy is 4KB
