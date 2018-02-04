@@ -346,7 +346,7 @@ int main(int argc, char **argv)
   int i,x,y;
   
   if (argc <3) {
-    fprintf(stderr,"Usage: pngtoscreens <output file> <png file ...>\n");
+    fprintf(stderr,"Usage: pngtoscreens <output file> [c64palette] <png file ...>\n");
     exit(-1);
   }
 
@@ -369,15 +369,38 @@ int main(int argc, char **argv)
   }
 
   int image_tiles=0;
+  int screen_num=1;
   
   for(int i=2;i<argc;i++) {
     printf("Reading %s\n",argv[i]);
-    read_png_file(argv[i]);
-    image_tiles+=width*height/64;
-    // We start with screen ID 1, as screen ID 0 is reserved to refer to the
-    // current displayed screen.
-    struct screen *s = png_to_screen(i-1,ts);
-    screen_list[screen_count++]=s;
+    if ((i==2)&&(!strcmp(argv[i],"c64palette"))) {
+      printf("Putting C64 palette in slots 0 - 15\n");
+      // Pre-populate with C64 palette
+      palette_lookup(ts,0,0,0); // black 0
+      palette_lookup(ts,0xff,0xff,0xff); // white 1
+      palette_lookup(ts,0xab,0x31,0x26); // red 2
+      palette_lookup(ts,0x66,0xda,0xff); // cyan 3
+      palette_lookup(ts,0xbb,0x3f,0xb8); // pur 4
+      palette_lookup(ts,0x55,0xce,0x58); // green 5
+      palette_lookup(ts,0x1d,0x0e,0x97); // blue 6
+      palette_lookup(ts,0xea,0xf5,0x7c); // yel 7
+      palette_lookup(ts,0xb9,0x74,0x18); // org 8
+      palette_lookup(ts,0x78,0x73,0x00); // brown 9
+      palette_lookup(ts,0xdd,0x93,0x87); // pink 10
+      palette_lookup(ts,0x5b,0x5b,0x5b); // dark gray 11
+      palette_lookup(ts,0x8b,0x8b,0x8b); // med gray 12
+      palette_lookup(ts,0xb0,0xf4,0xac); // light green 13
+      palette_lookup(ts,0xaa,0x9d,0xef); // light blue 14
+      palette_lookup(ts,0xb8,0xb8,0xb8); // light grey 15
+    }
+    else {
+      read_png_file(argv[i]);
+      image_tiles+=width*height/64;
+      // We start with screen ID 1, as screen ID 0 is reserved to refer to the
+      // current displayed screen.
+      struct screen *s = png_to_screen(screen_num++,ts);
+      screen_list[screen_count++]=s;
+    }
   }
 
   printf("Images consists of %d tiles (%d unique) and %d unique colours found.\n",

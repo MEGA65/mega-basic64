@@ -28,7 +28,7 @@ tools:	$(TOOLS)
 	$(CA65) $< -l $*.list
 
 $(BINDIR)/megabanner.tiles:	$(TOOLDIR)/pngtoscreens $(ASSETS)/mega65_320x64.png
-	$(TOOLDIR)/pngtoscreens $(BINDIR)/megabanner.tiles $(ASSETS)/mega65_320x64.png
+	$(TOOLDIR)/pngtoscreens $(BINDIR)/megabanner.tiles c64palette $(ASSETS)/mega65_320x64.png
 
 $(BINDIR)/megabasic64.prg:       $(MEGABASICOBJS) $(BINDIR)/megabanner.tiles
 	mkdir -p $(BINDIR)
