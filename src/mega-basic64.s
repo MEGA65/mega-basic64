@@ -75,7 +75,7 @@ init:
 		LDA	#<raster_irq
 		STA	$0314
 		LDA	#>raster_irq
-		STA	$0315
+		STA	$0315		
 		LDA	#$7F
 		STA	$DC0D
 		STA	$DC0E
@@ -86,6 +86,9 @@ init:
 		LDA	#$81
 		STA	$D01A
 		CLI
+
+		;; XXX And setup NMI ($0318) and BRK ($0316) catchers?
+		;; (Model of $FE47 in C64 KERNAL).
 		
 		rts
 
@@ -741,8 +744,9 @@ megabasic_perform_canvas:
 		sta	source_canvas
 @canvasIDNotInvalid:
 		inc $0402
-		;; Get next token 
-		JSR	$0073
+		;; Get current token 
+		JSR	$0079
+		STA	$0423
 		CMP	#token_stamp
 		LBEQ	megabasic_perform_canvas_stamp
 		CMP	#token_delete
@@ -753,9 +757,20 @@ megabasic_perform_canvas:
 		LBEQ	megabasic_perform_canvas_new
 		CMP	#token_set
 		LBEQ	megabasic_perform_canvas_settile
-
+		;; Else, its bad
+		JMP	megabasic_perform_undefined_function
+		
 megabasic_perform_canvas_stamp:
 		;; CANVAS s STAMP [from x1,y1 TO x2,y2] ON CANVAS t [AT x3,y3]
+		;; Minimal example:
+		;; CANVAS 1 STAMP ON CANVAS 0
+		;; (with default tileset, should display MEGA65 banner at top of screen)
+
+		;; Get the token after "STAMP"
+		STA	$0424
+		JSR	$0073
+		STA	$0425
+		
 		;; At this point we have only CANVAS STAMP
 		inc $0403
 		LDA	source_canvas
@@ -796,8 +811,9 @@ megabasic_perform_canvas_stamp:
 		STA	source_canvas_y2
 		LDZ	#$00
 @gotCanvasSize:		
-		inc $0405
 		JSR	$0073
+		STA	$0426
+		inc $0405
 		cmp	#token_from
 		lbne	@stampAll
 		;; We are being given a region to copy
@@ -814,7 +830,7 @@ megabasic_perform_canvas_stamp:
 		STA	source_canvas_x1
 		;; get comma between X1 and Y1
 		inc $0407
-		jsr 	$0073
+		jsr 	$0079
 		CMP	#$2C
 		LBNE	megabasic_perform_syntax_error
 		;; get Y1
@@ -830,7 +846,7 @@ megabasic_perform_canvas_stamp:
 		STA	source_canvas_y1
 		;; Check for TO keyword between coordinate pairs
 		inc $040a
-		JSR	$0073
+		JSR	$0079
 		CMP	#token_to
 		LBNE	megabasic_perform_syntax_error
 		inc $040b
@@ -846,7 +862,7 @@ megabasic_perform_canvas_stamp:
 		STA	source_canvas_x2
 		;; get comma between X2 and Y2
 		inc $040c
-		jsr 	$0073
+		jsr 	$0079
 		CMP	#$2C
 		LBNE	megabasic_perform_syntax_error
 		;; get Y2
@@ -862,11 +878,12 @@ megabasic_perform_canvas_stamp:
 
 		;; Get next token ready (should be TO)
 		inc $040e
-		JSR	$0073
+		JSR	$0079
 @stampAll:
 		;; check that next tokens are ON CANVAS (or just CANVAS to save space and typing)
 		STA	$0427
 		inc $040f
+		jmp	@stampAll
 		CMP	#token_canvas
 		BEQ	@skipOn
 		CMP	#token_on
