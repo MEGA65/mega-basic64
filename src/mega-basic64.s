@@ -95,7 +95,7 @@ megabasic_enable:
 
 welcomeText:	
 		.byte $93,$11,"    **** MEGA65 MEGA BASIC V0.1 ****",$0D
-		.byte $11," 75776 GRAPHIC 38911 PROGRAM BYTES FREE",$0D
+		.byte $11," 55296 GRAPHIC 38911 PROGRAM BYTES FREE",$0D
 		.byte $00
 		
 megabasic_disable:
@@ -595,6 +595,26 @@ megabasic_perform_illegal_direct_error:
 		JMP	$A437
 
 megabasic_perform_tile:
+		;; Valid syntax options:
+		;; TILE SET LOAD <"filename"> [,device]
+		CMP	#token_set
+		bne	megabasic_perform_syntax_error
+		JSR	$0073
+		CMP	#$93 	; Token for "LOAD" keyword
+		bne	megabasic_perform_syntax_error
+		JSR	$0073
+		;; Convienently the LOAD command has a routine we
+		;; can call that gets the filename and device + ,1
+		;; options.
+		LDA	#$00 	; Set LOAD/VERIFY flag for LOAD
+		STA	$0A
+		JSR	$E1D4
+
+		;; XXX - Not yet implemented
+		
+		jmp	basic2_main_loop
+
+		
 megabasic_perform_canvas:
 		;; FALL THROUGH for unimplemented commands
 megabasic_perform_undefined_function:
