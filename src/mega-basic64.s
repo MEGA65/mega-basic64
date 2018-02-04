@@ -24,10 +24,10 @@ bootstrap:
 ;-------------------------------------------------------------------------------
 init:
 		;; Get acces to DMAgic etc
-		lda 	#$47
-		sta	$d02f
-		lda	#$53
-		sta 	$d02f
+		LDA	#$47
+		STA	$D02F
+		LDA	#$53
+		STA	$D02F
 		
 		;; Install $C000 block (and preloaded tiles)		
 		lda 	#>c000blockdmalist
@@ -36,10 +36,11 @@ init:
 		sta	$d705
 
 		;; enable wedge
-		jsr megabasic_enable
+		jsr 	megabasic_enable
 
 		;; Then make the demo tile set available for use
-		jsr tileset_validate
+		jsr 	tileset_point_to_start_of_area
+		jsr 	tileset_install
 		
 		rts
 
@@ -650,23 +651,11 @@ enable_viciv:
 ; -------------------------------------------------------------
 ; Tileset operations
 ; -------------------------------------------------------------
-
-tileset_validate:
-		;; Sanity check the tile set that is in memory at $12000-$127FF
-		;; We do memory access via flat-32 adressing, using $03-$06 as our
-		;; 32-bit vector
-		;; All graphics memory is currently in bank 1, so that part of the
-		;; address can be fixed
-		LDA 	#$00
-		STA 	$06
-		LDA 	#$01
-		STA 	$05
-
-		;; Lower 16 bits we start with pointing at $2000
-		LDA 	#$20
-		STA 	$04
-		LDA 	#$00
-		STA 	$03
+		
+tileset_install:
+		;; Sanity check the tile set that is in memory at 32-bit pointer
+		;; in $03, and fix tile numbers in any canvases, so that they are
+		;; correct for the tileset location.
 
 		;; Check magic string
 		LDZ 	#$00
@@ -685,11 +674,157 @@ tileset_validate:
 		BEQ	@magicOk
 @magicBad:
 		INC	$D020
+		LDZ	#$00
 		RTS		
 @magicOk:
-		
+		;; Fix the first tile number.
+		;; As we currently use a fixed location at $12000, and
+		;; the header = 64 bytes + $300 of palette, the first tile
+		;; will be at $12340 = $48D.
+		LDZ #20
+		lda #<($12000+$40+$300)
+		NOP
+		NOP
+		STA ($03),Z
+		INZ
+		LDA #>($12000+$40+$300)
+		NOP
+		NOP
+		STA ($03),Z
+
+		;; Install the supplied palette.
+		jsr tileset_install_palette
+
+		;; Then follow pointer to next section
+		jsr tileset_follow_pointer
+
+		LDZ	#$00
 		RTS
 
+tileset_read_section_size:	
+		LDZ	#61
+		NOP
+		NOP
+		LDA	($03),Z
+		STA	section_size+0
+		INZ
+		NOP
+		NOP
+		LDA	($03),Z
+		STA	section_size+1
+		INZ
+		NOP
+		NOP
+		LDA	($03),Z
+		STA	section_size+2
+
+		LDZ	#$00
+		RTS
+
+tileset_point_to_start_of_area:	
+		LDA 	#$00
+		STA 	$06
+		LDA 	#$01
+		STA 	$05
+
+		;; Lower 16 bits we start with pointing at $2000
+		LDA 	#$20
+		STA 	$04
+		LDA 	#$00
+		STA 	$03
+		RTS
+		
+tileset_follow_pointer:
+		;; Follow the pointer in the section, by adding
+		;; the section length to the current pointer
+		jsr	tileset_read_section_size
+		;; FALL-THROUGH to tileset_advance_by_section_size
+
+tileset_advance_by_section_size:	
+		;; Add length to current pointer
+		;; (Offsets are 24 bit, so we don't bother touching the
+		;; 4th byte of the pointer.)
+		lda	section_size+0
+		CLC
+		ADC	$03
+		STA	$03
+		lda	section_size+1
+		ADC	$04
+		STA	$04
+		lda	section_size+2
+		ADC	$05
+		STA	$05
+		RTS
+
+tileset_retreat_by_section_size:	
+		;; Add length to current pointer
+		;; (Offsets are 24 bit, so we don't bother touching the
+		;; 4th byte of the pointer.)
+		LDA	$03
+		SEC
+		SBC	section_size+0
+		STA	$03
+		LDA	$04
+		SBC	section_size+1
+		STA	$04
+		LDA	$05
+		SBC	section_size+2
+		STA	$05
+		RTS
+
+tileset_install_palette:
+		;; Install palette from current tileset
+		jsr	enable_viciv
+		
+		;; Advance to red palette
+		lda 	#$40
+		sta 	section_size+0
+		lda	#$00
+		sta	section_size+1
+		sta	section_size+2
+		jsr	tileset_advance_by_section_size
+		LDZ	#$00
+		LDX	#$00
+@redloop:
+		NOP
+		NOP
+		LDA	($03),Z
+		STA	$D100,X
+		INZ
+		INX
+		bne 	@redloop
+		lda	#$00
+		sta	section_size+0
+		lda	#$01
+		sta	section_size+1
+		jsr	tileset_advance_by_section_size
+@greenloop:
+		NOP
+		NOP
+		LDA	($03),Z
+		STA	$D200,X
+		INZ
+		INX
+		bne 	@greenloop
+		jsr	tileset_advance_by_section_size
+@blueloop:
+		NOP
+		NOP
+		LDA	($03),Z
+		STA	$D300,X
+		INZ
+		INX
+		bne 	@blueloop
+
+		;; Now step back to start of section.
+		lda	#$40
+		sta	section_size
+		lda	#$03
+		sta	section_size+1
+		jsr 	tileset_retreat_by_section_size
+
+		LDZ	#$00
+		RTS				
 		
 tileset_magic:
 		.byte "MEGA65 TILESET00",0
@@ -700,8 +835,14 @@ tileset_magic:
 ; Variables and scratch space	
 ; -------------------------------------------------------------
 
+		;; Flag to indicate which half of token list we are in.
 token_hi_page_flag:
 		.byte $00
+
+		;; Where a colour is being put
 colour_target:
 		.byte $00
-		
+
+		;; 24-bit length of a tileset section
+section_size:
+		.byte 0,0,0

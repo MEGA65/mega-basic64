@@ -389,7 +389,7 @@ int main(int argc, char **argv)
     header + 18 = number of palette slots used
     [ header + 19,20 = first tile number (set only when loaded) ]
     
-    header + 61-63 = size of section in bytes [becomes pointer to next section after loading]
+    header + 61-63 = size of section in bytes
     3x256 bytes palette values
     Tiles, 64 bytes each.
   */
@@ -428,15 +428,15 @@ int main(int argc, char **argv)
   /* 
     Screen consists of
     64 byte header
-    header + 0-14 = magic string "MEGA65 SCREEN00" [becomes tokenised ID after loading]
+    header + 0-14 = magic string "MEGA65 SCREEN00"
     header + 15 = screen ID number
     header + 16 = width
     header + 17 = height
     
-    header + 18-20 = offset of screenram rows [becomes absolute pointer after loading]
-    header + 21-24 = offset of colourram rows [becomes absolute pointer after loading]
+    header + 18-20 = offset of screenram rows
+    header + 21-24 = offset of colourram rows
 
-    header + 61-63 = size of section in bytes [becomes pointer to next section after loading]
+    header + 61-63 = size of section in bytes
 
     screenram bytes (2 bytes x width) x height [get resolved to absolute tile numbers after loading]
     colourram bytes (2 bytes x width) x height     
