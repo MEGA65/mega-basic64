@@ -606,6 +606,9 @@ enable_viciv:
 		STA	$D02F
 		LDA	#$53
 		STA	$D02F
+		;; Enable extended attributes / 8-bit colour register values
+		LDA	#$20
+		STA	$D031
 		RTS
 
 

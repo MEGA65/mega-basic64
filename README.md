@@ -19,7 +19,7 @@ Command reference
 
 * FAST - Set CPU to full speed
 * SLOW - Disable MEGA65 fast CPU (C128 style and C65 style 2MHz and 3.5MHz selection is unaffected)
-* COLOUR TEXT <0-255> - Select text foreground colour
+* COLOUR TEXT <0-255> - Select text foreground colour (16 colours only). Upper 4 bits are VIC-III extended attributes (this command might get extended to allow easier setting of attributes. 16 = BLINK, 128 = UNDERLINE, 32 = REVERSE, 64 = BOLD (selects colours 32-47 instead of colours 0 - 15).
 * COLOUR BORDER <0-255> - Set border colour
 * COLOUR SCREEN <0-255> - Set screen background colour
 * COLOUR SPRITE <sprite number> COLOUR <colour index in sprite>> = <0-255>,<0-255>,<0-255> - Set the R,G,B values of a sprite colour
