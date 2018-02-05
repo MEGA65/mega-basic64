@@ -246,12 +246,12 @@ struct screen *png_to_screen(int id,struct tile_set *ts)
 	    }
 	}
 	if (transparent_tile) {
-	  // Set screen and colour bytes to all $00 to indicate
+	  // Set screen and colour bytes to all $FF to indicate
 	  // non-set block.
-	  s->screen_rows[y/8][x*2+0]=0x00;
-	  s->screen_rows[y/8][x*2+1]=0x00;
-	  s->colourram_rows[y/8][x*2+0]=0x00;
-	  s->colourram_rows[y/8][x*2+1]=0x00;
+	  s->screen_rows[y/8][x*2+0]=0xFF;
+	  s->screen_rows[y/8][x*2+1]=0xFF;
+	  s->colourram_rows[y/8][x*2+0]=0xFF;
+	  s->colourram_rows[y/8][x*2+1]=0xFF;
 	} else {
 	  // Block has non-transparent pixels, so add to tileset,
 	  // or lookup to see if it is already there.
