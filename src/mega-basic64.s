@@ -1,3 +1,7 @@
+.if 0
+		XXX - canvas_find gets in infinite loop if canvas is not found
+		.endif
+
 ;-------------------------------------------------------------------------------
 ;BASIC interface 
 ;-------------------------------------------------------------------------------
@@ -979,9 +983,11 @@ update_viciv_registers:
 
 canvas_find:
 		sta	search_canvas
+		jsr 	tileset_point_to_start_of_area
 		;; Are we looking for canvas 0?
 		;; If yes, this is the special case. Always direct
 		;; mapped at $E000, 80x50, and has no header structure
+		lda	search_canvas
 		CMP	#$00
 		BNE	@canvasSearchLoop
 		;; Set pointer to start of data
@@ -1002,8 +1008,7 @@ canvas_find:
 		RTS
 @canvasSearchLoop:
 		;; Find the next canvas (or first, skipping tileset header)
-		jsr 	tileset_point_to_start_of_area
-		jsr 	tileset_follow_pointer
+			jsr 	tileset_follow_pointer
 
 		;; (We assume all following sections are valid, after having been installed.
 		;; XXX - We sould check the magic string, just be to safe, anyway, though.)
