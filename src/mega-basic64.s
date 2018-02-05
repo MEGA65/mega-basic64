@@ -1169,6 +1169,20 @@ megabasic_stamp_canvas:
 
 		;; Decrement count of lines left to copy
 		dec	source_canvas_y2
+		;; Advance pointers to next lines
+		LDX	#$10
+		LDY	#$20
+		jsr	add_16bit_value
+		LDX	#$14
+		LDY	#$20
+		jsr	add_16bit_value
+		LDX	#$18
+		LDY	#$22
+		jsr	add_16bit_value
+		LDX	#$1c
+		LDY	#$22
+		jsr	add_16bit_value
+		
 		;; See if more to do
 		jmp	@stampLineLoop
 		
@@ -1254,6 +1268,29 @@ add_32bit_value:
 		INY
 		LDA	$00, X
 		ADC	$00, Y
+		STA	$00, X
+		RTS
+
+add_16bit_value:
+		;; X=X+Y
+		CLC
+		LDA	$00, X
+		ADC	$00, Y
+		STA	$00, X
+		INX
+		INY
+		LDA	$00, X
+		ADC	$00, Y
+		STA	$00, X
+		INX
+		INY
+		LDA	$00, X
+		ADC	#0
+		STA	$00, X
+		INX
+		INY
+		LDA	$00, X
+		ADC	#0
 		STA	$00, X
 		RTS
 		
