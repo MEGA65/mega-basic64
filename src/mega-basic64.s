@@ -1170,10 +1170,11 @@ tileset_install_section:
 		NOP
 		NOP
 		LDA	($03),Z
-		INX
+		DEZ
 		AND	#$1F
 		CMP	#$00
 		bne	@doPatchTile
+		INZ
 		INZ
 		jmp	@donePatchingTile
 @doPatchTile:
@@ -1194,6 +1195,7 @@ tileset_install_section:
 		NOP
 		NOP
 		STA	($03),Z
+		INZ
 @donePatchingTile:
 		;; IF Z has wrapped to 0, then inc $04
 		CPZ	#$00
