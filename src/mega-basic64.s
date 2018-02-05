@@ -1,10 +1,10 @@
 .if 0
-		XXX - CANVAS STAMP command doesn't restore BASIC state properly
+		XXX - CANVAS STAMP command doesnt restore BASIC state properly
 		and can display gibberish on return, and not do things properly,
 		and not finish drawing properly.
 		XXX - Seems like where on the screen the CANVAS command is run
-		from affects where it does or doesn't draw to.
-		Using AT optional arg with valid values seems to prevent it?
+		from affects where it does or doesnt draw to.
+		Using AT optional arg with valid values seems to prevent it, maybe
 .endif
 
 ;-------------------------------------------------------------------------------
