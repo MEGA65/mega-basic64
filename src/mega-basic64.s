@@ -961,22 +961,6 @@ megabasic_stamp_canvas:
 		;; Then get source canvas, and do the same
 		lda	source_canvas
 		jsr	@prepareCanvasPointers
-
-		LDX	#$00
-@ll1a:		LDA	$10, X
-		STA	$0400+40*0, X
-		INX
-		CPX	#$10
-		BNE	@ll1a
-
-		lda $07
-		sta $044c
-		lda $08
-		sta $044d
-		lda $09
-		sta $044e
-		lda $0a
-		sta $044f
 		
 		;; The pointers are currently to the start of the
 		;; regions.  We need to advance them to the first
@@ -994,8 +978,10 @@ megabasic_stamp_canvas:
 		LDA	$07	
 		ASL
 		STA	$D780
+		STA	$20	; low byte of row advance for source
 		ROL
 		AND	#$01
+		STA	$21	; high byte of row advance for source
 		STA	$D781
 		;; start row
 		LDA	source_canvas_y1
@@ -1011,7 +997,6 @@ megabasic_stamp_canvas:
 		LDX 	#$00
 @ll2:		LDA	$D788, X
 		STA	$0B, X
-		STA	$0420, X
 		INX
 		CPX	#4
 		BNE	@ll2
@@ -1021,7 +1006,6 @@ megabasic_stamp_canvas:
 		CLC
 		ADC	$0B
 		STA	$0B
-		STA	$0424
 		PHP
 		LDA	source_canvas_x1
 		ASL
@@ -1030,7 +1014,6 @@ megabasic_stamp_canvas:
 		PLP
 		ADC	$0C
 		STA	$0C
-		STA	$0425
 		LDA	$0D
 		ADC	#$00
 		STA	$0D
@@ -1053,22 +1036,16 @@ megabasic_stamp_canvas:
 		SBC	source_canvas_x1
 		STA	source_canvas_x2
 
-		LDX	#$00
-@ll1b:		LDA	$10, X
-		STA	$0400+40*1, X
-		INX
-		CPX	#$10
-		BNE	@ll1b
-
-		
 		;; ... and similarly for the target canvas
 
 		; target width*2 = row bytes		
 		LDA	$09	
 		ASL
 		STA	$D780
+		STA	$22	; low byte of row advance for dest
 		ROL
 		AND	#$01
+		STA	$23	; high byte of row advance for dest
 		STA	$D781
 		;; start row
 		LDA	target_canvas_y
@@ -1118,33 +1095,85 @@ megabasic_stamp_canvas:
 		SEC
 		SBC	target_canvas_y
 		STA	$0A
+
+		;; If nothing to do, skip the hard work
+		LDA	source_canvas_x2
+		BEQ	@copiedLastLine
 		
 @stampLineLoop:
+		;; $07 = source width (not reduced by X offset)
+		;; $08 = source height (not reduced by Y offset)
+		;; $09 = target width (reduced by X offset)
+		;; $0A = target height (reduced by Y offset)
+		;; source_canvas_x2 = number of tiles per row to copy
+		;; source_canvas_y2 = number of rows to copy
+		;; uint16_t $20 = row advance for source
+		;; uint16_t $22 = row advance for target
+		;; uint32_t $10 = source screen RAM rows
+		;; uint32_t $14 = source colour RAM rows
+		;; uint32_t $18 = target screen RAM rows
+		;; uint32_t $1C = target colour RAM rows
 
-		;; Effective width and heights of canvases
-		;; (for working out when we have reached the limit of them)
-		LDA	$07
-		STA	$0460
-		LDA	$08
-		STA	$0461
-		LDA	$09
-		STA	$0463
-		LDA	$0A
-		STA	$0464
-		;; Number of columns and rows to copy
-		LDA	source_canvas_x2
-		STA	$0466
+		;; Have we done all the lines?
 		LDA	source_canvas_y2
-		STA	$0467
-		;; XXX - # of bytes in each row for source and target
+		BEQ	@copiedLastLine
+
+		;; Another line to copy
+
+		;; Point to beginning of line (corrected for X offsets)
+		LDZ	#$00
+		;; Get the # of tiles in the row that we have to copy
+		LDX	source_canvas_x2
+
+@stampTileLoop:
+		;; Check if the tile needs stamping ($FFFF = transparent)
+.if 0
+		NOP
+		NOP
+		LDA	($10), Z
+		INZ
+		NOP
+		NOP
+		AND	($10), Z
+		DEZ
+		CMP	#$FF
+		beq	@dontCopyThisTile
+.endif
+		;; Copy the tile
+		LDY #$01
+@copyByteLoop:
+		NOP
+		NOP
+		LDA	($10), Z
+		NOP
+		NOP
+		STA	($18), Z
+		NOP
+		NOP
+		LDA	($14), Z
+		NOP
+		NOP
+		STA	($1C), Z
+		INZ
+		DEY
+		BPL	@copyByteLoop
+		DEZ
+		DEZ
+
+@dontCopyThisTile:
+		INZ
+		INZ
+@copiedTile:
+		DEX
+		BNE	@stampTileLoop
+
+		;; Decrement count of lines left to copy
+		dec	source_canvas_y2
+		;; See if more to do
+		jmp	@stampLineLoop
 		
-		LDX	#$00
-@ll1:		LDA	$10, X
-		STA	$0400+40*5, X
-		INX
-		CPX	#$10
-		BNE	@ll1
-		
+@copiedLastLine:
+		LDZ	#$00
 		;; All done, restore saved ZP
 		jmp	zp_scratch_restore
 
