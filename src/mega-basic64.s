@@ -785,9 +785,9 @@ megabasic_perform_canvas_stamp:
 		LDA	source_canvas
 		BNE	@notCanvas0
 		;; Is canvas 0, so dimensions are fixed: 80x50
-		lda	#80-1
+		lda	#80
 		sta	source_canvas_x2
-		lda	#50-1
+		lda	#50
 		sta	source_canvas_y2
 		jmp	@gotCanvasSize
 @notCanvas0:
@@ -796,15 +796,11 @@ megabasic_perform_canvas_stamp:
 		NOP
 		NOP
 		LDA	($03),Z
-		SEC
-		SBC	#$01
 		STA	source_canvas_x2
 		INZ
 		NOP
 		NOP
 		LDA	($03),Z
-		SEC
-		SBC	#$01
 		STA	source_canvas_y2
 		LDZ	#$00
 @gotCanvasSize:
@@ -966,12 +962,170 @@ megabasic_stamp_canvas:
 		lda	source_canvas
 		jsr	@prepareCanvasPointers
 
-@stampLineLoop:
 		LDX	#$00
-@ll1:		LDA	$03, X
-		STA	$0400, X
+@ll1a:		LDA	$10, X
+		STA	$0400+40*0, X
 		INX
-		CPX	#$20
+		CPX	#$10
+		BNE	@ll1a
+
+		lda $07
+		sta $044c
+		lda $08
+		sta $044d
+		lda $09
+		sta $044e
+		lda $0a
+		sta $044f
+		
+		;; The pointers are currently to the start of the
+		;; regions.  We need to advance them to the first
+		;; line in the source and targets, and then advance
+		;; them by the X offset in each.
+		;; After that, we can subtract the start offsets,
+		;; and process as though copy is from 0,0 to 0,0,
+		;; with normalised width and height.
+		;; The fast way is to multiply the row number by the
+		;; row length. We can use the hardware multiplier for
+		;; this.
+		jsr 	enable_viciv ; make multiplier registers visible
+
+		; source width*2 = row bytes		
+		LDA	$07	
+		ASL
+		STA	$D780
+		ROL
+		AND	#$01
+		STA	$D781
+		;; start row
+		LDA	source_canvas_y1
+		STA	$D784
+		;; Zero out unused upper byteese
+		LDA	#$00
+		STA 	$D782
+		STA	$D783
+		STA	$D786
+		STA	$D787
+		;; XXX - Wait for multiplier to finish
+		;; Get multplier result and add X offset
+		LDX 	#$00
+@ll2:		LDA	$D788, X
+		STA	$0B, X
+		STA	$0420, X
+		INX
+		CPX	#4
+		BNE	@ll2
+		;; Now add 2*(X position of start of copy) to get offset within row
+		LDA	source_canvas_x1
+		ASL
+		CLC
+		ADC	$0B
+		STA	$0B
+		STA	$0424
+		PHP
+		LDA	source_canvas_x1
+		ASL
+		ROL
+		AND	#$01
+		PLP
+		ADC	$0C
+		STA	$0C
+		STA	$0425
+		LDA	$0D
+		ADC	#$00
+		STA	$0D
+		LDA	#$00
+		STA	$0E
+		;; $0B-$0E contains the amount to add to the source canvas pointers
+		LDX	#$10
+		LDY	#$0B
+		jsr	add_32bit_value	; X=X+Y
+		LDX	#$14
+		LDY	#$0B
+		jsr	add_32bit_value		
+		;; Normalise source canvas positions
+		LDA	source_canvas_y2
+		SEC
+		SBC	source_canvas_y1
+		STA	source_canvas_y1
+		LDA	source_canvas_x2
+		SEC
+		SBC	source_canvas_x1
+		STA	source_canvas_x2
+
+		LDX	#$00
+@ll1b:		LDA	$10, X
+		STA	$0400+40*1, X
+		INX
+		CPX	#$10
+		BNE	@ll1b
+
+		
+		;; ... and similarly for the target canvas
+
+		; target width*2 = row bytes		
+		LDA	$09	
+		ASL
+		STA	$D780
+		ROL
+		AND	#$01
+		STA	$D781
+		;; start row
+		LDA	target_canvas_y
+		STA	$D784
+		;; XXX - Wait for multiplier to finish
+		;; Get multplier result and add X offset
+		LDX 	#$00
+@ll3:		LDA	$D788, X
+		STA	$0B, X
+		INX
+		CPX	#4
+		BNE	@ll3
+		;; Now add 2*(X position of start of copy) to get offset within row
+		LDA	target_canvas_x
+		ASL
+		CLC
+		ADC	$0B
+		STA	$0B
+		PHP
+		LDA	target_canvas_x
+		ASL
+		ROL
+		AND	#$01
+		PLP
+		ADC	$0C
+		STA	$0C
+		LDA	$0D
+		ADC	#$00
+		STA	$0D
+		LDA	#$00
+		STA	$0E
+		;; $0B-$0E contains the amount to add to the target canvas pointers
+		LDX	#$18
+		LDY	#$0B
+		jsr	add_32bit_value	; X=X+Y
+		LDX	#$1C
+		LDY	#$0B
+		jsr	add_32bit_value		
+		;; Normalise target canvas positions
+		;; Subtract target X offset from target width
+		LDA	$09
+		SEC
+		SBC	target_canvas_x
+		STA	$09
+		;; Subtract target Y offset from target height
+		LDA	$0A
+		SEC
+		SBC	target_canvas_y
+		STA	$0A
+		
+@stampLineLoop:
+		
+		LDX	#$00
+@ll1:		LDA	$10, X
+		STA	$0400+40*5, X
+		INX
+		CPX	#$10
 		BNE	@ll1
 		
 		;; All done, restore saved ZP
@@ -999,10 +1153,10 @@ megabasic_stamp_canvas:
 		jmp 	@gotTargetPointers
 @targetNotCanvas0:
 		;;  Canvas dimensions 
-		lda	canvas_height
-		sta 	$07
 		lda	canvas_width
-		sta	$08		
+		sta	$07		
+		lda	canvas_height
+		sta 	$08
 		
 		;; screen RAM rows are at header+64
 		JSR	tileset_advance_by_64
@@ -1033,6 +1187,29 @@ megabasic_stamp_canvas:
 @gotTargetPointers:
 		LDZ	#$00
 		RTS		
+
+add_32bit_value:
+		;; X=X+Y
+		CLC
+		LDA	$00, X
+		ADC	$00, Y
+		STA	$00, X
+		INX
+		INY
+		LDA	$00, X
+		ADC	$00, Y
+		STA	$00, X
+		INX
+		INY
+		LDA	$00, X
+		ADC	$00, Y
+		STA	$00, X
+		INX
+		INY
+		LDA	$00, X
+		ADC	$00, Y
+		STA	$00, X
+		RTS
 		
 get_canvas0_pointers:
 		;; Canvas 0 screen RAM is at $000E000,
