@@ -927,8 +927,150 @@ megabasic_perform_canvas_stamp:
 
 		;; Now we need to get pointers to the various structures,
 		;; and iterate through the copy.
+		jsr	megabasic_stamp_canvas
 
 		JMP	basic2_main_loop
+
+megabasic_stamp_canvas:
+		jsr	zp_scratch_stash
+		
+		;; CANVAS stamping (copying)
+		;; We copy from source_canvas to target_canvas.
+		;; Copy is of source_canvas_{x1,y1} to _{x2,y2}, inclusive,
+		;; and target is at target_canvas_{x,y}.
+		;; The source canvas coordinates are assumed to be valid.
+		;; Target canvas dimensions will be deduced and applied
+		;; For the copy, we want to do each line in turn.
+		;; We need pointers to the four locations, all of
+		;; which need to be 32-bit pointers, so that we
+		;; can access outside the first 64KB.
+
+		;; Get pointers to, and size of everything
+		
+		;; Get target pointers into $10-$17
+		lda	target_canvas
+		jsr	@prepareCanvasPointers
+		;; Then copy to $18-$1F
+		LDX	#$10
+		LDY	#$18
+		jsr	copy_32bit_pointer
+		LDX	#$14
+		LDY	#$1C
+		jsr	copy_32bit_pointer
+		;; (and canvas dimensions)
+		LDX	#$07
+		LDY	#$09
+		jsr	copy_32bit_pointer
+
+		;; Then get source canvas, and do the same
+		lda	source_canvas
+		jsr	@prepareCanvasPointers
+
+@stampLineLoop:
+		LDX	#$00
+@ll1:		LDA	$03, X
+		STA	$0400, X
+		INX
+		CPX	#$20
+		BNE	@ll1
+		
+		;; All done, restore saved ZP
+		jmp	zp_scratch_restore
+
+@prepareCanvasPointers:
+		;; Get pointers to screen and colour RAM for
+		;; source and target canvases into $10-$17,
+		;; and width and height into $07,$08
+		
+		;; Put target screen ram in $10-$13
+		;; skip header, and save pointer
+
+		PHA
+		jsr	canvas_find
+		PLA
+		BNE	@targetNotCanvas0
+		;; Canvas 0 has set addresses
+		LDX	#$10
+		jsr	get_canvas0_pointers
+		lda	#80
+		sta	$07
+		LDA	#50
+		sta	$08
+		jmp 	@gotTargetPointers
+@targetNotCanvas0:
+		;;  Canvas dimensions 
+		lda	canvas_height
+		sta 	$07
+		lda	canvas_width
+		sta	$08		
+		
+		;; screen RAM rows are at header+64
+		JSR	tileset_advance_by_64
+		LDX	#$03
+		LDY	#$10
+		jsr	copy_32bit_pointer
+		jsr	tileset_retreat_by_64
+
+		;; colour RAM rows are at header + *(unsigned short*)&header[21]
+		LDX	#$03
+		LDY	#$14
+		jsr	copy_32bit_pointer
+		LDZ	#21
+		LDA	$14
+		CLC
+		ADC	($03),Z
+		STA	$14
+		INZ
+		LDA	$15
+		CLC
+		ADC	($03),Z
+		STA	$15
+		INZ
+		LDA	$16
+		CLC
+		ADC	($03),Z
+		STA	$16
+@gotTargetPointers:
+		LDZ	#$00
+		RTS		
+		
+get_canvas0_pointers:
+		;; Canvas 0 screen RAM is at $000E000,
+		;; colour RAM at $FF80800
+		LDA	#<$E000
+		STA	$00,X
+		LDA	#>$E000
+		STA	$01, X
+		LDA	#$00
+		STA	$02, X
+		STA	$03, X
+		LDA	#<$0800
+		STA	$04, X
+		LDa	#>$0800
+		STA	$05, X
+		LDA	#<$0FF8
+		STA	$06, X
+		LDA	#>$0FF8
+		STA	$07, X
+		RTS
+		
+copy_32bit_pointer:
+		;; Copy 4 bytes from $00XX to $00YY
+		LDA	$00,X
+		STA	$00,Y
+		INX
+		INY
+		LDA	$00,X
+		STA	$00,Y
+		INX
+		INY
+		LDA	$00,X
+		STA	$00,Y
+		INX
+		INY
+		LDA	$00,X
+		STA	$00,Y
+		RTS		
 		
 megabasic_perform_canvas_new:
 megabasic_perform_canvas_delete:
@@ -1310,6 +1452,23 @@ tileset_advance_by_64:
 		STA	$05
 		RTS
 		
+tileset_retreat_by_64:
+		;; Deduct 64 from current pointer
+		;; (Offsets are 24 bit, so we don't bother touching the
+		;; 4th byte of the pointer.)
+		lda	$03
+		SEC
+		SBC	#$40
+		STA	$03
+		lda	$04
+		SBC	#$00
+		STA	$04
+		LDA	$05
+		SBC	#$00
+		STA	$05
+		RTS
+		
+
 tileset_retreat_by_section_size:	
 		;; Add length to current pointer
 		;; (Offsets are 24 bit, so we don't bother touching the
@@ -1484,12 +1643,7 @@ merge_basic_screen_to_display_canvas:
 		;; 3. MEGA BASIC display canvas screen RAM  ($07-$08)
 		;; 4. MEGA BASIC display canvas colour RAM  ($03-$06)
 		;; We need to thus first save $03-$0C to a scratch space
-		LDX	#$00
-@c:		LDA	$03, X
-		STA	merge_scratch, X
-		INX
-		CPX	#($0C-$03+1)
-		BNE	@c
+		jsr	zp_scratch_stash
 
 		;; We also need to bank out the BASIC ROM
 		LDA	$01
@@ -1610,19 +1764,36 @@ merge_basic_screen_to_display_canvas:
 		;; Always end with Z=0, to avoid crazy behaviour from 6502 code
 		LDZ	#$00
 		
-		;; Restore ZP bytes
-		LDX	#$00
-@c2:		LDA	merge_scratch, X
-		STA	$03, X
-		INX
-		CPX	#($0C-$03+1)
-		BNE	@c2
-
+		jsr	zp_scratch_restore
+		
 		;; Put BASIC ROM back
 		LDA	$01
 		ORA	#$01
 		STA	$01
 		
+		RTS
+
+		;; We use $03-$22 in ZP as scratch space for some
+		;; things.  To be compatible, we save it first, and
+		;; restore it again after.
+		
+zp_scratch_stash:	
+		LDX	#$00
+@c:		LDA	$03, X
+		STA	merge_scratch, X
+		INX
+		CPX	#$20
+		BNE	@c
+		RTS
+
+zp_scratch_restore:
+		;; Restore ZP bytes
+		LDX	#$00
+@c2:		LDA	merge_scratch, X
+		STA	$03, X
+		INX
+		CPX	#$20
+		BNE	@c2
 		RTS
 		
 ; -------------------------------------------------------------
@@ -1651,7 +1822,7 @@ stashed_pointer:
 		.byte 0,0,0,0
 
 merge_scratch:
-		.byte 0,0,0,0,0,0,0,0,0,0
+		.res $20,0
 
 
 		;; For CANVAS stamping (copying)
