@@ -1047,7 +1047,7 @@ megabasic_stamp_canvas:
 		LDA	source_canvas_y2
 		SEC
 		SBC	source_canvas_y1
-		STA	source_canvas_y1
+		STA	source_canvas_y2
 		LDA	source_canvas_x2
 		SEC
 		SBC	source_canvas_x1
@@ -1120,6 +1120,23 @@ megabasic_stamp_canvas:
 		STA	$0A
 		
 @stampLineLoop:
+
+		;; Effective width and heights of canvases
+		;; (for working out when we have reached the limit of them)
+		LDA	$07
+		STA	$0460
+		LDA	$08
+		STA	$0461
+		LDA	$09
+		STA	$0463
+		LDA	$0A
+		STA	$0464
+		;; Number of columns and rows to copy
+		LDA	source_canvas_x2
+		STA	$0466
+		LDA	source_canvas_y2
+		STA	$0467
+		;; XXX - # of bytes in each row for source and target
 		
 		LDX	#$00
 @ll1:		LDA	$10, X
