@@ -339,6 +339,24 @@ void read_png_file(char* file_name)
   return;
 }
 
+int print_spaces(FILE *f,int n)
+{
+  return 0;
+}
+
+int dump_bytes(int col, char *msg,unsigned char *bytes,int length)
+{
+  print_spaces(stderr,col);
+  fprintf(stderr,"%s:\n",msg);
+  for(int i=0;i<length;i+=16) {
+    print_spaces(stderr,col);
+    fprintf(stderr,"%04X: ",i);
+    for(int j=0;j<16;j++) if (i+j<length) fprintf(stderr," %02X",bytes[i+j]);
+    fprintf(stderr,"\n");
+  }
+  return 0;
+}
+
 /* ============================================================= */
 
 int main(int argc, char **argv)
@@ -489,8 +507,13 @@ int main(int argc, char **argv)
       header[62]=(size>>8)&0xff;
       header[63]=(size>>16)&0xff;
       fwrite(header,64,1,outfile);
-      for(y=0;y<screen_list[i]->height;y++)
+      
+      for(y=0;y<screen_list[i]->height;y++) {
+	char msg[80];
+	snprintf(msg,80,"screen_rows[%d]",y);
+	dump_bytes(0,msg,screen_list[i]->screen_rows[y],2*screen_list[i]->width);
 	fwrite(screen_list[i]->screen_rows[y],2*screen_list[i]->width,1,outfile);
+      }
       for(y=0;y<screen_list[i]->height;y++)
 	fwrite(screen_list[i]->colourram_rows[y],2*screen_list[i]->width,1,outfile);
       printf("."); fflush(stdout);
