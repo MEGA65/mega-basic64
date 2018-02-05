@@ -1,6 +1,11 @@
 .if 0
-		XXX - canvas_find gets in infinite loop if canvas is not found
-		.endif
+		XXX - CANVAS STAMP command doesn't restore BASIC state properly
+		and can display gibberish on return, and not do things properly,
+		and not finish drawing properly.
+		XXX - Seems like where on the screen the CANVAS command is run
+		from affects where it does or doesn't draw to.
+		Using AT optional arg with valid values seems to prevent it?
+.endif
 
 ;-------------------------------------------------------------------------------
 ;BASIC interface 
@@ -1127,7 +1132,6 @@ megabasic_stamp_canvas:
 
 @stampTileLoop:
 		;; Check if the tile needs stamping ($FFFF = transparent)
-.if 0
 		NOP
 		NOP
 		LDA	($10), Z
@@ -1138,7 +1142,6 @@ megabasic_stamp_canvas:
 		DEZ
 		CMP	#$FF
 		beq	@dontCopyThisTile
-.endif
 		;; Copy the tile
 		LDY #$01
 @copyByteLoop:
