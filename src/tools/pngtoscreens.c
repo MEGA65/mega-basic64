@@ -69,15 +69,17 @@ struct tile_set {
   struct tile_set *next;
 };
 
+int colour_mask=0xf0;
+
 int palette_lookup(struct tile_set *ts,int r,int g, int b)
 {
   int i;
 
   // Do we know this colour already?
   for(i=0;i<ts->colour_count;i++) {
-    if (r==ts->colours[i].r
-	&&g==ts->colours[i].g
-	&&b==ts->colours[i].b) {
+    if ((r&colour_mask)==(ts->colours[i].r&colour_mask)
+	&&(g&colour_mask)==(ts->colours[i].g&colour_mask)
+	&&(b&colour_mask)==(ts->colours[i].b&colour_mask)) {
       // It's a colour we have seen before, so return the index
       return i;
     }
@@ -85,8 +87,7 @@ int palette_lookup(struct tile_set *ts,int r,int g, int b)
   
   // new colour, check if palette has space
   if (ts->colour_count>255) {
-    fprintf(stderr,"Too many colours in image: Must be <= %d\n",
-	    256);
+    fprintf(stderr,"Too many colours in image: Must be <= %d\n",256);
     exit(-1);
   }
 
@@ -231,7 +232,7 @@ struct screen *png_to_screen(int id,struct tile_set *ts)
 	  png_byte* row = row_pointers[yy+y];
 	  for(int xx=0;xx<8;xx++)
 	    {
-	      png_byte* ptr = &(row[x*multiplier]);	      
+	      png_byte* ptr = &(row[(xx+x)*multiplier]);	      
 	      int r,g,b,a,c;
 	      r=ptr[0];
 	      g=ptr[1];
