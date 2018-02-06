@@ -1,11 +1,3 @@
-.if 0
-		XXX - CANVAS STAMP command doesnt restore BASIC state properly
-		and can display gibberish on return, and not do things properly,
-		and not finish drawing properly.
-		XXX - Seems like where on the screen the CANVAS command is run
-		from affects where it does or doesnt draw to.
-		Using AT optional arg with valid values seems to prevent it, maybe
-.endif
 
 ;-------------------------------------------------------------------------------
 ;BASIC interface 
@@ -1906,7 +1898,7 @@ merge_basic_screen_to_display_canvas:
 		;; 3. MEGA BASIC display canvas screen RAM  ($07-$08)
 		;; 4. MEGA BASIC display canvas colour RAM  ($03-$06)
 		;; We need to thus first save $03-$0C to a scratch space
-		jsr	zp_scratch_stash
+		jsr	zp_scratch_stash_b
 
 		;; We also need to bank out the BASIC ROM
 		LDA	$01
@@ -2027,7 +2019,7 @@ merge_basic_screen_to_display_canvas:
 		;; Always end with Z=0, to avoid crazy behaviour from 6502 code
 		LDZ	#$00
 		
-		jsr	zp_scratch_restore
+		jsr	zp_scratch_restore_b
 		
 		;; Put BASIC ROM back
 		LDA	$01
@@ -2059,6 +2051,26 @@ zp_scratch_restore:
 		BNE	@c2
 		RTS
 		
+zp_scratch_stash_b:	
+		LDX	#$00
+@c:		LDA	$03, X
+		STA	merge_scratch_b, X
+		INX
+		CPX	#$20
+		BNE	@c
+		RTS
+
+zp_scratch_restore_b:
+		;; Restore ZP bytes
+		LDX	#$00
+@c2:		LDA	merge_scratch_b, X
+		STA	$03, X
+		INX
+		CPX	#$20
+		BNE	@c2
+		RTS
+		
+
 ; -------------------------------------------------------------
 ; Variables and scratch space	
 ; -------------------------------------------------------------
@@ -2087,6 +2099,8 @@ stashed_pointer:
 merge_scratch:
 		.res $20,0
 
+merge_scratch_b:
+		.res $20,0		
 
 		;; For CANVAS stamping (copying)
 source_canvas:	.byte 0
