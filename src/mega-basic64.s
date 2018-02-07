@@ -767,8 +767,57 @@ megabasic_perform_canvas_stamp:
 
 		;; Get the token after "STAMP"
 				
-		;; At this point we have only CANVAS STAMP
+		;; At this point we have only CANVAS STAMP, and
+		;; the source canvas in source_canvas
+
+		;; Get the size of the canvas
 		LDA	source_canvas
+		JSR	get_canvas_dimensions
+
+		;; Then work out which part of the canvas will be
+		;; copied.
+		JSR	$0073
+		jsr	parse_from_xy_to_xy
+		;; Get next token ready (should be TO)
+		JSR	$0079
+
+		;; check that next tokens are ON CANVAS (or just CANVAS to save space and typing)
+		JSR	$0079
+		CMP	#token_canvas
+		BEQ	@skipOn
+		CMP	#token_on
+		LBNE	megabasic_perform_syntax_error
+		jsr 	$0073
+		CMP	#token_canvas
+		LBNE	megabasic_perform_syntax_error
+@skipOn:
+		;; Next should be the destination canvas
+		JSR	$0073
+		JSR	$AD8A
+		JSR	$B7F7
+		LDA	$15
+		LBNE	megabasic_perform_illegal_quantity_error
+		LDA	$14
+		STA	target_canvas
+		jsr	canvas_find
+		BCS	@foundCanvas2
+		jmp	megabasic_perform_illegal_quantity_error
+@foundCanvas2:		
+		;; Finally, look for optional AT X,Y
+		jsr 	parse_at_xy
+
+		;; We now have all that we need to do a token stamping
+		;; 1. We know the source and target canvases exist
+		;; 2. We know the source region to copy from
+		;; 3. We know the target location to draw into
+
+		;; Now we need to get pointers to the various structures,
+		;; and iterate through the copy.
+		jsr	megabasic_stamp_canvas
+
+		JMP	basic2_main_loop
+
+get_canvas_dimensions:
 		jsr	canvas_find
 		BCS	@foundCanvas
 		jmp	megabasic_perform_illegal_quantity_error
@@ -801,8 +850,11 @@ megabasic_perform_canvas_stamp:
 		STA	source_canvas_y2
 		LDZ	#$00
 @gotCanvasSize:
+		RTS
+		
+parse_from_xy_to_xy:	
 		;; Get token following STAMP
-		JSR	$0073
+		JSR	$0079
 		cmp	#token_from
 		lbne	@stampAll
 		;; We are being given a region to copy
@@ -858,32 +910,11 @@ megabasic_perform_canvas_stamp:
 		cmp	source_canvas_y2
 		lbcs	megabasic_perform_illegal_quantity_error
 		STA	source_canvas_y2
-
-		;; Get next token ready (should be TO)
-		JSR	$0079
+		RTS
 @stampAll:
-		;; check that next tokens are ON CANVAS (or just CANVAS to save space and typing)
-		CMP	#token_canvas
-		BEQ	@skipOn
-		CMP	#token_on
-		LBNE	megabasic_perform_syntax_error
-		jsr 	$0073
-		CMP	#token_canvas
-		LBNE	megabasic_perform_syntax_error
-@skipOn:
-		;; Next should be the destination canvas
-		JSR	$0073
-		JSR	$AD8A
-		JSR	$B7F7
-		LDA	$15
-		LBNE	megabasic_perform_illegal_quantity_error
-		LDA	$14
-		STA	target_canvas
-		jsr	canvas_find
-		BCS	@foundCanvas2
-		jmp	megabasic_perform_illegal_quantity_error
-@foundCanvas2:
-		;; Finally, look for optional AT X,Y
+		RTS
+
+parse_at_xy:	
 		LDA	#$00
 		STA	target_canvas_x
 		STA	target_canvas_y
@@ -912,18 +943,8 @@ megabasic_perform_canvas_stamp:
 		LDA	$14
 		STA	target_canvas_y
 @noAt:
-
-		;; We now have all that we need to do a token stamping
-		;; 1. We know the source and target canvases exist
-		;; 2. We know the source region to copy from
-		;; 3. We know the target location to draw into
-
-		;; Now we need to get pointers to the various structures,
-		;; and iterate through the copy.
-		jsr	megabasic_stamp_canvas
-
-		JMP	basic2_main_loop
-
+		RTS
+		
 megabasic_stamp_canvas:
 		jsr	zp_scratch_stash
 		
