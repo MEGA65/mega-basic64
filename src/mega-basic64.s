@@ -758,6 +758,93 @@ megabasic_perform_canvas:
 		LBEQ	megabasic_perform_canvas_settile
 		;; Else, its bad
 		JMP	megabasic_perform_undefined_function
+
+megabasic_perform_canvas_clear:
+		;; CANVAS s CLEAR [from x1,y1 TO x2,y2]
+		LDA	source_canvas
+		JSR	get_canvas_dimensions
+
+		;; Then work out which part of the canvas will be
+		;; cleared
+		JSR	$0073
+		jsr	parse_from_xy_to_xy
+
+		;; Get pointers to start of screen and colour RAM areas for the canvas
+		lda	source_canvas
+		jsr	canvas_prepare_pointers
+		;; Adjust them for the region we need to clear
+		jsr	canvas_adjust_source_pointers_for_from_xy_to_xy
+		
+		;; XXX - Do actual clear
+		jsr	canvas_clear_region
+		
+		RTS
+
+canvas_clear_region:	
+		
+		;; If nothing to do, skip the hard work
+		LDA	source_canvas_x2
+		BEQ	@copiedLastLine
+		
+@stampLineLoop:
+		;; $07 = source width (not reduced by X offset)
+		;; $08 = source height (not reduced by Y offset)
+		;; $09 = target width (reduced by X offset)
+		;; $0A = target height (reduced by Y offset)
+		;; source_canvas_x2 = number of tiles per row to copy
+		;; source_canvas_y2 = number of rows to copy
+		;; uint16_t $20 = row advance for source
+		;; uint16_t $22 = row advance for target
+		;; uint32_t $10 = source screen RAM rows
+		;; uint32_t $14 = source colour RAM rows
+		;; uint32_t $18 = target screen RAM rows
+		;; uint32_t $1C = target colour RAM rows
+
+		;; Have we done all the lines?
+		LDA	source_canvas_y2
+		BEQ	@copiedLastLine
+
+		;; Another line to copy
+
+		;; Point to beginning of line (corrected for X offsets)
+		LDZ	#$00
+		;; Get the # of tiles in the row that we have to copy
+		LDX	source_canvas_x2
+
+@stampTileLoop:
+		;; Clear the tile:
+		;; screen ram = $20 $00 (show a SPACE character)
+		;; colour bytes = $00 $00
+		LDA	#$20 
+		NOP
+		NOP
+		STA	($10), Z
+		LDA	#$00		
+		NOP
+		NOP
+		STA	($14), Z
+		INZ
+		NOP
+		NOP
+		STA	($10), Z
+		LDA	#$00		
+		NOP
+		NOP
+		STA	($14), Z
+
+		INZ
+		DEX
+		BNE	@stampTileLoop
+
+		jsr	canvas_pointer_advance_to_next_line
+
+		;; See if more to do
+		jmp	@stampLineLoop
+		
+@copiedLastLine:
+		LDZ	#$00
+		;; All done, restore saved ZP
+		jmp	zp_scratch_restore		
 		
 megabasic_perform_canvas_stamp:
 		;; CANVAS s STAMP [from x1,y1 TO x2,y2] ON CANVAS t [AT x3,y3]
@@ -961,9 +1048,12 @@ megabasic_stamp_canvas:
 
 		;; Get pointers to, and size of everything
 		
-		;; Get target pointers into $10-$17
+		;; Get target pointers
+		;; (canvas_prepare_pointers writes to source_canvas pointers,
+		;; so after the call we copy those pointers ($00-$17) to the
+		;; target pointers ($18-$1F)
 		lda	target_canvas
-		jsr	@prepareCanvasPointers
+		jsr	canvas_prepare_pointers
 		;; Then copy to $18-$1F
 		LDX	#$10
 		LDY	#$18
@@ -978,8 +1068,167 @@ megabasic_stamp_canvas:
 
 		;; Then get source canvas, and do the same
 		lda	source_canvas
-		jsr	@prepareCanvasPointers
+		jsr	canvas_prepare_pointers
+
+		jsr	canvas_adjust_source_pointers_for_from_xy_to_xy
+		jsr	canvas_adjust_target_pointers_for_at_xy
+
+		;; If nothing to do, skip the hard work
+		LDA	source_canvas_x2
+		BEQ	@copiedLastLine
 		
+@stampLineLoop:
+		;; $07 = source width (not reduced by X offset)
+		;; $08 = source height (not reduced by Y offset)
+		;; $09 = target width (reduced by X offset)
+		;; $0A = target height (reduced by Y offset)
+		;; source_canvas_x2 = number of tiles per row to copy
+		;; source_canvas_y2 = number of rows to copy
+		;; uint16_t $20 = row advance for source
+		;; uint16_t $22 = row advance for target
+		;; uint32_t $10 = source screen RAM rows
+		;; uint32_t $14 = source colour RAM rows
+		;; uint32_t $18 = target screen RAM rows
+		;; uint32_t $1C = target colour RAM rows
+
+		;; Have we done all the lines?
+		LDA	source_canvas_y2
+		BEQ	@copiedLastLine
+
+		;; Another line to copy
+
+		;; Point to beginning of line (corrected for X offsets)
+		LDZ	#$00
+		;; Get the # of tiles in the row that we have to copy
+		LDX	source_canvas_x2
+
+@stampTileLoop:
+		;; Check if the tile needs stamping ($FFFF = transparent)
+		NOP
+		NOP
+		LDA	($10), Z
+		INZ
+		NOP
+		NOP
+		AND	($10), Z
+		DEZ
+		CMP	#$FF
+		beq	@dontCopyThisTile
+		;; Copy the tile
+		LDY #$01
+@copyByteLoop:
+		NOP
+		NOP
+		LDA	($10), Z
+		NOP
+		NOP
+		STA	($18), Z
+		NOP
+		NOP
+		LDA	($14), Z
+		NOP
+		NOP
+		STA	($1C), Z
+		INZ
+		DEY
+		BPL	@copyByteLoop
+		DEZ
+		DEZ
+
+@dontCopyThisTile:
+		INZ
+		INZ
+@copiedTile:
+		DEX
+		BNE	@stampTileLoop
+
+		jsr	canvas_pointer_advance_to_next_line
+
+		;; See if more to do
+		jmp	@stampLineLoop
+		
+@copiedLastLine:
+		LDZ	#$00
+		;; All done, restore saved ZP
+		jmp	zp_scratch_restore
+
+canvas_pointer_advance_to_next_line:	
+		;; Decrement count of lines left to copy
+		dec	source_canvas_y2
+		;; Advance pointers to next lines
+		LDX	#$10
+		LDY	#$20
+		jsr	add_16bit_value
+		LDX	#$14
+		LDY	#$20
+		jsr	add_16bit_value
+		LDX	#$18
+		LDY	#$22
+		jsr	add_16bit_value
+		LDX	#$1c
+		LDY	#$22
+		jsr	add_16bit_value
+		
+		RTS
+		
+canvas_prepare_pointers:
+		;; Get pointers to screen and colour RAM for
+		;; source and target canvases into $10-$17,
+		;; and width and height into $07,$08
+		
+		;; Put target screen ram in $10-$13
+		;; skip header, and save pointer
+
+		PHA
+		jsr	canvas_find
+		PLA
+		BNE	@targetNotCanvas0
+		;; Canvas 0 has set addresses
+		LDX	#$10
+		jsr	get_canvas0_pointers
+		lda	#80
+		sta	$07
+		LDA	#50
+		sta	$08
+		jmp 	@gotTargetPointers
+@targetNotCanvas0:
+		;;  Canvas dimensions 
+		lda	canvas_width
+		sta	$07		
+		lda	canvas_height
+		sta 	$08
+		
+		;; screen RAM rows are at header+64
+		JSR	tileset_advance_by_64
+		LDX	#$03
+		LDY	#$10
+		jsr	copy_32bit_pointer
+		jsr	tileset_retreat_by_64
+
+		;; colour RAM rows are at header + *(unsigned short*)&header[21]
+		LDX	#$03
+		LDY	#$14
+		jsr	copy_32bit_pointer
+		LDZ	#21
+		LDA	$14
+		CLC
+		ADC	($03),Z
+		STA	$14
+		INZ
+		LDA	$15
+		CLC
+		ADC	($03),Z
+		STA	$15
+		INZ
+		LDA	$16
+		CLC
+		ADC	($03),Z
+		STA	$16
+@gotTargetPointers:
+		LDZ	#$00
+		RTS		
+
+canvas_adjust_source_pointers_for_from_xy_to_xy:	
 		;; The pointers are currently to the start of the
 		;; regions.  We need to advance them to the first
 		;; line in the source and targets, and then advance
@@ -1054,7 +1303,9 @@ megabasic_stamp_canvas:
 		SBC	source_canvas_x1
 		STA	source_canvas_x2
 
-		;; ... and similarly for the target canvas
+		RTS
+
+canvas_adjust_target_pointers_for_at_xy:	
 
 		; target width*2 = row bytes		
 		LDA	$09	
@@ -1114,156 +1365,8 @@ megabasic_stamp_canvas:
 		SBC	target_canvas_y
 		STA	$0A
 
-		;; If nothing to do, skip the hard work
-		LDA	source_canvas_x2
-		BEQ	@copiedLastLine
+		RTS
 		
-@stampLineLoop:
-		;; $07 = source width (not reduced by X offset)
-		;; $08 = source height (not reduced by Y offset)
-		;; $09 = target width (reduced by X offset)
-		;; $0A = target height (reduced by Y offset)
-		;; source_canvas_x2 = number of tiles per row to copy
-		;; source_canvas_y2 = number of rows to copy
-		;; uint16_t $20 = row advance for source
-		;; uint16_t $22 = row advance for target
-		;; uint32_t $10 = source screen RAM rows
-		;; uint32_t $14 = source colour RAM rows
-		;; uint32_t $18 = target screen RAM rows
-		;; uint32_t $1C = target colour RAM rows
-
-		;; Have we done all the lines?
-		LDA	source_canvas_y2
-		BEQ	@copiedLastLine
-
-		;; Another line to copy
-
-		;; Point to beginning of line (corrected for X offsets)
-		LDZ	#$00
-		;; Get the # of tiles in the row that we have to copy
-		LDX	source_canvas_x2
-
-@stampTileLoop:
-		;; Check if the tile needs stamping ($FFFF = transparent)
-		NOP
-		NOP
-		LDA	($10), Z
-		INZ
-		NOP
-		NOP
-		AND	($10), Z
-		DEZ
-		CMP	#$FF
-		beq	@dontCopyThisTile
-		;; Copy the tile
-		LDY #$01
-@copyByteLoop:
-		NOP
-		NOP
-		LDA	($10), Z
-		NOP
-		NOP
-		STA	($18), Z
-		NOP
-		NOP
-		LDA	($14), Z
-		NOP
-		NOP
-		STA	($1C), Z
-		INZ
-		DEY
-		BPL	@copyByteLoop
-		DEZ
-		DEZ
-
-@dontCopyThisTile:
-		INZ
-		INZ
-@copiedTile:
-		DEX
-		BNE	@stampTileLoop
-
-		;; Decrement count of lines left to copy
-		dec	source_canvas_y2
-		;; Advance pointers to next lines
-		LDX	#$10
-		LDY	#$20
-		jsr	add_16bit_value
-		LDX	#$14
-		LDY	#$20
-		jsr	add_16bit_value
-		LDX	#$18
-		LDY	#$22
-		jsr	add_16bit_value
-		LDX	#$1c
-		LDY	#$22
-		jsr	add_16bit_value
-		
-		;; See if more to do
-		jmp	@stampLineLoop
-		
-@copiedLastLine:
-		LDZ	#$00
-		;; All done, restore saved ZP
-		jmp	zp_scratch_restore
-
-@prepareCanvasPointers:
-		;; Get pointers to screen and colour RAM for
-		;; source and target canvases into $10-$17,
-		;; and width and height into $07,$08
-		
-		;; Put target screen ram in $10-$13
-		;; skip header, and save pointer
-
-		PHA
-		jsr	canvas_find
-		PLA
-		BNE	@targetNotCanvas0
-		;; Canvas 0 has set addresses
-		LDX	#$10
-		jsr	get_canvas0_pointers
-		lda	#80
-		sta	$07
-		LDA	#50
-		sta	$08
-		jmp 	@gotTargetPointers
-@targetNotCanvas0:
-		;;  Canvas dimensions 
-		lda	canvas_width
-		sta	$07		
-		lda	canvas_height
-		sta 	$08
-		
-		;; screen RAM rows are at header+64
-		JSR	tileset_advance_by_64
-		LDX	#$03
-		LDY	#$10
-		jsr	copy_32bit_pointer
-		jsr	tileset_retreat_by_64
-
-		;; colour RAM rows are at header + *(unsigned short*)&header[21]
-		LDX	#$03
-		LDY	#$14
-		jsr	copy_32bit_pointer
-		LDZ	#21
-		LDA	$14
-		CLC
-		ADC	($03),Z
-		STA	$14
-		INZ
-		LDA	$15
-		CLC
-		ADC	($03),Z
-		STA	$15
-		INZ
-		LDA	$16
-		CLC
-		ADC	($03),Z
-		STA	$16
-@gotTargetPointers:
-		LDZ	#$00
-		RTS		
-
 add_32bit_value:
 		;; X=X+Y
 		CLC
@@ -1350,7 +1453,6 @@ copy_32bit_pointer:
 		
 megabasic_perform_canvas_new:
 megabasic_perform_canvas_delete:
-megabasic_perform_canvas_clear:
 megabasic_perform_canvas_settile:
 		;; FALL THROUGH
 megabasic_perform_undefined_function:
