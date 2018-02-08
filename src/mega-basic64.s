@@ -970,7 +970,7 @@ parse_from_xy_to_xy:
 		jsr	$0073
 		;; get Y1
 		JSR	$AD8A
-		JSR	$B7F7
+		JSR	$B7F7		
 		LDA	$15
 		LBNE	megabasic_perform_illegal_quantity_error
 		LDA	$14
@@ -985,6 +985,7 @@ parse_from_xy_to_xy:
 		;; get X2
 		JSR	$AD8A
 		JSR	$B7F7
+		INW	$14
 		LDA	$15
 		LBNE	megabasic_perform_illegal_quantity_error
 		LDA	$14
@@ -999,6 +1000,7 @@ parse_from_xy_to_xy:
 		;; get Y2
 		JSR	$AD8A
 		JSR	$B7F7
+		INW	$14
 		LDA	$15
 		LBNE	megabasic_perform_illegal_quantity_error
 		LDA	$14
