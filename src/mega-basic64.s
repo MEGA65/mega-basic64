@@ -760,6 +760,9 @@ megabasic_perform_canvas:
 		JMP	megabasic_perform_undefined_function
 
 megabasic_perform_canvas_clear:
+
+		jsr	zp_scratch_stash
+				
 		;; CANVAS s CLEAR [from x1,y1 TO x2,y2]
 		LDA	source_canvas
 		JSR	get_canvas_dimensions
@@ -774,14 +777,16 @@ megabasic_perform_canvas_clear:
 		jsr	canvas_prepare_pointers
 		;; Adjust them for the region we need to clear
 		jsr	canvas_adjust_source_pointers_for_from_xy_to_xy
-		
-		;; XXX - Do actual clear
+
+		;; Do actual clearing
 		jsr	canvas_clear_region
 		
-		RTS
+		;; All done, restore saved ZP
+		jSR	zp_scratch_restore		
+		jmp 	basic2_main_loop
 
 canvas_clear_region:	
-		
+
 		;; If nothing to do, skip the hard work
 		LDA	source_canvas_x2
 		BEQ	@copiedLastLine
@@ -843,8 +848,7 @@ canvas_clear_region:
 		
 @copiedLastLine:
 		LDZ	#$00
-		;; All done, restore saved ZP
-		jmp	zp_scratch_restore		
+		RTS
 		
 megabasic_perform_canvas_stamp:
 		;; CANVAS s STAMP [from x1,y1 TO x2,y2] ON CANVAS t [AT x3,y3]
@@ -857,6 +861,8 @@ megabasic_perform_canvas_stamp:
 		;; At this point we have only CANVAS STAMP, and
 		;; the source canvas in source_canvas
 
+		jsr	zp_scratch_stash
+		
 		;; Get the size of the canvas
 		LDA	source_canvas
 		JSR	get_canvas_dimensions
@@ -902,6 +908,8 @@ megabasic_perform_canvas_stamp:
 		;; and iterate through the copy.
 		jsr	megabasic_stamp_canvas
 
+		;; All done, restore saved ZP
+		JSR	zp_scratch_restore
 		JMP	basic2_main_loop
 
 get_canvas_dimensions:
@@ -1033,7 +1041,6 @@ parse_at_xy:
 		RTS
 		
 megabasic_stamp_canvas:
-		jsr	zp_scratch_stash
 		
 		;; CANVAS stamping (copying)
 		;; We copy from source_canvas to target_canvas.
@@ -1149,8 +1156,7 @@ megabasic_stamp_canvas:
 		
 @copiedLastLine:
 		LDZ	#$00
-		;; All done, restore saved ZP
-		jmp	zp_scratch_restore
+		RTS
 
 canvas_pointer_advance_to_next_line:	
 		;; Decrement count of lines left to copy
