@@ -1303,25 +1303,25 @@ canvas_adjust_source_pointers_for_from_xy_to_xy:
 		; source width*2 = row bytes		
 		LDA	$07	
 		ASL
-		STA	$D780
+		STA	$D770
 		STA	$20	; low byte of row advance for source
 		ROL
 		AND	#$01
 		STA	$21	; high byte of row advance for source
-		STA	$D781
+		STA	$D771
 		;; start row
 		LDA	source_canvas_y1
-		STA	$D784
+		STA	$D774
 		;; Zero out unused upper byteese
 		LDA	#$00
-		STA 	$D782
-		STA	$D783
-		STA	$D786
-		STA	$D787
+		STA 	$D772
+		STA	$D773
+		STA	$D776
+		STA	$D777
 		;; XXX - Wait for multiplier to finish
 		;; Get multplier result and add X offset
 		LDX 	#$00
-@ll2:		LDA	$D788, X
+@ll2:		LDA	$D778, X
 		STA	$0B, X
 		INX
 		CPX	#4
@@ -1369,19 +1369,19 @@ canvas_adjust_target_pointers_for_at_xy:
 		; target width*2 = row bytes		
 		LDA	$09	
 		ASL
-		STA	$D780
+		STA	$D770
 		STA	$22	; low byte of row advance for dest
 		ROL
 		AND	#$01
 		STA	$23	; high byte of row advance for dest
-		STA	$D781
+		STA	$D771
 		;; start row
 		LDA	target_canvas_y
-		STA	$D784
+		STA	$D774
 		;; XXX - Wait for multiplier to finish
 		;; Get multplier result and add X offset
 		LDX 	#$00
-@ll3:		LDA	$D788, X
+@ll3:		LDA	$D778, X
 		STA	$0B, X
 		INX
 		CPX	#4
