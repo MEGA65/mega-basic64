@@ -870,6 +870,7 @@ canvas_clear_region:
 		
 @copiedLastLine:
 		LDZ	#$00
+
 		RTS
 		
 megabasic_perform_canvas_stamp:
@@ -1645,7 +1646,6 @@ tileset_install:
 		BNE	@magicCheckLoop
 		BEQ	@magicOk
 @magicBad:
-		INC	$D020
 		LDZ	#$00
 		RTS		
 @magicOk:
@@ -2015,7 +2015,7 @@ raster_irq:
 
 		lda	canvas_pause_drawing
 		BNE	@dontDrawCanvas0
-		
+
 		;; Copy CANVAS 0 stored copy to display copy
 		lda 	#>canvas0copylist
 		STA	$D701
@@ -2091,28 +2091,28 @@ merge_basic_screen_to_display_canvas:
 		STA	$01
 
 		;; 16-bit pointer to BASIC screen RAM
-		LDA	#$00
+		LDA	#<$0400
 		STA	$0B
-		LDA	#$04
+		LDA	#>$0400
 		STA	$0C
 		;; 16-bit pointer to canvas screen RAM
-		LDA	#$00
+		LDA	#<$A000
 		STA	$07
-		LDA	#$A0
+		LDA	#>$A000
 		STA	$08
 		;; 16-bit pointer to BASIC 2 colour RAM
-		LDA	#$00
+		LDA	#<$D800
 		STA	$09
-		LDA	#$D8
+		LDA	#>$D800
 		STA	$0A
 		;; Set 32-bit pointer to canvas colour RAM
-		LDA 	#$00
+		LDA 	#<$0800
 		STA	$03
-		LDA	#$08
+		LDA	#>$0800
 		STA	$04
-		LDA	#$F8
+		LDA	#<$0FF8
 		STA	$05
-		LDA 	#$0F
+		LDA 	#>$0FF8
 		STA	$06
 
 .if 1
