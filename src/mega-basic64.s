@@ -622,8 +622,10 @@ tokenlist:
 
 		;; Quick reference to C64 BASIC tokens
 		token_clr	=	$9C
+		token_cont	=	$9A
 		token_new	=	$A2
 		token_on	=	$91
+		token_stop	=	$90
 		token_to	=	$A4
 
 megabasic_perform_tile:
@@ -746,6 +748,26 @@ megabasic_perform_canvas:
 
 		;; Get current token 
 		JSR	$0079
+		;; CANVAS0STOP stops rendering of canvas 0 to screen
+		cmp	#token_stop
+		BNE	@notCanvasStop
+		LDA	source_canvas
+		LBNE	megabasic_perform_illegal_quantity_error
+		LDA	#$01
+		STA	canvas_pause_drawing
+		JSR	$0073
+		jmp	basic2_main_loop
+@notCanvasStop:
+		;; CANVAS0CONT resumes rendering of canvas 0 to screen
+		cmp	#token_cont
+		BNE	@notCanvasRun
+		LDA	source_canvas
+		LBNE	megabasic_perform_illegal_quantity_error
+		LDA	#$00
+		STA	canvas_pause_drawing
+		JSR	$0073
+		jmp	basic2_main_loop
+@notCanvasRun:
 		CMP	#token_stamp
 		LBEQ	megabasic_perform_canvas_stamp
 		CMP	#token_delete
@@ -1022,7 +1044,21 @@ parse_at_xy:
 		JSR	$0073
 		;; get X
 		JSR	$AD8A
-		JSR	$B7F7
+		JSR	$B7FB
+@checkNegativeX:
+		LDA	$15
+		CMP	#$FF
+		BNE	@notNegX
+		;; X is negative, so we can increment X to normalise it, and
+		;; at the same time increment X1 of the source. It is only
+		;; illegal quantity if after doing this that there is no region to copy
+		LDA	source_canvas_x1
+		CMP	source_canvas_x2
+		LBEQ	megabasic_perform_illegal_quantity_error
+		INC	source_canvas_x1
+		INW	$14
+		jmp	@checkNegativeX
+@notNegX:
 		LDA	$15
 		LBNE	megabasic_perform_illegal_quantity_error
 		LDA	$14
@@ -1034,7 +1070,21 @@ parse_at_xy:
 		jsr	$0073
 		;; get Y
 		JSR	$AD8A
-		JSR	$B7F7
+		JSR	$B7FB
+@checkNegativeY:
+		LDA	$15
+		CMP	#$FF
+		BNE	@notNegY
+		;; Y is negative, so we can increment Y to normalise it, and
+		;; at the same time increment Y1 of the source. It is only
+		;; illegal quantity if after doing this that there is no region to copy
+		LDA	source_canvas_y1
+		CMP	source_canvas_y2
+		LBEQ	megabasic_perform_illegal_quantity_error
+		INC	source_canvas_y1
+		INW	$14
+		jmp	@checkNegativeY
+@notNegY:
 		LDA	$15
 		LBNE	megabasic_perform_illegal_quantity_error
 		LDA	$14
@@ -1963,6 +2013,9 @@ raster_irq:
 		;; Clear raster IRQ
 		INC	$D019
 
+		lda	canvas_pause_drawing
+		BNE	@dontDrawCanvas0
+		
 		;; Copy CANVAS 0 stored copy to display copy
 		lda 	#>canvas0copylist
 		STA	$D701
@@ -1973,6 +2026,7 @@ raster_irq:
 
 		jsr 	merge_basic_screen_to_display_canvas
 
+@dontDrawCanvas0:
 		jsr	update_viciv_registers
 
 		;; XXX $D06B - sprite 16 colour enables
@@ -2216,6 +2270,11 @@ d054_bits:
 token_hi_page_flag:
 		.byte $00
 
+		;; If non-zero, then we don't update the visible canvas.
+		;; This allows slow off-screen scene preparation, without glitching
+canvas_pause_drawing:
+		.byte $00
+		
 		;; Where a colour is being put
 colour_target:
 		.byte $00
