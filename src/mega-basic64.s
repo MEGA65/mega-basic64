@@ -1474,7 +1474,7 @@ add_16bit_value:
 		
 get_canvas0_pointers:
 		;; Canvas 0 screen RAM is at $000E000,
-		;; colour RAM at $FF80800
+		;; colour RAM at $FF82800
 		LDA	#<$E000
 		STA	$00,X
 		LDA	#>$E000
@@ -1482,9 +1482,9 @@ get_canvas0_pointers:
 		LDA	#$00
 		STA	$02, X
 		STA	$03, X
-		LDA	#<$0800
+		LDA	#<$2800
 		STA	$04, X
-		LDa	#>$0800
+		LDa	#>$2800
 		STA	$05, X
 		LDA	#<$0FF8
 		STA	$06, X
@@ -2146,7 +2146,7 @@ merge_basic_screen_to_display_canvas:
 		LDA	#$00
 		NOP
 		NOP
-		STA	($03),Z
+		STA	($03),Z	
 		;; Colour goes in 2nd byte
 		INZ
 		LDA	($09), Y
@@ -2264,7 +2264,8 @@ d054_bits:
 		;; $01 = sixteen bit character mode
 		;; $04 = full colour for chars >$FF
 		;; $10 = sprite H640
-		.byte $05
+		;; $80 = Alhpa blender enable
+		.byte $85
 		
 		;; Flag to indicate which half of token list we are in.
 token_hi_page_flag:
