@@ -1,4 +1,9 @@
+.if 0
+		XXX - When performing a syntax or other errors, check if we have
+		saved ZP variables, and if so, restore them.
+.endif
 
+		
 ;-------------------------------------------------------------------------------
 ;BASIC interface 
 ;-------------------------------------------------------------------------------
@@ -662,11 +667,210 @@ megabasic_perform_slow:
 		TRB	d054_bits
 		JMP	basic2_main_loop		
 
+megabasic_perform_canvas_new:
+		;; CANVAS n NEW x,y
+		;; At this point NEW is the current token
+
+		;;  Save ZP variables
+		jsr	zp_scratch_stash
+
+		;; Check if canvas id already exists
+		lda	source_canvas
+		;; CANVAS 0 is special, and always exists at a fixed address
+		LBEQ	megabasic_perform_illegal_quantity_error
+		
+		;; Skip NEW
+		JSR	$0073
+
+		;; Parse x,y into source_canvas_x1,y1
+		jsr	parse_xy
+
+		;; Calculate required memory
+		;; = (2*x) * y * 2 = 4 * x * y
+		lda	source_canvas_x1
+		asl
+		sta	$d770
+		LDA 	source_canvas_y1
+		asl
+		sta	$d774
+		LDA 	#$00
+		STA	$d771
+		sta	$D772
+		sta	$D773
+		sta	$D775
+		sta	$d776
+		sta	$D777
+		lda	source_canvas_x1
+		bpl	@noXbit7
+		inc	$d771
+@noXbit7:	lda	source_canvas_y1
+		bpl	@noYbit7
+		inc	$D775
+@noYbit7:
+		;; Find end of canvas list
+		jsr	tileset_point_to_start_of_area
+@canvasListTraverse:
+		jsr	tileset_follow_pointer
+		LDZ	#$00
+		NOP
+		NOP
+		LDA	($03),Z
+		BNE	@canvasListTraverse
+
+		;; Pointer $03-$07 now points to start of free
+		;; graphics memory.  We can use upto $1F7FF.
+		
+		
+		;; Check available memory.
+		;; We need 64 bytes for header, plus the computed
+		;; bytes for the rows.
+		LDA	$03
+		CLC
+		ADC	$D778
+		STA	$08
+		LDA	$04
+		ADC	$D779
+		STA	$09
+		LDA	$05
+		ADC	$D77A
+		STA	$0A
+		;; Add $40 for the header
+		LDA	$08
+		CLC
+		ADC	#$40
+		STA	$08
+		LDA	$09
+		ADC	#$00
+		STA	$09
+		LDA	$0A
+		ADC	#$00
+		STA	$0A
+		;; now check that result is <= $1F7FF
+		CMP	#$01
+		LBNE	megabasic_perform_out_of_memory_error
+		LDA	$09
+		CMP	#>$F800
+		LBCS	megabasic_perform_out_of_memory_error
+		
+		;; Memory space is okay.		
+
+		;; Create header
+		LDX	#$00
+		LDZ	#$00
+@installMagicLoop:
+		LDA	canvas_magicstring,x
+		NOP
+		NOP
+		STA	($03),Z
+		INX
+		INZ
+		CPX	#$0F
+		BNE	@installMagicLoop
+		;; Store canvas number at offset 15
+		LDA	source_canvas
+		NOP
+		NOP
+		STA	($03),Z
+
+		LDA	source_canvas_x1
+		LDZ	#16
+		NOP
+		NOP
+		STA	($03),Z
+		LDA	source_canvas_y1
+		LDZ	#17
+		NOP
+		NOP
+		STA	($03),Z
+
+		;; Set offset to screen RAM rows (always $40) in 18-20
+		LDZ	#18
+		LDA	#$40
+		NOP
+		NOP
+		STA	($03), Z
+		INZ
+		LDA	#$00
+		NOP
+		NOP
+		STA	($03), Z
+		INZ
+		LDA	#$00
+		NOP
+		NOP
+		STA	($03), Z
+		;; Set offset to colour RAM rows in 21-24
+		LDZ	#21
+		LDA	$D778
+		CLC
+		ADC	#$40
+		NOP
+		NOP
+		STA	($03),Z
+		INZ
+		LDA	$D779
+		ADC	#$00
+		NOP
+		NOP
+		STA	($03),Z
+		INZ
+		LDA	$D77A
+		ADC	#$00
+		NOP
+		NOP
+		STA	($03),Z
+
+		;; Set length of screenram/colour ram row slab in 25-26
+		LDZ	#24
+		LDA	$D778
+		NOP
+		NOP
+		STA	($03),Z
+		INZ
+		LDA	$D779
+		NOP
+		NOP
+		STA	($03),Z
+		
+		
+		;; Set length field
+		;; (Use multiplier output + $40 for header)
+		LDZ	#61
+		LDA	$D778
+		CLC
+		ADC	#$40
+		NOP
+		NOP
+		STA	($03), Z
+		INZ
+		LDA	$D779
+		ADC	#$00
+		NOP
+		NOP
+		STA	($03), Z
+		INZ
+		LDA	$D77A
+		ADC	#$00
+		NOP
+		NOP
+		STA	($03), Z		
+		LDZ	#$00
+		
+		;; Initialise canvas by clearing it
+		lda	source_canvas
+		jsr	canvas_prepare_pointers
+		jsr	canvas_clear_region
+
+		jsr	zp_scratch_restore
+		jmp	basic2_main_loop
+		
 megabasic_perform_canvas_delete:
 		JSR	$0073
 		jsr	zp_scratch_stash
 
 		lda	source_canvas
+		;; CANVAS 0 is special, and can't be deleted
+		LBEQ	megabasic_perform_illegal_quantity_error
 		jsr	canvas_find
 		bcs	@canvasExists
 		;; If canvas exists, silently do nothing
@@ -798,6 +1002,10 @@ megabasic_perform_illegal_direct_error:
 
 megabasic_perform_illegal_quantity_error:
 		LDX	#$0E
+		JMP	$A437
+
+megabasic_perform_out_of_memory_error:
+		LDX	#$10
 		JMP	$A437
 		
 megabasic_perform_canvas:
@@ -1104,6 +1312,30 @@ parse_from_xy_to_xy:
 @stampAll:
 		RTS
 
+parse_xy:
+		;; get X
+		JSR	$AD8A
+		JSR	$B7FB
+		LDA	$15
+		CMP	#$FF
+		LBEQ	megabasic_perform_illegal_quantity_error
+		LDA	$14
+		STA	source_canvas_x1
+		;; get comma between X1 and Y1
+		jsr 	$0079
+		CMP	#$2C
+		LBNE	megabasic_perform_syntax_error
+		jsr	$0073
+		;; get Y
+		JSR	$AD8A
+		JSR	$B7FB
+		LDA	$15
+		CMP	#$FF
+		LBEQ	megabasic_perform_illegal_quantity_error
+		LDA	$14
+		STA	source_canvas_y1
+		RTS		
+		
 parse_at_xy:	
 		LDA	#$00
 		STA	target_canvas_x
@@ -1580,7 +1812,6 @@ copy_32bit_pointer:
 		STA	$00,Y
 		RTS		
 		
-megabasic_perform_canvas_new:
 megabasic_perform_canvas_settile:
 		;; FALL THROUGH
 megabasic_perform_undefined_function:
