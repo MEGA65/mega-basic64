@@ -632,10 +632,10 @@ megabasic_perform_tile:
 		;; Valid syntax options:
 		;; TILE SET LOAD <"filename"> [,device]
 		CMP	#token_set
-		bne	megabasic_perform_syntax_error
+		lbne	megabasic_perform_syntax_error
 		JSR	$0073
 		CMP	#$93 	; Token for "LOAD" keyword
-		bne	megabasic_perform_syntax_error
+		lbne	megabasic_perform_syntax_error 
 		JSR	$0073
 		;; Convienently the LOAD command has a routine we
 		;; can call that gets the filename and device + ,1
@@ -652,13 +652,82 @@ megabasic_perform_fast:
 		jsr	enable_viciv
 		LDA	#$40
 		TSB	$D054
+		TSB	d054_bits
 		JMP	basic2_main_loop		
 		
 megabasic_perform_slow:
 		jsr	enable_viciv
 		LDA	#$40
 		TRB	$D054
+		TRB	d054_bits
 		JMP	basic2_main_loop		
+
+megabasic_perform_canvas_delete:
+		jsr	zp_scratch_stash
+
+		lda	source_canvas
+		jsr	canvas_find
+		bcs	@canvasExists
+		;; If canvas exists, silently do nothing
+		;; (that way it is always save to DELETE a canvas
+		;; if you are not sure it exists, e.g., before
+		;; calling CANVAS n NEW
+		jsr	zp_scratch_restore
+		jmp	basic2_main_loop
+@canvasExists:		
+
+		;; Pointer at $03 points to the canvas's header
+		;; We need to work out the region to copy down.
+		;; The target will be the start of the canvas.
+		;; The source will be the start of the following
+		;; canvas
+
+		LDA	$03
+		STA	canvas_delete_dmalist_dest_lsb
+		LDA	$04
+		STA	canvas_delete_dmalist_dest_msb
+
+		;; Get source by following to the next pointer
+		jsr	tileset_follow_pointer
+
+		LDA	$03
+		STA	canvas_delete_dmalist_source_lsb
+		LDA	$04
+		STA	canvas_delete_dmalist_source_msb
+
+		;; Work out size
+		LDA	canvas_delete_dmalist_source_msb
+		SEC
+		SBC	canvas_delete_dmalist_dest_msb
+		sta	canvas_delete_dmalist_size_msb
+		LDA	canvas_delete_dmalist_source_lsb
+		SBC	canvas_delete_dmalist_dest_lsb
+		sta	canvas_delete_dmalist_size_lsb
+		
+		;; Call DMA job to actually shuffle 
+		LDA 	#>canvas_delete_dmalist
+		STA	$D701
+		LDA	#<canvas_delete_dmalist
+		STA	$D705
+		
+		jsr	zp_scratch_restore
+		jmp	basic2_main_loop
+		
+canvas_delete_dmalist:	
+		;; Install pre-prepared tileset @ $12000+
+		.byte $0A,$00 	; F011A list follows
+		;; Normal F011A list
+		.byte $00 ; copy + end of chain
+canvas_delete_dmalist_size_lsb:	.byte 0
+canvas_delete_dmalist_size_msb:	.byte 0
+canvas_delete_dmalist_source_lsb:	.byte 0
+canvas_delete_dmalist_source_msb:	.byte 0
+		.byte $01   ; always bank 1 for now
+canvas_delete_dmalist_dest_lsb:	.byte 0
+canvas_delete_dmalist_dest_msb:	.byte 0
+		.byte $01   ; always bank 1 for now
+		.word $0000 ; modulo (unused)		
+		
 		
 megabasic_perform_colour:
 		;; What are we being asked to colour?
@@ -1511,7 +1580,6 @@ copy_32bit_pointer:
 		RTS		
 		
 megabasic_perform_canvas_new:
-megabasic_perform_canvas_delete:
 megabasic_perform_canvas_settile:
 		;; FALL THROUGH
 megabasic_perform_undefined_function:
@@ -2001,6 +2069,8 @@ raster_irq:
 		;; to control things in BASIC.  This means SLOW and FAST must use
 		;; the VIC-IV speed control register, not the POKE0,65 trick, since
 		;; there is no way to READ that, and thus restore it after.
+
+		PHZ
 		
 		;; Remember current speed setting
 		LDA	$D054
@@ -2044,6 +2114,7 @@ raster_irq:
 		;; hot reg $D016, we can fix it up without waiting for a whole frame.
 		;; Else, we need two IRQ routines, the other at top of screen that all it does
 		;; is fix the VIC-IV registers.
+		PLZ
 		JMP	$EA31
 
 canvas0copylist:	
@@ -2264,6 +2335,7 @@ d054_bits:
 		;; $01 = sixteen bit character mode
 		;; $04 = full colour for chars >$FF
 		;; $10 = sprite H640
+		;; $40 = 50MHz enable
 		;; $80 = Alhpa blender enable
 		.byte $85
 		
