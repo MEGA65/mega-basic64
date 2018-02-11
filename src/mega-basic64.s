@@ -1,6 +1,7 @@
 .if 0
 		XXX - When performing a syntax or other errors, check if we have
 		saved ZP variables, and if so, restore them.
+		XXX - Stamping canvases isnt bounds checking properly
 .endif
 
 		
@@ -1459,6 +1460,20 @@ megabasic_stamp_canvas:
 		jsr	canvas_adjust_source_pointers_for_from_xy_to_xy
 		jsr	canvas_adjust_target_pointers_for_at_xy
 
+		;; Clip copy to fit destination canvas
+		LDA	source_canvas_x2
+		CMP	$09
+		BCC	@notTooWide
+		LDA	$09
+		STA	source_canvas_x2
+@notTooWide:
+		LDA	source_canvas_y2
+		CMP	$0A
+		BCC	@notTooHigh
+		LDA	$0A
+		STA	source_canvas_y2
+@notTooHigh:
+		
 		;; If nothing to do, skip the hard work
 		LDA	source_canvas_x2
 		BEQ	@copiedLastLine
