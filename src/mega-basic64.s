@@ -1317,8 +1317,8 @@ parse_xy:
 		JSR	$AD8A
 		JSR	$B7FB
 		LDA	$15
-		CMP	#$FF
-		LBEQ	megabasic_perform_illegal_quantity_error
+		CMP	#$00
+		LBNE	megabasic_perform_illegal_quantity_error
 		LDA	$14
 		STA	source_canvas_x1
 		;; get comma between X1 and Y1
@@ -1330,8 +1330,8 @@ parse_xy:
 		JSR	$AD8A
 		JSR	$B7FB
 		LDA	$15
-		CMP	#$FF
-		LBEQ	megabasic_perform_illegal_quantity_error
+		CMP	#$00
+		LBNE	megabasic_perform_illegal_quantity_error
 		LDA	$14
 		STA	source_canvas_y1
 		RTS		
