@@ -678,6 +678,8 @@ megabasic_perform_canvas_new:
 		lda	source_canvas
 		;; CANVAS 0 is special, and always exists at a fixed address
 		LBEQ	megabasic_perform_illegal_quantity_error
+		jsr	canvas_find
+		LBCS	megabasic_perform_file_open_error
 		
 		;; Skip NEW
 		JSR	$0073
@@ -1002,6 +1004,10 @@ megabasic_perform_illegal_direct_error:
 
 megabasic_perform_illegal_quantity_error:
 		LDX	#$0E
+		JMP	$A437
+
+megabasic_perform_file_open_error:
+		LDX	#$02
 		JMP	$A437
 
 megabasic_perform_out_of_memory_error:
