@@ -663,6 +663,7 @@ megabasic_perform_slow:
 		JMP	basic2_main_loop		
 
 megabasic_perform_canvas_delete:
+		JSR	$0073
 		jsr	zp_scratch_stash
 
 		lda	source_canvas
