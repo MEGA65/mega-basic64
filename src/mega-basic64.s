@@ -916,6 +916,24 @@ megabasic_perform_canvas_delete:
 		STA	$D701
 		LDA	#<canvas_delete_dmalist
 		STA	$D705
+
+		;; Then write an empty header at the end of the chain
+		LDA	canvas_delete_dmalist_dest_lsb
+		CLC
+		ADC	canvas_delete_dmalist_size_lsb
+		STA	$03
+		LDA	canvas_delete_dmalist_dest_msb
+		ADC	canvas_delete_dmalist_size_msb
+		STA	$04
+		LDZ	#$63
+		LDA	#$00
+@eraseHeaderLoop:
+		NOP
+		NOP
+		STA	($03), Z
+		DEZ
+		bpl	@eraseHeaderLoop
+
 		
 		jsr	zp_scratch_restore
 		jmp	basic2_main_loop
