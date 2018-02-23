@@ -197,6 +197,7 @@ megabasic_enable:
 		;; (This is to add hooks for the M65 buffered UARTs as
 		;; well as accelerated C65 internal floppy access)
 		;; $031A = open logical file
+		;; $031C = close logical file
 		;; $031E = open channel for input
 		;; $0320 = open channel for output
 		;; $0324 = input character from channel
@@ -206,6 +207,10 @@ megabasic_enable:
 		STA	$031A
 		LDA	#>megabasic_open_vector
 		STA	$031B
+		lda	#<megabasic_close_vector
+		STA	$031C
+		LDA	#>megabasic_close_vector
+		STA	$031D
 
 		lda 	#<welcomeText
 		ldy 	#>welcomeText
@@ -221,6 +226,23 @@ welcomeText:
 megabasic_disable:
 		RTS
 
+megabasic_close_vector:
+		;; Our job is simply to trap CLOSE on device 2, the RS232 interface,
+		;; so that the old BASIC behaviour of trashing variables etc doesn't
+		;; happen
+
+		JSR	$F314	; Look up file ID from accumulator
+		lbne	$F296	; If not found, report error (jumping back to kernal close routine)
+		JSR	$F31F	; Get file details from file table
+		TXA
+		PHA
+		LDA	$BA
+		CMP	#$02
+		lbne	$F29D	; if not RS232, then jump back into KERNAL close routine
+		;; Ok, so it was RS232.  Jump to KERNAL routine to delete the logical file entry
+		PLA
+		JMP	$F2F2
+		
 megabasic_open_vector:
 		;; Check if device is RS232
 		LDA	$BA
