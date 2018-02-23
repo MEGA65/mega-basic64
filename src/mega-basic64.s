@@ -254,6 +254,7 @@ megabasic_chrout_vector:
 		lbne	$F1CB
 		;; RS232 output
 		;; First, make UART visible
+		SEI
 		JSR	enable_viciv
 		PLA
 		;; Check which UART
@@ -261,9 +262,11 @@ megabasic_chrout_vector:
 		CPX	#$01	; UART1?
 		BNE	@uart2
 		STA	$D0E0
+		CLI
 		CLC
 		RTS
 @uart2:		STA	$D0E8
+		CLI
 		CLC
 		RTS
 		
@@ -272,7 +275,8 @@ megabasic_chrin_vector:
 		CMP	#$02
 		lbne	$F157
 		;; RS232 input
-read_from_buffereduart:	
+read_from_buffereduart:
+		SEI
 		;; First, make UART visible
 		JSR	enable_viciv
 		;; Check which UART
@@ -281,9 +285,11 @@ read_from_buffereduart:
 		CPX	#$01	; UART1?
 		BNE	@uart2
 		LDA	$D0E0
+		CLI
 		CLC
 		RTS
 @uart2:		LDA	$D0E8
+		CLI
 		CLC
 		RTS
 
