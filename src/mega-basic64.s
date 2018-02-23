@@ -1,7 +1,9 @@
 .if 0
 		XXX - When performing a syntax or other errors, check if we have
 		saved ZP variables, and if so, restore them.
-		XXX - Stamping canvases isnt bounds checking properly
+		XXX - Canvas set tile command
+		XXx - Tile edit pixel command
+		XXX - How to implement functions as BASIC extension
 .endif
 
 		
@@ -191,6 +193,20 @@ megabasic_enable:
 		lda #>megabasic_execute
 		sta execute_vector+1
 
+		;; Install hooks for IO access
+		;; (This is to add hooks for the M65 buffered UARTs as
+		;; well as accelerated C65 internal floppy access)
+		;; $031A = open logical file
+		;; $031E = open channel for input
+		;; $0320 = open channel for output
+		;; $0324 = input character from channel
+		;; $0326 = output character to channel ($FFD2)
+		;; $032A = get charater from input device (similar to $0324)
+		lda	#<megabasic_open_vector
+		STA	$031A
+		LDA	#>megabasic_open_vector
+		STA	$031B
+
 		lda 	#<welcomeText
 		ldy 	#>welcomeText
 		JSR	$AB1E
@@ -205,6 +221,63 @@ welcomeText:
 megabasic_disable:
 		RTS
 
+megabasic_open_vector:
+		;; Check if device is RS232
+		LDA	$BA
+		CMP	#$02
+		BNE	@notRS232
+
+		;; Device is RS232
+		;; C64 BASIC normally allows setting serial parameters via filename.
+		;; For now, we just hardcode these to match the expected use case.
+		;; At present we allow access only the 2 buffered UARTs, and not the
+		;; C65 UART which would still need an RX buffer and interrupts.
+		;; In contrast, the buffered UARTs are very simple to drive, allowing
+		;; bytes to just be pushed and popped to/from the TX/RX queues, and with
+		;; an RX buffer of 1KB for each, can be ignored for considerable periods
+		;; of time in most cases.
+		;; The secondary address is used to select the UART:
+		;; 0 = C65 UART (currently not supported)
+		;; 1 = buffered UART 0
+		;; 2 = buffered UART 2 (there is no buffered UART 1)
+		LDA	$B9
+		CMP	#$01
+		beq	@secondaryOK
+		CMP	#$02
+		beq	@secondaryOK
+		;; Bad secondary address
+		;; Is this a sensible error?
+		jmp megabasic_perform_illegal_quantity_error
+@secondaryOK:
+		;; Secondary ID is okay
+		;; Make sure file not already open, and not too many files open		
+		LDX	$B8	; try to find this file number
+		JSR	$FE0F	; Find file
+		lbeq	$F6FE	; FILE ALREADY OPEN error
+		LDX	$98 	; get number of open files
+		CPX	#$0A	; 10 files already open?
+		lbcs	$f6fb	; TOO MANY FILES error
+
+		;; All is now set for us to open the file
+		INC	$98	; Increment open file count
+		;; Save logical file number
+		LDA	$B8
+		STA	$0259, X
+		;; Save device number
+		LDA	$B9
+		STA	$0263, X 
+		;; Save secondary address
+		LDA	$BA
+		STA	$026D, X
+
+		;; return with success
+		inc	$0401
+		jmp	$F3D3
+
+@notRS232:
+		JMP	$F34A
+
+		
 		;; Works on modified version of the ROM tokeniser, but with extended
 		;; token list.
 		;; Original C64 ROM routine is from $A57C to $A612.
