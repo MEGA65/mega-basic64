@@ -1,0 +1,1 @@
+make clean bin/megabasic64.prg && m65 -l /dev/ttyUSB1 -b ../mega65-core/bin/mega65r1.bit -k ../mega65-core/bin/KICKUP.M65 -R ../mega65-core/910111.bin -C ../mega65-core/charrom.bin -4 -r bin/megabasic64.prg && m65dbg -d /dev/ttyUSB1
