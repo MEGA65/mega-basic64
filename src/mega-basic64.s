@@ -253,9 +253,17 @@ megabasic_chrout_vector:
 		CMP	#$02
 		lbne	$F1CB
 		;; RS232 output
-		;; XXX - Do fake output for now
+		;; First, make UART visible
+		JSR	enable_viciv
 		PLA
-		STA	$0400
+		;; Check which UART
+		LDX	$B6
+		CPX	#$01	; UART1?
+		BNE	@uart2
+		STA	$D0E0
+		CLC
+		RTS
+@uart2:		STA	$D0E8
 		CLC
 		RTS
 		
@@ -264,9 +272,18 @@ megabasic_chrin_vector:
 		CMP	#$02
 		lbne	$F157
 		;; RS232 input
-		;; Return fake byte corresponding to channel
-		LDA	$AB
-		ORA	#$40
+read_from_buffereduart:	
+		;; First, make UART visible
+		JSR	enable_viciv
+		;; Check which UART
+		;; XXX - Check for empty buffer
+		LDX	$AB
+		CPX	#$01	; UART1?
+		BNE	@uart2
+		LDA	$D0E0
+		CLC
+		RTS
+@uart2:		LDA	$D0E8
 		CLC
 		RTS
 
@@ -276,10 +293,7 @@ megabasic_getchar_vector:
 		lbne	$F13E
 		;; RS232 input
 		;; Return fake byte corresponding to channel
-		LDA	$AB
-		ORA	#$40
-		CLC
-		RTS
+		jmp	read_from_buffereduart
 		
 megabasic_openin_vector:
 		;; Trap KERNAL set input channel vector
@@ -387,14 +401,13 @@ megabasic_open_vector:
 		LDA	$B8
 		STA	$0259, X
 		;; Save device number
-		LDA	$B9
+		LDA	$BA
 		STA	$0263, X 
 		;; Save secondary address
-		LDA	$BA
+		LDA	$B9
 		STA	$026D, X
 
 		;; return with success
-		inc	$0401
 		jmp	$F3D3
 
 @notRS232:
