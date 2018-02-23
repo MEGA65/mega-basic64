@@ -219,6 +219,18 @@ megabasic_enable:
 		STA	$0320
 		LDA	#>megabasic_openout_vector
 		STA	$0321
+		lda	#<megabasic_chrin_vector
+		STA	$0324
+		LDA	#>megabasic_chrin_vector
+		STA	$0325
+		lda	#<megabasic_chrout_vector
+		STA	$0326
+		LDA	#>megabasic_chrout_vector
+		STA	$0327
+		lda	#<megabasic_getchar_vector
+		STA	$032A
+		LDA	#>megabasic_getchar_vector
+		STA	$032B
 		
 
 		lda 	#<welcomeText
@@ -235,6 +247,40 @@ welcomeText:
 megabasic_disable:
 		RTS
 
+megabasic_chrout_vector:
+		PHA
+		LDA	$99
+		CMP	#$02
+		lbne	$F1CB
+		;; RS232 output
+		;; XXX - Do fake output for now
+		PLA
+		STA	$0400
+		CLC
+		RTS
+		
+megabasic_chrin_vector:
+		LDA	$99
+		CMP	#$02
+		lbne	$F157
+		;; RS232 input
+		;; Return fake byte corresponding to channel
+		LDA	$AB
+		ORA	#$40
+		CLC
+		RTS
+
+megabasic_getchar_vector:	
+		LDA	$99
+		CMP	#$02
+		lbne	$F13E
+		;; RS232 input
+		;; Return fake byte corresponding to channel
+		LDA	$AB
+		ORA	#$40
+		CLC
+		RTS
+		
 megabasic_openin_vector:
 		;; Trap KERNAL set input channel vector
 		;; Check if RS232, if so, do nothing, else do normal.
