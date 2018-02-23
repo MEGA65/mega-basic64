@@ -211,6 +211,15 @@ megabasic_enable:
 		STA	$031C
 		LDA	#>megabasic_close_vector
 		STA	$031D
+		lda	#<megabasic_openin_vector
+		STA	$031E
+		LDA	#>megabasic_openin_vector
+		STA	$031F
+		lda	#<megabasic_openout_vector
+		STA	$0320
+		LDA	#>megabasic_openout_vector
+		STA	$0321
+		
 
 		lda 	#<welcomeText
 		ldy 	#>welcomeText
@@ -226,6 +235,52 @@ welcomeText:
 megabasic_disable:
 		RTS
 
+megabasic_openin_vector:
+		;; Trap KERNAL set input channel vector
+		;; Check if RS232, if so, do nothing, else do normal.
+		;; (our buffered UARTs require no special handling)
+
+		jsr	$f30f	; Find file
+		lbne	$f701	; file not found
+		jsr	$f31f	; Get file details from table
+		LDA	$BA	; Get device # of the file
+		CMP	#$02	; Is it RS232?
+		lbne	$f219	; not RS232, so return to KERNAL routine
+
+		;; Is RS232, so all we need to do is save input device #
+		STA	$99
+		;; XXX - Do we need to put the secondary device (from $B9)
+		;; anywhere?  Probably do... $AB = RS232 byte input buffer in
+		;; C64, so we can override that
+		LDA	$B9
+		STA	$AB
+		CLC
+		RTS
+
+
+megabasic_openout_vector:
+		;; Trap KERNAL set output channel vector
+		;; Check if RS232, if so, do nothing, else do normal.
+		;; (our buffered UARTs require no special handling)
+
+		jsr	$f30f	; Find file
+		lbne	$f701	; file not found
+		jsr	$f31f	; Get file details from table
+		LDA	$BA	; Get device # of the file
+		CMP	#$02	; Is it RS232?
+		lbne	$f25b	; not RS232, so return to KERNAL routine
+
+		;; Is RS232, so all we need to do is save input device #
+		STA	$99
+		;; XXX - Do we need to put the secondary device (from $B9)
+		;; anywhere?  Probably do. $B6 normally holds RS232 output
+		;; byte buffer, so we can re-use that
+		LDA	$B9
+		STA	$B6
+		CLC
+		RTS
+
+		
 megabasic_close_vector:
 		;; Our job is simply to trap CLOSE on device 2, the RS232 interface,
 		;; so that the old BASIC behaviour of trashing variables etc doesn't
