@@ -407,6 +407,20 @@ megabasic_open_vector:
 		LDA	$B9
 		STA	$026D, X
 
+		;; Finally, set the baud rate of the UARTs to the correct values
+		;; Set registers to 50000000/baud
+		;; Buffered UART0 = 2000000bps
+		JSR	enable_viciv
+		LDA	#<$0019
+		STA	$D0E6
+		LDA	#>$0019
+		STA	$D0E7
+		;; Buffered UART2 = 115200bps
+		LDA	#<$01B2
+		STA	$D0EE
+		LDA	#>$01B2
+		STA	$D0EF
+		
 		;; return with success
 		jmp	$F3D3
 
