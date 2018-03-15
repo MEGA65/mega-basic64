@@ -182,7 +182,17 @@ c000block:
 		JMP	zp_scratch_stash
 		;; $C015 - Restore ZP values
 		JMP	zp_scratch_restore
+		;; $C018 - Enable/disable screen rendering
+		JMP	set_render_pause_flag
 
+
+set_render_pause_flag:
+		LDX	canvas_pause_drawing
+		CMP	#$FF
+		BEQ	@dontSet
+		STA	canvas_pause_drawing
+@dontSet:	RTS
+		
 canvas_clear_region_simple:
 		;; Get pointers to start of screen and colour RAM areas for the canvas
 		lda	source_canvas
