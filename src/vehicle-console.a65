@@ -482,8 +482,10 @@ irq_handler:
 	jsr	ethernet_packet_received
 
 	PLZ
-	JMP	(irq_routine_saved)
+	JMP	$EA31
+	
 @noEthRx:
+	
 	; Update display once per frame
 	jsr update_display
 
