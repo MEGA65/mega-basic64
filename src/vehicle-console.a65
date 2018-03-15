@@ -16,7 +16,16 @@ iter1:	 .byte 0
 	 .advance 2079
 
 programentrypoint:
-	
+
+	; black screen
+	LDA	#$00
+	STA	$D020
+	STA	$D021
+
+	; Upper case font for graphics chars
+	LDA	#$15
+	STA	$D018
+
 	; Enable C65GS io
 	lda #$47
 	sta $d02f
@@ -142,7 +151,7 @@ gotPacket:
 	; $xx.$03 = Motor velocity (32-bits of message format type 4, starting byte 0)
 	
 
-can_id_byte0_is_04:
+can_id_byte0_is_04:	
 
 	CPY	#$03
 	beq can_msg_04_03
@@ -262,52 +271,11 @@ update_display:
 	CMP	$D012
 	BNE	@rasterWait
 
-	; black screen
-	LDA	#$00
-	STA	$D020
-	STA	$D021
-
-	; Upper case font for graphics chars
-	LDA	#$15
-	STA	$D018
-
-	; Clear display
-	LDX	#$00
-	LDA	#$20
-@u1:	STA	$0404, X
-	STA	$0500, X
-	STA	$0600, X
-	STA	$0700, X
-	INX
-	BNE	@u1
-
-	LDA	#$01
-@uib:	STA	$D800, X
-	STA	$D900, X
-	STA	$DA00, X
-	STA	$DB00, X
-	INX
-	BNE	@uib
-
-	; Draw ticks and borders for speed display
-	LDX    #39
-	LDA    #$64
-@ll1:
-	STA    $0400+2*40, X
-	STA    $0400+5*40, X
-	DEX
-	BPL	@ll1
-	LDX	#39
-@ll2:	LDA	speed_labels, X
-	STA	$0400+6*40, X
-	DEX
-	BPL	@ll2
-
-	; Draw speed bar
+	; Normalise speed reading before drawing speedometer
 	ldy vehicle_speed+1
 	bne @tooFast
 	ldy vehicle_speed+0
-	cmp #159
+	cpy #159
 	bcc @notTooFast
 @tooFast:
 
@@ -315,49 +283,56 @@ update_display:
 @notTooFast:
 
 	; Deduct 1km/h to get edges of bar to line up correctly
-	DEC
-	BEQ	@doneSpeedBar
+	DEY
+	STY	vehicle_speed_normalised
+	sty	$0402
 
+	SEI
+
+	; Draw speedometer graphics
+
+	; Save ZP before doing canvas work
+	JSR    $C012
+
+	; Clear screen
+	LDA    #$00
+	JSR    $C009 ; Select canvas 0
+	JSR    $C003 ; and clear it
+
+	; Select speedo bar canvas as source
+	LDA    #$01
+	JSR    $C009 
+	; Select screen @ 0,0 as target
+	LDA    #$00
+	TAX
+	TAY
+	JSR    $C00F ; Canvas 0 (screen) as target
+
+	; Work out how much of speedo bar to show
 	LDX	#$00
+	LDY	#$00
 
-@speedBarLoop:
-	CPY	#$00
-	BEQ	@doneSpeedBar
-	LDA	#$A0 ; solid reverse block
-	CPY	#$03
-	BCS	@gotBarChar
-	LDA	#$F6 ; 3/4 solid block
-	CPY	#$02
-	BCS	@gotBarChar
-	LDA	#$61 ; 1/2 solid block
-	CPY	#$01
-	BCS	@gotBarChar
-	LDA	#$74
-@gotBarChar:
-	; Draw bar
-	STA	$0400+3*40,X
-	STA	$0400+4*40,X
-	STA	$0400+5*40,X
+	; X2,Y2 from A,Z
+	; 1x column per 4km/h gives a range of 0 - 159km/h
+	LDA    vehicle_speed_normalised
+	STA    $0400
+	LSR
+	LSR
+	STA	$0401
+	LDZ	#9
+	JSR	$C00C ; select source canvas region
 
-	; Advance to next column to render
-	INX
-	CPX	#40
-	BEQ	@doneSpeedBar
+	LDZ	#$00
 
-	; Decrement remaining speed to render by 4 km/h, and abort if hit zero
-	DEY
-	beq	@doneSpeedBar
-	DEY
-	beq	@doneSpeedBar
-	DEY
-	beq	@doneSpeedBar
-	DEY
-	beq	@doneSpeedBar
-	
-	bne	@speedBarLoop
+	; And stamp it
+	JSR	$C006
 
-@doneSpeedBar:
+	; Restore ZP before doing canvas work
+	JSR    $C015
 
+	LDZ #$00
+
+	CLI
 
 	; Convert speed in km/h to string
 	LDA	  vehicle_speed+0
@@ -385,6 +360,8 @@ update_display:
 
 ; Vehicle speed in km/hour
 vehicle_speed:	.word	0
+
+vehicle_speed_normalised: .byte 0
 
 ; Motor speed in RPM
 motor_speed:	.word 0
