@@ -1,0 +1,418 @@
+; Ethernet controller test program for the C65GS
+
+; Include C64 BASIC program load header
+
+	 .word $0801
+	 .org $0801
+
+	 .scope
+	 .word _next, 10                       ; Next line and current line number
+	 .byte $97, "2,0:", $9e, " 2014", $AA, "65",0      ; POKE 2,0 : SYS 2014+65
+_next:	 .word 0
+
+iter1:	 .byte 0
+
+	 .checkpc 2079
+	 .advance 2079
+
+programentrypoint:
+	
+	; Enable C65GS io
+	lda #$47
+	sta $d02f
+	lda #$53
+	sta $D02f
+
+	; 50MHz CPU
+	LDA #65
+	STA 0
+
+	; Clear screen
+	LDA #$93
+	JSR $FFD2
+
+	; Disable ethernet CRC check, allow broadcast, multicast RX
+	LDA	 $D6E5
+	ORA	 #$32
+	STA	 $D6E5
+	
+	; Begin by preparing unit conversion factors
+	LDA	#<three_point_six
+	STA	$22
+	LDA	#>three_point_six
+	STA	$23
+	JSR	$B7B5   ; parse string to FAC
+	LDX	#<float_three_point_six
+	LDY	#>float_three_point_six
+	JSR	$BBD4   ; copy FAC to memory at $YYXX	
+
+
+	; Map ethernet registers at $6000 - $7FFF
+
+	; Ethernet controller really lives $FFDE000 - $FFDEFFF, so select $FF megabyte section for MAP LO
+	lda #$ff
+	ldx #$0f
+	ldy #$00
+	ldz #$00
+	map
+	eom
+
+	; now enable mapping of $DE000-$DFFFF at $6000
+	; MAPs are offset based, so we need to subtract $6000 from the target address
+	; $DE000 - $6000 = $D8000
+	lda #$80
+	ldx #$8d
+	ldy #$00
+	ldz #$00
+	map
+	eom
+
+	; Ethernet registers should now be visible from $6000 - $6FFF
+	; read buffer will be at $6800 - $6FFF
+
+	; make sure ethernet transceiver is on and not generating IRQs
+	; (we will poll it).
+	; also make sure that we acknowledge the last received packet so that the
+	; ethernet controller knows it can receive.
+	lda $d6e1
+	lsr
+	and #$02
+	ora #$01
+	sta $d6e1
+
+packetloop:
+
+	; We toggle the eth RX buffers here, as if we do it too early,
+	; it seems to cause trouble sometimes.
+
+	; clear eth RX signal, and leave ethernet tranceiver on
+	; and make last used RX buffer visible
+	lda $d6e1
+	and #$04
+	lsr
+	ora #$01
+	sta $d6e1
+
+packetloop2:
+	lda $d6e1
+	and #$20
+	beq packetloop2
+
+gotPacket:
+
+	; show number of received packets
+;	neg
+;	neg
+;	inc	$0400
+
+	; Packet body is at $6802 onwards
+
+	; Packet length is in $6800-1
+
+	; Check for UDP port 4786
+	LDA	$6826
+	CMP	#>4876
+	BNE	packetloop
+	LDA	$6827
+	CMP	#<4876
+	BNE	packetloop
+
+	;Check for "Tritium" string
+	LDA    $682D
+	CMP    #$54
+	BNE    packetloop
+	LDA    $682E
+	CMP    #$72
+	BNE    packetloop
+	LDA    $682F
+	CMP    #$69
+	BNE    packetloop
+
+	; Get Message type
+	LDX   $683E
+	LDY   $683F
+
+	CPX   #$04
+	beq   can_id_byte0_is_04
+
+	jmp   packetloop
+
+	; The CAN message types we care about for now are:
+	; $xx.$03 = Vehicle velocity in m/sec (32-bits of message format type 4, starting byte 4)
+	; $xx.$03 = Motor velocity (32-bits of message format type 4, starting byte 0)
+	
+
+can_id_byte0_is_04:
+
+	CPY	#$03
+	beq can_msg_04_03
+	JMP	packetloop
+
+can_msg_04_03:
+
+	; Extract vehicle speed (m/sec as IEEE float)
+	LDX	#$42
+	JSR	ieee_float_to_fac
+
+	; Multiply it by 3.6 km/hour per m/sec to get vehicle speed in KM/hour
+	LDY	   #>float_three_point_six
+	LDA	   #<float_three_point_six
+	JSR	   $BA28	; Fetch float from mem to ARG, and multiply FAC by this
+
+	; Convert FAC value to 32-bit integer
+	JSR	  $BC9B
+
+	; Store speed in km/hour
+	LDA	$65
+	STA	vehicle_speed+0
+	LDA	$64
+	STA	vehicle_speed+1
+
+	; Get motor speed (presumably in RPM as IEEE float)
+	LDX	#$46
+	JSR	ieee_float_to_fac
+	; Convert FAC value to 32-bit integer
+	JSR	  $BC9B
+
+	; Store in RPM
+	LDA	$65
+	STA	motor_speed+0
+	LDA	$64
+	STA	motor_speed+1	
+
+	jsr update_display
+
+	jmp packetloop
+
+
+ieee_float_to_fac:
+	; $6845-5 = first 32-bit value
+	; byte order is MSB first (network ordering)
+	; $6845.7 = sign bit
+	; $6844.6-0 & $6843.7 = 8-bit exponent
+	; $6843.6-0 & $6842 & $6841 = 23-bit mantissa, implied leading 1.
+
+	; C64 floating-point accumulator lives at
+	; $61 = 8-bit exponent
+	; $62-$65 = 32-bit mantissa
+	; $66 = sign in bit 7
+
+	; Copy sign bit
+	LDA    #$00
+	STA    $66
+	LDA    $6803, X
+	AND    #$80
+	BEQ    @plus
+	LDA    #$FF
+@plus:
+	STA   $66
+	
+	; Copy exponent
+	LDA	$6802, X
+	ASL
+	LDA	$6803, X
+	ROL
+	CLC
+	ADC	#$80
+
+	; Renormalise from IEEE exponent ?
+	CLC
+	ADC	#32
+	STA	$61
+
+	; Copy mantissa
+	LDA    #$00
+	STA    $62
+
+	LDA    $6802, X
+	STA    $63
+
+	LDA    $6801, X
+	STA    $64
+
+	LDA    $6800, X
+	STA    $65
+
+@shiftTest:
+	; Shift left until upper bit of mantissa is a one
+	LDA	$62
+	BMI	@doneShifting
+
+	; Shift 32 bit mantissa left
+	ASL $65
+	ROL $64
+	ROL $63
+	ROL $62
+
+	; Decrement exponent by one
+	dec $61
+	bne @shiftTest
+
+@doneShifting:
+
+	LDA #$00
+	STA $70
+
+	RTS
+
+update_display:
+
+	LDA	#$F0
+@rasterWait:
+	CMP	$D012
+	BNE	@rasterWait
+
+	; black screen
+	LDA	#$00
+	STA	$D020
+	STA	$D021
+
+	; Upper case font for graphics chars
+	LDA	#$15
+	STA	$D018
+
+	; Clear display
+	LDX	#$00
+	LDA	#$20
+@u1:	STA	$0404, X
+	STA	$0500, X
+	STA	$0600, X
+	STA	$0700, X
+	INX
+	BNE	@u1
+
+	LDA	#$01
+@uib:	STA	$D800, X
+	STA	$D900, X
+	STA	$DA00, X
+	STA	$DB00, X
+	INX
+	BNE	@uib
+
+	; Draw ticks and borders for speed display
+	LDX    #39
+	LDA    #$64
+@ll1:
+	STA    $0400+2*40, X
+	STA    $0400+5*40, X
+	DEX
+	BPL	@ll1
+	LDX	#39
+@ll2:	LDA	speed_labels, X
+	STA	$0400+6*40, X
+	DEX
+	BPL	@ll2
+
+	; Draw speed bar
+	ldy vehicle_speed+1
+	bne @tooFast
+	ldy vehicle_speed+0
+	cmp #159
+	bcc @notTooFast
+@tooFast:
+
+	LDY	#160 ; max speed our display can show
+@notTooFast:
+
+	; Deduct 1km/h to get edges of bar to line up correctly
+	DEC
+	BEQ	@doneSpeedBar
+
+	LDX	#$00
+
+@speedBarLoop:
+	CPY	#$00
+	BEQ	@doneSpeedBar
+	LDA	#$A0 ; solid reverse block
+	CPY	#$03
+	BCS	@gotBarChar
+	LDA	#$F6 ; 3/4 solid block
+	CPY	#$02
+	BCS	@gotBarChar
+	LDA	#$61 ; 1/2 solid block
+	CPY	#$01
+	BCS	@gotBarChar
+	LDA	#$74
+@gotBarChar:
+	; Draw bar
+	STA	$0400+3*40,X
+	STA	$0400+4*40,X
+	STA	$0400+5*40,X
+
+	; Advance to next column to render
+	INX
+	CPX	#40
+	BEQ	@doneSpeedBar
+
+	; Decrement remaining speed to render by 4 km/h, and abort if hit zero
+	DEY
+	beq	@doneSpeedBar
+	DEY
+	beq	@doneSpeedBar
+	DEY
+	beq	@doneSpeedBar
+	DEY
+	beq	@doneSpeedBar
+	
+	bne	@speedBarLoop
+
+@doneSpeedBar:
+
+
+	; Convert speed in km/h to string
+	LDA	  vehicle_speed+0
+	LDX	  vehicle_speed+1
+	STA 	  $63
+	STX 	  $62
+	LDX 	  #$90
+	SEC
+	JSR	$BC49
+	JSR 	$BDDF
+	; String is now at AY
+	STA	 $FD
+	STY	 $FE
+	LDY	 #$00
+@u2:	LDA	 ($FD),Y
+	CMP	#$00
+	BEQ	@u3
+	STA	 $0400+18,Y
+	INY
+	BNE @u2
+@u3:
+
+	RTS
+
+
+; Vehicle speed in km/hour
+vehicle_speed:	.word	0
+
+; Motor speed in RPM
+motor_speed:	.word 0
+
+float_three_point_six:
+		.byte 0,0,0,0,0
+
+three_point_six:
+		.byte "3.6",0
+
+
+speed_labels:
+	; 25km/h = 50 pixels ~= 6 chars
+	.byte "   25 ",116
+	; 60km/h = 120 pixels = 15 chars
+	; - 7 chars above = 8
+	.byte "    60 ",116
+	; 70km/h = 140 pixels = 17.5 chars
+	.byte " ",66
+	; 80km/h = 160 pixels = 20 chars
+	.byte "  ",116
+	; 100km/h = 200 pixels = 25 chars
+	.byte "100 ",116
+	; 110km/h = 27.5 chars
+	.byte " ",66
+	; then no more ticks to end
+	.byte "         160",103
+	
+	.scend
+
+	.outfile "bin/vehicle-console.prg"

@@ -200,6 +200,7 @@ megabasic_enable:
 		;; $031C = close logical file
 		;; $031E = open channel for input
 		;; $0320 = open channel for output
+		;; $0322 = close input and output channels
 		;; $0324 = input character from channel
 		;; $0326 = output character to channel ($FFD2)
 		;; $032A = get charater from input device (similar to $0324)
@@ -249,7 +250,8 @@ megabasic_disable:
 
 megabasic_chrout_vector:
 		PHA
-		LDA	$99
+		LDA	$9A
+		STA	$0400
 		CMP	#$02
 		lbne	$F1CB
 		;; RS232 output
@@ -258,7 +260,9 @@ megabasic_chrout_vector:
 		JSR	enable_viciv
 		PLA
 		;; Check which UART
+		inc	$042a
 		LDX	$B6
+		STX	$0429
 		CPX	#$01	; UART1?
 		BNE	@uart2
 		STA	$D0E0
@@ -272,6 +276,7 @@ megabasic_chrout_vector:
 		
 megabasic_chrin_vector:
 		LDA	$99
+		STA	$0401
 		CMP	#$02
 		lbne	$F157
 		;; RS232 input
@@ -295,6 +300,7 @@ read_from_buffereduart:
 
 megabasic_getchar_vector:	
 		LDA	$99
+		STA	$0402
 		CMP	#$02
 		lbne	$F13E
 		;; RS232 input
@@ -310,10 +316,11 @@ megabasic_openin_vector:
 		lbne	$f701	; file not found
 		jsr	$f31f	; Get file details from table
 		LDA	$BA	; Get device # of the file
+		STA	$0403
 		CMP	#$02	; Is it RS232?
 		lbne	$f219	; not RS232, so return to KERNAL routine
 
-		;; Is RS232, so all we need to do is save input device #
+		;; Is RS232, so all we need to do is save input device #	
 		STA	$99
 		;; XXX - Do we need to put the secondary device (from $B9)
 		;; anywhere?  Probably do... $AB = RS232 byte input buffer in
@@ -333,11 +340,12 @@ megabasic_openout_vector:
 		lbne	$f701	; file not found
 		jsr	$f31f	; Get file details from table
 		LDA	$BA	; Get device # of the file
+		STA	$0404
 		CMP	#$02	; Is it RS232?
 		lbne	$f25b	; not RS232, so return to KERNAL routine
 
 		;; Is RS232, so all we need to do is save input device #
-		STA	$99
+		STA	$9A
 		;; XXX - Do we need to put the secondary device (from $B9)
 		;; anywhere?  Probably do. $B6 normally holds RS232 output
 		;; byte buffer, so we can re-use that
@@ -358,6 +366,7 @@ megabasic_close_vector:
 		TXA
 		PHA
 		LDA	$BA
+		STA	$0405
 		CMP	#$02
 		lbne	$F29D	; if not RS232, then jump back into KERNAL close routine
 		;; Ok, so it was RS232.  Jump to KERNAL routine to delete the logical file entry
@@ -367,9 +376,10 @@ megabasic_close_vector:
 megabasic_open_vector:
 		;; Check if device is RS232
 		LDA	$BA
+		STA	$0406
 		CMP	#$02
 		BNE	@notRS232
-
+		
 		;; Device is RS232
 		;; C64 BASIC normally allows setting serial parameters via filename.
 		;; For now, we just hardcode these to match the expected use case.
@@ -384,6 +394,7 @@ megabasic_open_vector:
 		;; 1 = buffered UART 0
 		;; 2 = buffered UART 2 (there is no buffered UART 1)
 		LDA	$B9
+		STA	$0428		
 		CMP	#$01
 		beq	@secondaryOK
 		CMP	#$02
@@ -415,17 +426,19 @@ megabasic_open_vector:
 
 		;; Finally, set the baud rate of the UARTs to the correct values
 		;; Set registers to 50000000/baud
+		;; 50000000/2000000=25=$19
 		;; Buffered UART0 = 2000000bps
 		JSR	enable_viciv
 		LDA	#<$0019
-		STA	$D0E6
-		LDA	#>$0019
-		STA	$D0E7
-		;; Buffered UART2 = 115200bps
-		LDA	#<$01B2
 		STA	$D0EE
-		LDA	#>$01B2
+		LDA	#>$0019
 		STA	$D0EF
+		;; Buffered UART2 = 115200bps
+		;; 50000000/115200=434=$1B2
+		LDA	#<$01B2
+		STA	$D0E6
+		LDA	#>$01B2
+		STA	$D0E7
 		
 		;; return with success
 		jmp	$F3D3

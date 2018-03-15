@@ -3,6 +3,7 @@
 
 COPT=	-Wall -g -std=c99
 CC=	gcc
+OPHIS=	../Ophis/bin/ophis -4
 
 CA65=  ca65 --cpu 4510
 LD65=  ld65 -t none
@@ -10,6 +11,18 @@ LD65=  ld65 -t none
 ASSETS=		assets
 SRCDIR=		src
 BINDIR=		bin
+
+VEHICLE_ASSETS=	$(ASSETS)/0.png \
+		$(ASSETS)/1.png \
+		$(ASSETS)/2.png \
+		$(ASSETS)/3.png \
+		$(ASSETS)/4.png \
+		$(ASSETS)/5.png \
+		$(ASSETS)/6.png \
+		$(ASSETS)/7.png \
+		$(ASSETS)/8.png \
+		$(ASSETS)/9.png \
+		$(ASSETS)/vehicle_console_cluster.svg.png
 
 BINARIES=	$(BINDIR)/megabasic64.prg \
 		$(BINDIR)/megabanner.tiles
@@ -30,9 +43,15 @@ tools:	$(TOOLS)
 $(BINDIR)/megabanner.tiles:	$(TOOLDIR)/pngtoscreens $(ASSETS)/mega65_320x64.png
 	$(TOOLDIR)/pngtoscreens $(BINDIR)/megabanner.tiles c64palette $(ASSETS)/mega65_320x64.png
 
+$(BINDIR)/vehicle_console.tiles:	$(TOOLDIR)/pngtoscreens $(VEHICLE_ASSETS)
+	$(TOOLDIR)/pngtoscreens $(BINDIR)/vehicle_console.tiles c64palette $(VEHICLE_ASSETS)
+
 $(BINDIR)/megabasic64.prg:       $(MEGABASICOBJS) $(BINDIR)/megabanner.tiles
 	mkdir -p $(BINDIR)
 	$(LD65) $< --mapfile $*.map -o $(BINDIR)/megabasic64.prg
+
+$(BINDIR)/vehicle-console.prg:	src/vehicle-console.a65 $(BINDIR)/vehicle_console.tiles
+	$(OPHIS) src/vehicle-console.a65
 
 $(TOOLDIR)/pngtoscreens:	$(TOOLDIR)/pngtoscreens.c Makefile
 	$(CC) $(COPT) -I/usr/local/include -L/usr/local/lib -o $(TOOLDIR)/pngtoscreens $(TOOLDIR)/pngtoscreens.c -lpng
