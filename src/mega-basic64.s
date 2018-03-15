@@ -169,7 +169,7 @@ c000block:
 		;; $C000 - Initialise MEGA BASIC
 		jmp	megabasic_enable
 		;; $C003 - Clear a canvas
-		jmp	canvas_clear_region
+		jmp	canvas_clear_region_simple
 		;; $C006 - Stamp a canvas
 		jmp	megabasic_stamp_canvas
 		;;  $C009 - Select canvas specified in A as primary
@@ -183,6 +183,18 @@ c000block:
 		;; $C015 - Restore ZP values
 		JMP	zp_scratch_restore
 
+canvas_clear_region_simple:
+		;; Get pointers to start of screen and colour RAM areas for the canvas
+		lda	source_canvas
+		jsr	canvas_prepare_pointers
+		;; Adjust them for the region we need to clear
+		jsr	canvas_adjust_source_pointers_for_from_xy_to_xy
+
+		;; Do actual clearing
+		jsr	canvas_clear_region
+
+		RTS
+		
 canvas_set_source:
 		;;  Find canvas and set active region to match dimensions
 		STA	source_canvas
