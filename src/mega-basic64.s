@@ -2667,6 +2667,8 @@ raster_irq:
 		TSB	$D054
 		TSB	$D031	
 
+		jsr	update_viciv_registers
+		
 		;; Clear raster IRQ
 		INC	$D019
 
@@ -2684,7 +2686,6 @@ raster_irq:
 		jsr 	merge_basic_screen_to_display_canvas
 
 @dontDrawCanvas0:
-		jsr	update_viciv_registers
 
 		;; XXX $D06B - sprite 16 colour enables
 		;; XXX $D06C-E - sprite pointer address
@@ -2695,6 +2696,8 @@ raster_irq:
 		ORA	d054_bits		
 		STA	$D054
 
+		jsr	update_viciv_registers
+		
 		;; Chain to normal IRQ routine
 		;; XXX - We should do this first, so that changing case with SHIFT-C=
 		;; happens first, so that when it messes up the VIC-IV registers via touching
@@ -2705,7 +2708,7 @@ raster_irq:
 		JMP	$EA31
 
 canvas0copylist:	
-		;; Copy CANVAS 0 screen RAM from $E000 to $A000 for combining with BASIC scree
+		;; Copy CANVAS 0 screen RAM from $E000 to $A000 for combining with BASIC screen
 		.byte $0A,$00 	; F011A list follows		
 		;; Normal F011A list
 		.byte $04 ; fill + chained
