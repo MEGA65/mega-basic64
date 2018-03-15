@@ -152,8 +152,9 @@ c000blockdmalist:
 		.word $0000 ; modulo (unused)		
 
 
-preloaded_tiles:	
-		.incbin "bin/megabanner.tiles"
+preloaded_tiles:
+		;; 		.incbin "bin/megabanner.tiles" 
+		.incbin "bin/vehicle_console.tiles" 
 preloaded_tiles_end:	
 		preloaded_tiles_length = preloaded_tiles_end - preloaded_tiles
 		
@@ -163,6 +164,48 @@ preloaded_tiles_end:
 c000block:	
 		.org $C000
 
+		;; Jump-table of functions
+
+		;; $C000 - Initialise MEGA BASIC
+		jmp	megabasic_enable
+		;; $C003 - Clear a canvas
+		jmp	canvas_clear_region
+		;; $C006 - Stamp a canvas
+		jmp	megabasic_stamp_canvas
+		;;  $C009 - Select canvas specified in A as primary
+		jmp	canvas_set_source
+		;; $C00C - Setup source canvas region
+		JMP	canvas_setup_region
+		;; $C00F - Setup target canvas and position
+		jmp	canvas_setup_target
+		;; $C012 - Stash ZP values
+		JMP	zp_scratch_stash
+		;; $C015 - Restore ZP values
+		JMP	zp_scratch_restore
+
+canvas_set_source:
+		;;  Find canvas and set active region to match dimensions
+		STA	source_canvas
+		JSR 	canvas_prepare_pointers
+		LDA	$07
+		STA	source_canvas_x2
+		LDA	$08
+		STA	source_canvas_y2
+		RTS
+
+canvas_setup_region:
+		STX	source_canvas_x1
+		STY	source_canvas_y1
+		STA	source_canvas_x2
+		STZ	source_canvas_y2
+		RTS
+		
+canvas_setup_target:
+		STA	target_canvas
+		STX	target_canvas_x
+		STY	target_canvas_y
+		RTS
+		
 megabasic_enable:
 
 		;;  Copy C64 tokens to start of our token list
@@ -1663,7 +1706,7 @@ parse_at_xy:
 		RTS
 		
 megabasic_stamp_canvas:
-		
+
 		;; CANVAS stamping (copying)
 		;; We copy from source_canvas to target_canvas.
 		;; Copy is of source_canvas_{x1,y1} to _{x2,y2}, inclusive,
@@ -1715,7 +1758,7 @@ megabasic_stamp_canvas:
 		LDA	$0A
 		STA	source_canvas_y2
 @notTooHigh:
-		
+
 		;; If nothing to do, skip the hard work
 		LDA	source_canvas_x2
 		BEQ	@copiedLastLine
@@ -1771,7 +1814,7 @@ megabasic_stamp_canvas:
 		LDA	($14), Z
 		NOP
 		NOP
-		STA	($1C), Z
+ 		STA	($1C), Z 
 		INZ
 		DEY
 		BPL	@copyByteLoop
@@ -1851,19 +1894,26 @@ canvas_prepare_pointers:
 		LDX	#$03
 		LDY	#$14
 		jsr	copy_32bit_pointer
+
 		LDZ	#21
 		LDA	$14
 		CLC
+		NOP
+		NOP
 		ADC	($03),Z
 		STA	$14
 		INZ
 		LDA	$15
 		CLC
+		NOP
+		NOP
 		ADC	($03),Z
 		STA	$15
 		INZ
 		LDA	$16
 		CLC
+		NOP
+		NOP
 		ADC	($03),Z
 		STA	$16
 @gotTargetPointers:
@@ -2333,10 +2383,23 @@ tileset_install_section:
 		AND	#$1F
 		CMP	#$00
 		bne	@doPatchTile
+@tileVacant:
 		INZ
 		INZ
 		jmp	@donePatchingTile
 @doPatchTile:
+
+		;;  But don't patch if the tile is $FFFF, which means not used.
+		NOP
+		NOP
+		LDA	($03),Z
+		INZ
+		NOP
+		NOP
+		AND	($03),Z
+		DEZ
+		CMP	#$FF 	; true if tile is $FFFF = unused
+		beq	@tileVacant
 		
 		NOP
 		NOP
@@ -2730,7 +2793,7 @@ merge_basic_screen_to_display_canvas:
 		LDA	#$00
 		NOP
 		NOP
-		STA	($03),Z	
+		STA	($03),Z
 		;; Colour goes in 2nd byte
 		INZ
 		LDA	($09), Y
