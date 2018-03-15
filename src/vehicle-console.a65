@@ -298,15 +298,28 @@ update_display:
 	JSR    $C012
 
 	; Clear screen
+	; (actually just the part with the speedometer bar. We do it
+	; in two pieces, so that we don't erase the speed digits)
 	LDA    #$00
 	JSR    $C009 ; Select canvas 0
 	LDX    #0
 	LDY    #0
 	LDA    #40
-	LDZ    #7  ; goes down far enough to erase speed digits also
+	LDZ    #5
 	JSR    $C00C ; select region
 	
 	JSR    $C003 ; and clear it
+
+	LDA    #$00
+	JSR    $C009 ; Select canvas 0
+	LDX    #0
+	LDY    #5
+	LDA    #8
+	LDZ    #9
+	JSR    $C00C ; select region
+	
+	JSR    $C003 ; and clear it
+
 
 	; Select speedo bar canvas as source
 	LDA    #$01
