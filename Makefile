@@ -12,7 +12,9 @@ ASSETS=		assets
 SRCDIR=		src
 BINDIR=		bin
 
-VEHICLE_ASSETS=	$(ASSETS)/0.png \
+VEHICLE_ASSETS=	\
+		$(ASSETS)/vehicle_console_cluster.svg.png \
+		$(ASSETS)/0.png \
 		$(ASSETS)/1.png \
 		$(ASSETS)/2.png \
 		$(ASSETS)/3.png \
@@ -22,10 +24,10 @@ VEHICLE_ASSETS=	$(ASSETS)/0.png \
 		$(ASSETS)/7.png \
 		$(ASSETS)/8.png \
 		$(ASSETS)/9.png \
-		$(ASSETS)/vehicle_console_cluster.svg.png
 
 BINARIES=	$(BINDIR)/megabasic64.prg \
-		$(BINDIR)/megabanner.tiles
+		$(BINDIR)/megabanner.tiles \
+		$(BINDIR)/vehicle_console.tiles
 
 MEGABASICOBJS=	$(SRCDIR)/mega-basic64.o
 
@@ -37,7 +39,7 @@ all:	$(TOOLS) $(BINDIR)/MEGABAS.D81
 # c-programs
 tools:	$(TOOLS)
 
-%.o:	%.s	$(BINDIR)/megabanner.tiles
+%.o:	%.s	$(BINDIR)/megabanner.tiles	$(BINDIR)/vehicle_console.tiles
 	$(CA65) $< -l $*.list
 
 $(BINDIR)/megabanner.tiles:	$(TOOLDIR)/pngtoscreens $(ASSETS)/mega65_320x64.png
