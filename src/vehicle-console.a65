@@ -294,8 +294,6 @@ update_display:
 	cmp    vehicle_last_normalised_speed
 	beq    @dontRedrawSpeedometer
 
-	inc $0400
-
 	; Save ZP before doing canvas work
 	JSR    $C012
 
@@ -356,6 +354,7 @@ update_display:
 	BEQ	@u3
 	STA	 vehicle_speed_string,Y
 	INY
+	cpy #4
 	BNE @u2
 @u3:
 	; Begin digits at column 15	
@@ -379,6 +378,7 @@ update_display:
 	ADC	#$02
 	cmp	#9
 	bcs	@illegalDigit
+
 	; Set as source
 	JSR   $C009
 	; Select screen position for destination
