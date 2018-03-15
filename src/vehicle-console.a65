@@ -290,6 +290,12 @@ update_display:
 
 	; Draw speedometer graphics
 
+	lda    vehicle_speed_normalised
+	cmp    vehicle_last_normalised_speed
+	beq    @dontRedrawSpeedometer
+
+	inc $0400
+
 	; Save ZP before doing canvas work
 	JSR    $C012
 
@@ -330,12 +336,7 @@ update_display:
 	; And stamp it
 	JSR	$C006
 
-	; Restore ZP before doing canvas work
-	JSR    $C015
-
-	LDZ #$00
-
-	CLI
+@dontRedrawSpeedometer:
 
 	; Convert speed in km/h to string
 	LDA	  vehicle_speed+0
@@ -376,6 +377,8 @@ update_display:
 	and 	#$0f
 	CLC
 	ADC	#$02
+	cmp	#9
+	bcs	@illegalDigit
 	; Set as source
 	JSR   $C009
 	; Select screen position for destination
@@ -392,7 +395,7 @@ update_display:
 	JSR    $C00C ; select region
 	; Stamp it
 	JSR	$C006
-
+@illegalDigit:
 	; Shuffle down speed digits
 	lda vehicle_speed_string+1
 	sta vehicle_speed_string+0
@@ -415,7 +418,18 @@ update_display:
 	PLA
 	PLA
 
-	RTS
+	; Remember last speed, so we can optimise drawing of speedometer bar
+	lda vehicle_speed_normalised
+	sta vehicle_last_normalised_speed
+
+	; Restore ZP before doing canvas work
+	JSR    $C015
+
+	LDZ #$00
+
+	CLI
+
+	rts
 
 vehicle_speed_string:	.byte "000"
 
@@ -425,6 +439,8 @@ vehicle_speed_string:	.byte "000"
 vehicle_speed:	.word	0
 
 vehicle_speed_normalised: .byte 0
+
+vehicle_last_normalised_speed:	  .byte 0
 
 ; Motor speed in RPM
 motor_speed:	.word 0
