@@ -123,9 +123,9 @@ ethernet_packet_received:
 	sta $d6e1
 
 	; show number of received packets
-	neg
-	neg
-	inc	$0400
+;	neg
+;	neg
+;	inc	$0400
 
 	; Packet body is at $6802 onwards
 
@@ -327,7 +327,7 @@ update_display:
 	LDX    #0
 	LDY    #0
 	LDA    #40
-	LDZ    #5
+	LDZ    #5+10
 	JSR    $C00C ; select region
 	
 	JSR    $C003 ; and clear it
@@ -409,10 +409,10 @@ update_display:
 	; Get canvas # for digit
 	lda	vehicle_speed_string
 	and 	#$0f
+	cmp	#10
+	bcs	@illegalDigit
 	CLC
 	ADC	#$02
-	cmp	#9
-	bcs	@illegalDigit
 
 	; Set as source
 	JSR   $C009
@@ -465,6 +465,9 @@ update_display:
 	rts
 
 irq_handler:
+
+	PHZ
+
 	LDA	$D6E1
 	AND	#$20
 	beq	@noEthRx
@@ -476,17 +479,15 @@ irq_handler:
 	ora #$81
 	sta $d6e1
 
-	inc $0428
 	jsr	ethernet_packet_received
-	inc $0429
-	
+
+	PLZ
 	JMP	(irq_routine_saved)
 @noEthRx:
 	; Update display once per frame
-	inc $d020
 	jsr update_display
-	dec $d020
 
+	PLZ
 	JMP	(irq_routine_saved)
 
 
