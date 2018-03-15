@@ -246,12 +246,13 @@ struct screen *png_to_screen(int id,struct tile_set *ts)
 	    }
 	}
 	if (transparent_tile) {
+	  //	  printf("Tile [%d,%d] is transparent (x*2+0 = %d)\n",x/8,y/8,x*2+1);
 	  // Set screen and colour bytes to all $FF to indicate
 	  // non-set block.
-	  s->screen_rows[y/8][x*2+0]=0xFF;
-	  s->screen_rows[y/8][x*2+1]=0xFF;
-	  s->colourram_rows[y/8][x*2+0]=0xFF;
-	  s->colourram_rows[y/8][x*2+1]=0xFF;
+	  s->screen_rows[y/8][x/8*2+0]=0xFF;
+	  s->screen_rows[y/8][x/8*2+1]=0xFF;
+	  s->colourram_rows[y/8][x/8*2+0]=0xFF;
+	  s->colourram_rows[y/8][x/8*2+1]=0xFF;
 	} else {
 	  // Block has non-transparent pixels, so add to tileset,
 	  // or lookup to see if it is already there.
