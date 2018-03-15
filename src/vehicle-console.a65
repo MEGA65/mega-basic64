@@ -82,7 +82,6 @@ programentrypoint:
 @w1e:	LDA    $D012
 	BMI    @w1e
 
-	inc $0400
 	lda	vehicle_speed_normalised
 	CLC
 	ADC	#$04
@@ -98,8 +97,6 @@ programentrypoint:
 	BPL    @w1c
 @w1d:	LDA    $D012
 	BMI    @w1d
-
-	inc $0401
 
 	LDA    vehicle_speed_normalised
 	SEC
