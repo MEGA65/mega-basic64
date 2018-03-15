@@ -1908,6 +1908,7 @@ canvas_prepare_pointers:
 		jsr	copy_32bit_pointer
 
 		LDZ	#21
+
 		LDA	$14
 		CLC
 		NOP
@@ -1916,14 +1917,12 @@ canvas_prepare_pointers:
 		STA	$14
 		INZ
 		LDA	$15
-		CLC
 		NOP
 		NOP
 		ADC	($03),Z
 		STA	$15
 		INZ
 		LDA	$16
-		CLC
 		NOP
 		NOP
 		ADC	($03),Z
