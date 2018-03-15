@@ -67,13 +67,54 @@ programentrypoint:
 	STA    $0315
 	CLI
 
+	; At this point, everything is working, but we are ignoring the ethernet interface.
+	; This is the time to provide the full-range test for the display.
+	LDA    #$00
+	STA    vehicle_speed+0
+	STA    vehicle_speed+1
+	STA    vehicle_speed_normalised
+
+@rangeUp:
+
+	; Wait a frame
+@w1:	LDA    $D012
+	BPL    @w1
+@w1e:	LDA    $D012
+	BMI    @w1e
+
+	inc $0400
+	lda	vehicle_speed_normalised
+	CLC
+	ADC	#$04
+	STA    vehicle_speed_normalised
+	CMP    #160
+	
+	bne    @rangeUp
+
+@rangeDown:
+
+	; Wait a frame
+@w1c:	LDA    $D012
+	BPL    @w1c
+@w1d:	LDA    $D012
+	BMI    @w1d
+
+	inc $0401
+
+	LDA    vehicle_speed_normalised
+	SEC
+	SBC	#$04
+	STA    vehicle_speed_normalised
+	bne    @rangeDown
+
+
 	; Enable ethernet RX IRQ
 	lda $d6e1
 	lsr
 	and #$02
 	ora #$81
 	sta $d6e1
-
+	
 mainloop:
 	jmp	mainloop
 
@@ -208,6 +249,21 @@ can_msg_04_03:
 	LDA	$64
 	STA	vehicle_speed+1
 
+	; Normalise speed reading before drawing speedometer
+	ldy vehicle_speed+1
+	bne @tooFast
+	ldy vehicle_speed+0
+	cpy #159
+	bcc @notTooFast
+@tooFast:
+
+	LDY	#160 ; max speed our display can show
+@notTooFast:
+
+	; Deduct 1km/h to get edges of bar to line up correctly
+	DEY
+	STY	vehicle_speed_normalised
+
 	; Get motor speed (presumably in RPM as IEEE float)
 	LDX	#$46
 	JSR	ieee_float_to_fac
@@ -294,21 +350,6 @@ ieee_float_to_fac:
 	RTS
 
 update_display:
-
-	; Normalise speed reading before drawing speedometer
-	ldy vehicle_speed+1
-	bne @tooFast
-	ldy vehicle_speed+0
-	cpy #159
-	bcc @notTooFast
-@tooFast:
-
-	LDY	#160 ; max speed our display can show
-@notTooFast:
-
-	; Deduct 1km/h to get edges of bar to line up correctly
-	DEY
-	STY	vehicle_speed_normalised
 
 	; Draw speedometer graphics
 
