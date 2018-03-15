@@ -262,8 +262,8 @@ struct screen *png_to_screen(int id,struct tile_set *ts)
 	  // Then store it
 	  s->screen_rows[y/8][x/8*2+0]=tile_number&0xff;
 	  s->screen_rows[y/8][x/8*2+1]=(tile_number>>8)&0xff;
-	  s->colourram_rows[y/8][x/8*2+0]=0x00;
-	  s->colourram_rows[y/8][x/8*2+1]=0xff; // FG colour
+	  s->colourram_rows[y/8][x/8*2+0]=0x00; // Extended attributes
+	  s->colourram_rows[y/8][x/8*2+1]=0; // =0xff; // FG colour (only works if extended fg mode enabled?)
 	}
       }
   return s;
@@ -504,6 +504,14 @@ int main(int argc, char **argv)
       header[25]=(slab_size>>0)&0xff;
       header[26]=(slab_size>>8)&0xff;
       unsigned int colourram_rows_offset=screenram_rows_offset + slab_size;
+      // Screen RAM follows immediately from header block
+      header[18]=(64>>0)&0xff;
+      header[19]=(64>>8)&0xff;
+      header[20]=(64>>16)&0xff;
+      // Colour RAM follows screen RAM
+      header[21]=(colourram_rows_offset>>0)&0xff;
+      header[22]=(colourram_rows_offset>>8)&0xff;
+      header[23]=(colourram_rows_offset>>16)&0xff;
       unsigned int size = colourram_rows_offset + slab_size;
       header[61]=(size>>0)&0xff;
       header[62]=(size>>8)&0xff;
