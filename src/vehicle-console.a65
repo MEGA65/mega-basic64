@@ -55,7 +55,29 @@ programentrypoint:
 	LDY	#>float_three_point_six
 	JSR	$BBD4   ; copy FAC to memory at $YYXX	
 
+	; Save IRQ routine, and wedge ourselves in
+	SEI
+	LDA    $0314
+	STA    irq_routine_saved+0
+	LDA    $0315
+	STA    irq_routine_saved+1
+	LDA    #<irq_handler
+	STA    $0314
+	LDA    #>irq_handler
+	STA    $0315
+	CLI
 
+	; Enable ethernet RX IRQ
+	lda $d6e1
+	lsr
+	and #$02
+	ora #$81
+	sta $d6e1
+
+mainloop:
+	jmp	mainloop
+
+ethernet_packet_received:
 	; Map ethernet registers at $6000 - $7FFF
 
 	; Ethernet controller really lives $FFDE000 - $FFDEFFF, so select $FF megabyte section for MAP LO
@@ -86,10 +108,8 @@ programentrypoint:
 	lda $d6e1
 	lsr
 	and #$02
-	ora #$01
+	ora #$81
 	sta $d6e1
-
-packetloop:
 
 	; We toggle the eth RX buffers here, as if we do it too early,
 	; it seems to cause trouble sometimes.
@@ -99,20 +119,13 @@ packetloop:
 	lda $d6e1
 	and #$04
 	lsr
-	ora #$01
+	ora #$81
 	sta $d6e1
 
-packetloop2:
-	lda $d6e1
-	and #$20
-	beq packetloop2
-
-gotPacket:
-
 	; show number of received packets
-;	neg
-;	neg
-;	inc	$0400
+	neg
+	neg
+	inc	$0400
 
 	; Packet body is at $6802 onwards
 
@@ -144,7 +157,25 @@ gotPacket:
 	CPX   #$04
 	beq   can_id_byte0_is_04
 
-	jmp   packetloop
+packetloop:
+
+	; Restore memory map to normal
+	lda #$00
+	ldx #$0f
+	ldy #$00
+	ldz #$00
+	map
+	eom
+	lda #$00
+	ldx #$00
+	ldy #$00
+	ldz #$00
+	map
+	eom
+
+	; ... and return
+	rts
+
 
 	; The CAN message types we care about for now are:
 	; $xx.$03 = Vehicle velocity in m/sec (32-bits of message format type 4, starting byte 4)
@@ -188,8 +219,6 @@ can_msg_04_03:
 	STA	motor_speed+0
 	LDA	$64
 	STA	motor_speed+1	
-
-	jsr update_display
 
 	jmp packetloop
 
@@ -266,11 +295,6 @@ ieee_float_to_fac:
 
 update_display:
 
-	LDA	#$F0
-@rasterWait:
-	CMP	$D012
-	BNE	@rasterWait
-
 	; Normalise speed reading before drawing speedometer
 	ldy vehicle_speed+1
 	bne @tooFast
@@ -285,8 +309,6 @@ update_display:
 	; Deduct 1km/h to get edges of bar to line up correctly
 	DEY
 	STY	vehicle_speed_normalised
-
-	SEI
 
 	; Draw speedometer graphics
 
@@ -440,9 +462,33 @@ update_display:
 
 	LDZ #$00
 
-	CLI
-
 	rts
+
+irq_handler:
+	LDA	$D6E1
+	AND	#$20
+	beq	@noEthRx
+
+	; Acknowledge ethernet interrupt by writing to $D6E1
+	lda $d6e1
+	lsr
+	and #$02
+	ora #$81
+	sta $d6e1
+
+	inc $0428
+	jsr	ethernet_packet_received
+	inc $0429
+	
+	JMP	(irq_routine_saved)
+@noEthRx:
+	; Update display once per frame
+	inc $d020
+	jsr update_display
+	dec $d020
+
+	JMP	(irq_routine_saved)
+
 
 vehicle_speed_string:	.byte "000"
 
@@ -481,7 +527,9 @@ speed_labels:
 	.byte " ",66
 	; then no more ticks to end
 	.byte "         160",103
-	
+
+irq_routine_saved:  .word	$EA31
+
 	.scend
 
 	.outfile "bin/vehicle-console.prg"
