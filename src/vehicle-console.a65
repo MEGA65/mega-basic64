@@ -285,7 +285,6 @@ update_display:
 	; Deduct 1km/h to get edges of bar to line up correctly
 	DEY
 	STY	vehicle_speed_normalised
-	sty	$0402
 
 	SEI
 
@@ -297,6 +296,12 @@ update_display:
 	; Clear screen
 	LDA    #$00
 	JSR    $C009 ; Select canvas 0
+	LDX    #0
+	LDY    #0
+	LDA    #40
+	LDZ    #9
+	JSR    $C00C ; select region
+	
 	JSR    $C003 ; and clear it
 
 	; Select speedo bar canvas as source
@@ -315,10 +320,8 @@ update_display:
 	; X2,Y2 from A,Z
 	; 1x column per 4km/h gives a range of 0 - 159km/h
 	LDA    vehicle_speed_normalised
-	STA    $0400
 	LSR
 	LSR
-	STA	$0401
 	LDZ	#9
 	JSR	$C00C ; select source canvas region
 
