@@ -410,8 +410,8 @@ update_display:
 @dontRedrawSpeedometer:
 
 	; Convert speed in km/h to string
-	LDA	  vehicle_speed+0
-	LDX	  vehicle_speed+1
+	LDA	  vehicle_speed_normalised
+	LDX	  #$00
 	STA 	  $63
 	STX 	  $62
 	LDX 	  #$90
