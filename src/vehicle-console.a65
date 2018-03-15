@@ -299,7 +299,7 @@ update_display:
 	LDX    #0
 	LDY    #0
 	LDA    #40
-	LDZ    #9
+	LDZ    #7  ; goes down far enough to erase speed digits also
 	JSR    $C00C ; select region
 	
 	JSR    $C003 ; and clear it
@@ -322,7 +322,7 @@ update_display:
 	LDA    vehicle_speed_normalised
 	LSR
 	LSR
-	LDZ	#9
+	LDZ	#7
 	JSR	$C00C ; select source canvas region
 
 	LDZ	#$00
@@ -353,12 +353,72 @@ update_display:
 @u2:	LDA	 ($FD),Y
 	CMP	#$00
 	BEQ	@u3
-	STA	 $0400+18,Y
+	STA	 vehicle_speed_string,Y
 	INY
 	BNE @u2
 @u3:
+	; Begin digits at column 15	
+	ldx	#15
+	; plus 5 for each digit short of three, so that speed is right justified
+	cpy    #3
+	beq    @gotSpeedXPos
+	ldx    #20
+	cpy    #2
+	beq    @gotSpeedXpos
+	ldx    #25
+@gotSpeedXpos:
+	; Digits are in canvas 2 + digit
+	phy
+	phx
+@drawDigitLoop:
+	; Get canvas # for digit
+	lda	vehicle_speed_string
+	and 	#$0f
+	CLC
+	ADC	#$02
+	; Set as source
+	JSR   $C009
+	; Select screen position for destination
+	LDA	 #0
+	PLX
+	PHX
+	LDY	#5
+	JSR	$C00F
+	; select source region
+	LDX    #0
+	LDY    #0
+	LDA    #5
+	LDZ    #8 
+	JSR    $C00C ; select region
+	; Stamp it
+	JSR	$C006
+
+	; Shuffle down speed digits
+	lda vehicle_speed_string+1
+	sta vehicle_speed_string+0
+	lda vehicle_speed_string+2
+	sta vehicle_speed_string+1
+
+	; Decrement number of digits left to draw, and work out
+	; if we still have work to do.
+	PLA
+	CLC
+	ADC	#5
+	TAX
+	PLY
+	DEY
+	PHY
+	PHX
+	CPY	#$00
+	BNE	@drawDigitLoop
+
+	PLA
+	PLA
 
 	RTS
+
+vehicle_speed_string:	.byte "000"
+
 
 
 ; Vehicle speed in km/hour
