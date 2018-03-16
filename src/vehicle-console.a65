@@ -105,6 +105,12 @@ programentrypoint:
 	bne    @rangeDown
 
 
+	; Reset ethernet controller
+	LDA	#$00
+	STA	$D6E1
+	LDA	#$01
+	STA	$D6E1
+
 	; Enable ethernet RX IRQ
 	lda $d6e1
 	lsr
@@ -192,7 +198,10 @@ ethernet_packet_received:
 	LDX   $683E
 	LDY   $683F
 
+	; FAST vehicles use $03 or $04 as the first ID byte -- so accept both
 	CPX   #$04
+	beq   can_id_byte0_is_04
+	CPX   #$03
 	beq   can_id_byte0_is_04
 
 packetloop:
