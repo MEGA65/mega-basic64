@@ -258,8 +258,10 @@ can_msg_04_03:
 @notTooFast:
 
 	; Deduct 1km/h to get edges of bar to line up correctly
+	CPY	 #$00
+	BEQ	 @noDec
 	DEY
-	STY	vehicle_speed_normalised
+@noDec:	STY	vehicle_speed_normalised
 
 	; Get motor speed (presumably in RPM as IEEE float)
 	LDX	#$46
@@ -304,43 +306,31 @@ ieee_float_to_fac:
 	LDA	$6803, X
 	ROL
 	CLC
-	ADC	#$80
-
-	; Renormalise from IEEE exponent ?
-	CLC
-	ADC	#32
+	ADC	#$02
 	STA	$61
 
 	; Copy mantissa
 	LDA    #$00
-	STA    $62
-
-	LDA    $6802, X
-	STA    $63
-
-	LDA    $6801, X
-	STA    $64
-
-	LDA    $6800, X
 	STA    $65
 
-@shiftTest:
-	; Shift left until upper bit of mantissa is a one
-	LDA	$62
-	BMI	@doneShifting
+	LDA    $6802, X
+	ORA    #$80
+	STA    $62
+	
+	LDA    $6801, X
+	STA    $63
+	
+	LDA    $6800, X
+	STA    $64
 
-	; Shift 32 bit mantissa left
-	ASL $65
-	ROL $64
-	ROL $63
-	ROL $62
+;	JSR    $BDDD
+;	LDX    #$1f
+;@col:	LDA    $100, X
+;	STA    $0428, X
+;	DEX
+;	BPL	@col
 
-	; Decrement exponent by one
-	dec $61
-	bne @shiftTest
-
-@doneShifting:
-
+	; Clear remainder storage
 	LDA #$00
 	STA $70
 
