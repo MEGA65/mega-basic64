@@ -231,7 +231,10 @@ int main(int argc, char **argv)
       palette_lookup(ts,0xb8,0xb8,0xb8); // light grey 15
     }
     else {
-      process_png(ts,argv[i]);
+      if (!strstr(argv[i],":"))
+	process_png(ts,argv[i]);
+      else
+	process_ttf(ts,argv[i]);
     }
   }
 
