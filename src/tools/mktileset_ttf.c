@@ -58,13 +58,25 @@ void process_ttf(struct tile_set *ts,char *font_spec)
 
   char *hex=strtok(point_spec,",");
   while(hex) {
+    unsigned int lo,hi;
     unsigned int code_point = strtoll(hex,NULL,16);
-    //    printf("Code point #%d is 0x%x from \"%s\"\n",glyph_count,code_point,hex);
-    if (glyph_count<256) {
-      unicode_points[glyph_count++]=code_point;
+    if (sscanf(hex,"%x-%x",&lo,&hi)==2) {
+      for(unsigned int code_point=lo;code_point<=hi;code_point++) {
+	if (glyph_count<256) {
+	  unicode_points[glyph_count++]=code_point;
+	} else {
+	  fprintf(stderr,"Too many code points in font definition. Limit is 255.\n");
+	  exit(-3);
+	}
+      }
     } else {
-      fprintf(stderr,"Too many code points in font definition. Limit is 255.\n");
-      exit(-3);
+      //    printf("Code point #%d is 0x%x from \"%s\"\n",glyph_count,code_point,hex);
+      if (glyph_count<256) {
+	unicode_points[glyph_count++]=code_point;
+      } else {
+	fprintf(stderr,"Too many code points in font definition. Limit is 255.\n");
+	exit(-3);
+      }
     }
     hex=strtok(NULL,",");
   }
