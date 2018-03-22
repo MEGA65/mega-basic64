@@ -57,5 +57,5 @@ int dump_bytes(int col, char *msg,unsigned char *bytes,int length);
 struct screen *png_to_screen(int id,struct tile_set *ts);
 void read_png_file(char* file_name);
 void process_png(struct tile_set *ts,char *filename);
-
+void process_ttf(struct tile_set *ts,char *font_spec);
 
