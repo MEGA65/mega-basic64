@@ -342,7 +342,7 @@ int main(int argc, char **argv)
       for(y=0;y<screen_list[i]->height;y++) {
 	char msg[80];
 	snprintf(msg,80,"screen_rows[%d]",y);
-	dump_bytes(0,msg,screen_list[i]->screen_rows[y],2*screen_list[i]->width);
+	//	dump_bytes(0,msg,screen_list[i]->screen_rows[y],2*screen_list[i]->width);
 	fwrite(screen_list[i]->screen_rows[y],2*screen_list[i]->width,1,outfile);
       }
       // Write out colour RAM rows

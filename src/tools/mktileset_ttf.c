@@ -31,14 +31,6 @@ void process_ttf(struct tile_set *ts,char *font_spec)
 {
   // Initialise unicode points we want to render.
   int i;
-  int cn=0;
-
-
-  
-  // for(i=0x2200;i<=0x22ff;i++) unicode_points[cn++]=i;
-  printf("Defined %d unicode points\n",cn);
-  glyph_count=cn;
-
 
   FT_Library    library;
   FT_Face       face;
@@ -63,6 +55,21 @@ void process_ttf(struct tile_set *ts,char *font_spec)
     fprintf(stderr,"Could not parse font spec: %s\n",font_spec);
     exit(-3);
   }
+
+  char *hex=strtok(point_spec,",");
+  while(hex) {
+    unsigned int code_point = strtoll(hex,NULL,16);
+    //    printf("Code point #%d is 0x%x from \"%s\"\n",glyph_count,code_point,hex);
+    if (glyph_count<256) {
+      unicode_points[glyph_count++]=code_point;
+    } else {
+      fprintf(stderr,"Too many code points in font definition. Limit is 255.\n");
+      exit(-3);
+    }
+    hex=strtok(NULL,",");
+  }
+
+  printf("Defined %d unicode points\n",glyph_count);
   
 
   error = FT_Init_FreeType( &library );              /* initialize library */
