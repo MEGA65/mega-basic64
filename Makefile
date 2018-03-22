@@ -62,7 +62,7 @@ MKTILESET_SRCS=	$(TOOLDIR)/mktileset.c \
 MKTILESET_HDRS=	$(TOOLDIR)/mktileset.h
 
 $(TOOLDIR)/mktileset:	$(MKTILESET_SRCS) $(MKTILESET_HDRS) Makefile
-	$(CC) $(COPT) -I/usr/local/include -L/usr/local/lib -o $(TOOLDIR)/mktileset $(MKTILESET_SRCS) -lpng -lfreetype
+	$(CC) $(COPT) `pkg-config --cflags freetype2` -I/usr/local/include -L/usr/local/lib -o $(TOOLDIR)/mktileset $(MKTILESET_SRCS) -lpng `pkg-config --libs freetype2`
 
 $(BINDIR)/MEGABAS.D81:	$(BINARIES)
 	rm -f $(BINDIR)/MEGABAS.D81
