@@ -42,11 +42,11 @@ tools:	$(TOOLS)
 %.o:	%.s	$(BINDIR)/megabanner.tiles	$(BINDIR)/vehicle_console.tiles
 	$(CA65) $< -l $*.list
 
-$(BINDIR)/megabanner.tiles:	$(TOOLDIR)/pngtoscreens $(ASSETS)/mega65_320x64.png
-	$(TOOLDIR)/pngtoscreens $(BINDIR)/megabanner.tiles c64palette $(ASSETS)/mega65_320x64.png
+$(BINDIR)/megabanner.tiles:	$(TOOLDIR)/mktileset $(ASSETS)/mega65_320x64.png
+	$(TOOLDIR)/mktileset $(BINDIR)/megabanner.tiles c64palette $(ASSETS)/mega65_320x64.png
 
-$(BINDIR)/vehicle_console.tiles:	$(TOOLDIR)/pngtoscreens $(VEHICLE_ASSETS)
-	$(TOOLDIR)/pngtoscreens $(BINDIR)/vehicle_console.tiles c64palette $(VEHICLE_ASSETS)
+$(BINDIR)/vehicle_console.tiles:	$(TOOLDIR)/mktileset $(VEHICLE_ASSETS)
+	$(TOOLDIR)/mktileset $(BINDIR)/vehicle_console.tiles c64palette $(VEHICLE_ASSETS)
 
 $(BINDIR)/megabasic64.prg:       $(MEGABASICOBJS) $(BINDIR)/megabanner.tiles
 	mkdir -p $(BINDIR)
@@ -55,15 +55,21 @@ $(BINDIR)/megabasic64.prg:       $(MEGABASICOBJS) $(BINDIR)/megabanner.tiles
 $(BINDIR)/vehicle-console.prg:	src/vehicle-console.a65 $(BINDIR)/vehicle_console.tiles
 	$(OPHIS) src/vehicle-console.a65
 
-$(TOOLDIR)/pngtoscreens:	$(TOOLDIR)/pngtoscreens.c Makefile
-	$(CC) $(COPT) -I/usr/local/include -L/usr/local/lib -o $(TOOLDIR)/pngtoscreens $(TOOLDIR)/pngtoscreens.c -lpng
+MKTILESET_SRCS=	$(TOOLDIR)/mktileset.c \
+		$(TOOLDIR)/mktileset_png.c \
+		$(TOOLDIR)/mktileset_ttf.c
+
+MKTILESET_HDRS=	$(TOOLDIR)/mktileset.h
+
+$(TOOLDIR)/mktileset:	$(MKTILESET_SRCS) $(MKTILESET_HDRS) Makefile
+	$(CC) $(COPT) -I/usr/local/include -L/usr/local/lib -o $(TOOLDIR)/mktileset $(MKTILESET_SRCS) -lpng -lfreetype
 
 $(BINDIR)/MEGABAS.D81:	$(BINARIES)
 	rm -f $(BINDIR)/MEGABAS.D81
 	cbmconvert -D8 $(BINDIR)/MEGABAS.D81 $(BINARIES)
 
 clean:
-	rm -f $(TOOLDIR)/pngtoscreens $(BINDIR)/* src/*.o
+	rm -f $(TOOLDIR)/mktileset $(BINDIR)/* src/*.o src/tools/*.o
 
 cleangen:
 
