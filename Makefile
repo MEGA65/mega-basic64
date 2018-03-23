@@ -27,7 +27,8 @@ VEHICLE_ASSETS=	\
 
 BINARIES=	$(BINDIR)/megabasic64.prg \
 		$(BINDIR)/megabanner.tiles \
-		$(BINDIR)/vehicle_console.tiles
+		$(BINDIR)/vehicle_console.tiles \
+		$(BINDIR)/fonttest.tiles
 
 MEGABASICOBJS=	$(SRCDIR)/mega-basic64.o
 
@@ -46,7 +47,10 @@ $(BINDIR)/megabanner.tiles:	$(TOOLDIR)/mktileset $(ASSETS)/mega65_320x64.png
 	$(TOOLDIR)/mktileset $(BINDIR)/megabanner.tiles c64palette $(ASSETS)/mega65_320x64.png
 
 $(BINDIR)/vehicle_console.tiles:	$(TOOLDIR)/mktileset $(VEHICLE_ASSETS)
-	$(TOOLDIR)/mktileset $(BINDIR)/vehicle_console.tiles c64palette $(VEHICLE_ASSETS) /usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:0:16:41-57,20
+	$(TOOLDIR)/mktileset $(BINDIR)/vehicle_console.tiles c64palette $(VEHICLE_ASSETS)
+
+$(BINDIR)/fonttest.tiles:	$(TOOLDIR)/mktileset
+	$(TOOLDIR)/mktileset $(BINDIR)/fonttest.tiles c64palette /usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:0:16:41-5A,61-7A,20
 
 $(BINDIR)/megabasic64.prg:       $(MEGABASICOBJS) $(BINDIR)/megabanner.tiles
 	mkdir -p $(BINDIR)
