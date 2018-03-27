@@ -138,7 +138,7 @@ void process_ttf(struct tile_set *ts,char *font_spec)
   // How big does our screen need to be, to fit everything?
   int glyph_rows_in_canvas=255/glyph_count;
   int screen_width_required=max_char_rows*glyph_count;
-  if (screen_width_required>255) screen_width_required=255;
+  if (screen_width_required>255) screen_width_required=255-(255%max_char_rows);
   int screen_height_required=glyph_rows_in_canvas*(max_char_rows+max_char_underhang);
   printf("Canvas will be %d,%d\n",screen_width_required,screen_height_required);
   
@@ -276,21 +276,27 @@ void process_ttf(struct tile_set *ts,char *font_spec)
     rendered++;
   }
 
-#if 0
-  // $00A0-$00BF - style (eg bold, italic, condensed) of font
-  if (face->style_name) {
-    for(i=0;i<32;i++)
-      if (face->style_name[i]) font_data[0xa0+i]=face->style_name[i];
-      else break;
-  }
-
-  // $00c0 - $00ff - name of font (upto 64 bytes)
+  // Generate name of font: family/style/size
+  int o=0;
   if (face->family_name) {
-    for(i=0;i<64;i++)
-      if (face->family_name[i]) font_data[0xc0+i]=face->family_name[i];
+    for(int i=0;i<64;i++)
+      if (face->family_name[i]) s->font_name[o++]=face->family_name[i];
       else break;
   }
-#endif
+  s->font_name[o++]='/';
+  if (face->style_name) {
+    for(int i=0;i<32;i++)
+      if (face->style_name[i]) s->font_name[o++]=face->style_name[i];
+      else break;
+  }
+  s->font_name[o++]='/';
+  {
+    char ssize[16];
+    snprintf(ssize,16,"%d",font_points);
+    for(int i=0;i<16;i++)
+      if (ssize[i]) s->font_name[o++]=ssize[i];
+      else break;
+  }
   
   FT_Done_Face    ( face );
   FT_Done_FreeType( library );
