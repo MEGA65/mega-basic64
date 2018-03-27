@@ -133,12 +133,17 @@ void process_ttf(struct tile_set *ts,char *font_spec)
     if (char_columns>max_char_columns) max_char_columns=char_columns;
     
   }  
+
   printf("max y range = %d..%d, x width = %d\n",max_char_rows-1,-max_char_underhang,max_char_columns);
 
   // How big does our screen need to be, to fit everything?
-  int glyph_rows_in_canvas=255/glyph_count;
-  int screen_width_required=max_char_rows*glyph_count;
+  int screen_width_required=max_char_columns*glyph_count;
   if (screen_width_required>255) screen_width_required=255-(255%max_char_rows);
+  int glyph_rows_in_canvas=(max_char_columns*glyph_count)/screen_width_required;
+  if ((max_char_columns*glyph_count)%screen_width_required) {
+    fprintf(stderr,"ERROR: Non-zero modulo encountered when sizing canvas for font.\n");
+    exit(-3);
+  }
   int screen_height_required=glyph_rows_in_canvas*(max_char_rows+max_char_underhang);
   printf("Canvas will be %d,%d\n",screen_width_required,screen_height_required);
   
