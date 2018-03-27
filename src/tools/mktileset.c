@@ -344,6 +344,8 @@ int main(int argc, char **argv)
       // Number of glyphs 
       header[34]=(screen_list[i]->glyph_count>>0)&0xff;
       header[35]=(screen_list[i]->glyph_count>>8)&0xff;
+      // Name of font (61-36 = 25 bytes max)
+      for(int j=36;j<61;j++) header[j]=screen_list[i]->font_name[j-36];
       
       unsigned int size = codepoint_info_offset + screen_list[i]->code_point_info_bytes;
       header[61]=(size>>0)&0xff;
