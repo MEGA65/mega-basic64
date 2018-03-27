@@ -230,6 +230,12 @@ void process_ttf(struct tile_set *ts,char *font_spec)
 	    // save space.
 	    s->colourram_rows[write_y][write_x*2+0]=0x00; // Extended attributes
 	    s->colourram_rows[write_y][write_x*2+1]=0; // =0xff; // FG colour (only works if extended fg mode enabled?)
+
+	    if (x==(char_columns-1)) {
+	      // Right-most column, so apply right_trim to reduce width of card when rendered
+	      s->screen_rows[write_y][write_x*2+1]|=(right_trim<<5)&0xe0;
+	    }
+	    
 	  }
 	  // Update canvas write column ready for next iteration
 	  write_x++;
