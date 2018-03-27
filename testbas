@@ -1,0 +1,29 @@
+#!/bin/csh -fx
+
+# usage: testbas <basic program as ASCII> [/dev/ttyUSBx]
+
+#set bitfile=$HOME/Projects/mega65/mega65-core/bin/nexys4ddr.bit
+#set bitfile=$HOME/Projects/mega65/mega65-core/bin/lcd4ddr.bit
+# OK
+#set bitfile=/home/paul/Projects/mega65/mega65-core/old-bitfiles/lcd4ddr-20180310-183313d~.bit
+set bitfile=/home/paul/Projects/mega65/mega65-core/old-bitfiles/lcd4ddr-20180310-ee6fc12~.bit
+# Not OK
+#set bitfile=/home/paul/Projects/mega65/mega65-core/old-bitfiles/lcd4ddr-20180313-ec4b67b~.bit
+
+
+# Under test
+#set bitfile=$HOME/Projects/mega65/mega65-core/bin/lcd4ddr.bit
+
+
+set port=/dev/ttyUSB1
+if ( x$2 != x ) then
+  set port=$2
+endif
+if ( -e test.prg ) then
+  rm test.prg
+endif
+echo "arg1 = $1"
+src/tools/hatoucan.py < $1 > test.prg && \
+make clean bin/megabasic64.prg && \
+m65 -l ${port} -b ${bitfile} -k ../mega65-core/bin/KICKUP.M65 -R ../mega65-core/910111.bin -C ../mega65-core/charrom.bin -4 -r bin/megabasic64.prg && \
+m65 -4 -r test.prg 
