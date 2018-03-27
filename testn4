@@ -1,13 +1,11 @@
 #!/bin/csh -f
 
 #set bitfile=$HOME/Projects/mega65/mega65-core/bin/nexys4ddr.bit
-#set bitfile=$HOME/Projects/mega65/mega65-core/bin/lcd4ddr.bit
-set bitfile=$HOME/Projects/mega65/mega65-core/old-bitfiles/lcd4ddr-20180306-865452c~.bit
-
+set bitfile=$HOME/Projects/mega65/mega65-core/bin/lcd4ddr.bit
 
 
 set port=/dev/ttyUSB1
 if ( x$1 != x ) then
   set port=$1
 endif
-make clean bin/megabasic64.prg && m65 -l ${port} -b ${bitfile} -k ../mega65-core/bin/KICKUP.M65 -R ../mega65-core/910111.bin -C ../mega65-core/charrom.bin -4 -r bin/megabasic64.prg && m65dbg -d ${port}
+make bin/megabasic64.prg && m65 -l ${port} -b ${bitfile} -k ../mega65-core/bin/KICKUP.M65 -R ../mega65-core/910111.bin -C ../mega65-core/charrom.bin -4 -r bin/megabasic64.prg && m65dbg -d ${port}

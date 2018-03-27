@@ -3,17 +3,15 @@
 # usage: testbas <basic program as ASCII> [/dev/ttyUSBx]
 
 #set bitfile=$HOME/Projects/mega65/mega65-core/bin/nexys4ddr.bit
-#set bitfile=$HOME/Projects/mega65/mega65-core/bin/lcd4ddr.bit
-# OK
-#set bitfile=/home/paul/Projects/mega65/mega65-core/old-bitfiles/lcd4ddr-20180310-183313d~.bit
-set bitfile=/home/paul/Projects/mega65/mega65-core/old-bitfiles/lcd4ddr-20180310-ee6fc12~.bit
-# Not OK
-#set bitfile=/home/paul/Projects/mega65/mega65-core/old-bitfiles/lcd4ddr-20180313-ec4b67b~.bit
+set bitfile=$HOME/Projects/mega65/mega65-core/bin/lcd4ddr.bit
 
-
-# Under test
-#set bitfile=$HOME/Projects/mega65/mega65-core/bin/lcd4ddr.bit
-
+# Buffered UART ok for:
+set bitfile=/home/paul/Projects/mega65/mega65-core/old-bitfiles/lcd4ddr-20180306-865452c~.bit
+set bitfile=/home/paul/Projects/mega65/mega65-core/old-bitfiles/lcd4ddr-20180308-4390226~.bit
+set bitfile=/home/paul/Projects/mega65/mega65-core/old-bitfiles/lcd4ddr-20180308-4b778c3~.bit
+set bitfile=/home/paul/Projects/mega65/mega65-core/old-bitfiles/lcd4ddr-20180309-ae56a05~.bit 
+set bitfile=/home/paul/Projects/mega65/mega65-core/old-bitfiles/lcd4ddr-20180310-183313d~.bit
+set bitfile=/home/paul/Projects/mega65/mega65-core/bin/lcd4ddr.bit
 
 set port=/dev/ttyUSB1
 if ( x$2 != x ) then
