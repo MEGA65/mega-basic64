@@ -33,11 +33,16 @@ struct screen {
   unsigned char width,height;
   unsigned char **screen_rows;
   unsigned char **colourram_rows;
+  // For tile-encoded rasterised TTF fonts, we need to know the set of glyphs,
+  // where they live, and how big they are.
+  unsigned char *code_point_info;
+  int code_point_info_bytes;
 
   // For rasterised fonts, we need to know which glyphs we have stored
   unsigned char isFont;
   unsigned char glyph_count;
-  struct glyph_info glyphs[256];
+#define MAX_GLYPHS_PER_CANVAS 1024
+  struct glyph_info glyphs[MAX_GLYPHS_PER_CANVAS];
   
   struct screen *next;
 };

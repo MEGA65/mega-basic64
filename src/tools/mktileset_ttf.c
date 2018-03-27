@@ -21,8 +21,6 @@ int encode_card(struct tile_set *ts,
 void process_ttf(struct tile_set *ts,char *font_spec)
 {
   // Initialise unicode points we want to render.
-  int i;
-
   FT_Library    library;
   FT_Face       face;
 
@@ -33,7 +31,7 @@ void process_ttf(struct tile_set *ts,char *font_spec)
   int           face_id;
   char          point_spec[8192];
 
-  int           n, num_chars;
+  int           n;
   
   int           font_points=16; // Height of face
 
@@ -53,19 +51,21 @@ void process_ttf(struct tile_set *ts,char *font_spec)
     unsigned int code_point = strtoll(hex,NULL,16);
     if (sscanf(hex,"%x-%x",&lo,&hi)==2) {
       for(unsigned int code_point=lo;code_point<=hi;code_point++) {
-	if (glyph_count<256) {
+	if (glyph_count<MAX_GLYPHS_PER_CANVAS) {
 	  unicode_points[glyph_count++]=code_point;
 	} else {
-	  fprintf(stderr,"Too many code points in font definition. Limit is 255.\n");
+	  fprintf(stderr,"Too many code points in font definition. Limit is %d.\n",
+		  MAX_GLYPHS_PER_CANVAS-1);
 	  exit(-3);
 	}
       }
     } else {
       //    printf("Code point #%d is 0x%x from \"%s\"\n",glyph_count,code_point,hex);
-      if (glyph_count<256) {
+      if (glyph_count<MAX_GLYPHS_PER_CANVAS) {
 	unicode_points[glyph_count++]=code_point;
       } else {
-	fprintf(stderr,"Too many code points in font definition. Limit is 255.\n");
+	fprintf(stderr,"Too many code points in font definition. Limit is %d.\n",
+		MAX_GLYPHS_PER_CANVAS);
 	exit(-3);
       }
     }
@@ -134,6 +134,20 @@ void process_ttf(struct tile_set *ts,char *font_spec)
     
   }  
   printf("max y range = %d..%d, x width = %d\n",max_char_rows-1,-max_char_underhang,max_char_columns);
+
+  // How big does our screen need to be, to fit everything?
+  int glyph_rows_in_canvas=255/glyph_count;
+  int screen_width_required=max_char_rows*glyph_count;
+  if (screen_width_required>255) screen_width_required=255;
+  int screen_height_required=glyph_rows_in_canvas*(max_char_rows+max_char_underhang);
+  printf("Canvas will be %d,%d\n",screen_width_required,screen_height_required);
+  
+  struct screen *s=new_screen(screen_num++,ts,screen_width_required,screen_height_required);
+  screen_list[screen_count++]=s;
+    
+  // Start in upper left of canvas when placing rendered glyphs.
+  int yy=0;
+  int xx=0;
   
   for ( n = 0; n < glyph_count; n++ )
   {
@@ -195,22 +209,64 @@ void process_ttf(struct tile_set *ts,char *font_spec)
 
     // Now build the glyph map
 
-    for(y=char_rows-1;y>=-under_rows;y--)
+    int write_y=yy;
+    
+    for(y=char_rows-1;y>=-under_rows;y--) {
+      int write_x=xx;
       for(x=0;x<char_columns;x++)
 	{
-	  int card_number=encode_card(ts,slot,x,y);
-	  if (card_number<0||card_number>4095) {
+	  int tile_number=encode_card(ts,slot,x,y);
+	  if (tile_number<0||tile_number>(4095-0x100)) {
 	    printf("Ran out of tiles.\n");
 	    exit(-1);
 	  } else {
-	    printf("  encoding tile (%d,%d) using card #%d\n",x,y,card_number);
+	    printf("  encoding tile (%d,%d) using card #%d\n",x,y,tile_number);
+
+	    // Record tile number in screen_row
+	    tile_number+=0x100;
+	    s->screen_rows[write_y][write_x*2+0]=tile_number&0xff;
+	    s->screen_rows[write_y][write_x*2+1]=(tile_number>>8)&0xff;
+	    // XXX - We should allow for canvases to lack colour RAM data when not required to
+	    // save space.
+	    s->colourram_rows[write_y][write_x*2+0]=0x00; // Extended attributes
+	    s->colourram_rows[write_y][write_x*2+1]=0; // =0xff; // FG colour (only works if extended fg mode enabled?)
 	  }
+	  // Update canvas write column ready for next iteration
+	  write_x++;
 	}
+      // Update canvas write row ready for next iteration
+      write_y++;
+    }
 
-    // Write unicode point into list
-    // font_data[0x100 + rendered*5 + 0] = unicode_points[n]&0xff;
-    // font_data[0x100 + rendered*5 + 1] = (unicode_points[n]>>8)&0xff;
+    // Record the unicode point and x,y position
+    // XXX - We should deduplicate code points that point to the same visible rendering
+    // so that we don't waste canvas bytes.
 
+    // Write unicode point into the list
+    for(int i=0;i<4;i++) s->code_point_info[n*8+i]=(unicode_points[n]>>(i*8))&0xff;
+    // Write (x,y) position and (width,height) also
+    s->code_point_info[n*8+4]=xx;
+    s->code_point_info[n*8+5]=yy;
+    s->code_point_info[n*8+6]=char_columns;
+    s->code_point_info[n*8+7]=char_rows-under_rows;
+    // Update length of code point info structure
+    s->code_point_info_bytes=n*8+8;
+    
+    // work out where to write the next glyph in the canvas, if there is a next glyph
+    // (we tile them horizontally and vertically, so that we can fit as many as possible)
+    if (n<glyph_count) {
+      xx+=max_char_columns;
+      if (x>=(255-max_char_columns)) {
+	xx=0;
+	yy+=max_char_rows-max_char_underhang;
+      }
+      if (yy>=255) {
+	fprintf(stderr,"Cannot fit glyph #%d (unicode point 0x%x) into canvas.\n",
+		n+1,unicode_points[n+1]);
+	exit(-3);
+      }
+    }
+    
     rendered++;
   }
 
@@ -310,7 +366,7 @@ int encode_card(struct tile_set *ts,
   }
 
   raw_tile_count++;
-  
+
   return tile_lookup(ts,&t);
 }
 

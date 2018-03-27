@@ -96,9 +96,14 @@ struct screen *new_screen(int id,struct tile_set *tiles,int width,int height)
     s->screen_rows[i]=calloc(sizeof(unsigned char)*2,width);
     s->colourram_rows[i]=calloc(sizeof(unsigned char)*2,width);
     if ((!s->screen_rows[i])||(!s->colourram_rows[i])) {
-      perror("calloc() failed");
+      perror("calloc() of s->screen_rows or s->colourram_rows failed");
       exit(-3);
     }
+  }
+  s->code_point_info=calloc(8,MAX_GLYPHS_PER_CANVAS);
+  if ((!s->code_point_info)||(!s->code_point_info)) {
+    perror("calloc() of s->code_point_info failed");
+    exit(-3);
   }
   
   return s;
@@ -238,7 +243,7 @@ int main(int argc, char **argv)
     }
   }
 
-  printf("Images consists of %d tiles (%d unique) and %d unique colours found.\n",
+  printf("Image(s) consist of %d tiles (%d unique) and %d unique colours found.\n",
 	 raw_tile_count,ts->tile_count,ts->colour_count);
 
   // Write out tile set structure
