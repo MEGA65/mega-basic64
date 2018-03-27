@@ -43,6 +43,7 @@ struct screen {
   unsigned char glyph_count;
 #define MAX_GLYPHS_PER_CANVAS 1024
   struct glyph_info glyphs[MAX_GLYPHS_PER_CANVAS];
+  char font_name[256];
   
   struct screen *next;
 };
