@@ -324,6 +324,7 @@ int main(int argc, char **argv)
       header[25]=(slab_size>>0)&0xff;
       header[26]=(slab_size>>8)&0xff;
       unsigned int colourram_rows_offset=screenram_rows_offset + slab_size;
+      unsigned int codepoint_info_offset=colourram_rows_offset + slab_size;
       // Screen RAM follows immediately from header block
       header[18]=(64>>0)&0xff;
       header[19]=(64>>8)&0xff;
@@ -332,12 +333,19 @@ int main(int argc, char **argv)
       header[21]=(colourram_rows_offset>>0)&0xff;
       header[22]=(colourram_rows_offset>>8)&0xff;
       header[23]=(colourram_rows_offset>>16)&0xff;
-      // XXX - Pointer to list of code points and character widths for font canvasses
-      // header[28]=
-      // header[29]=
-      // header[30]=
+      // Pointer to list of code points and character widths for font canvasses
+      header[28]=(codepoint_info_offset>>0)&0xff;
+      header[29]=(codepoint_info_offset>>8)&0xff;
+      header[30]=(codepoint_info_offset>>16)&0xff;
+      // Length of code point info structure in bytes
+      header[31]=(screen_list[i]->code_point_info_bytes>>0)&0xff;
+      header[32]=(screen_list[i]->code_point_info_bytes>>8)&0xff;
+      header[33]=(screen_list[i]->code_point_info_bytes>>16)&0xff;
+      // Number of glyphs 
+      header[34]=(screen_list[i]->glyph_count>>0)&0xff;
+      header[35]=(screen_list[i]->glyph_count>>8)&0xff;
       
-      unsigned int size = colourram_rows_offset + slab_size;
+      unsigned int size = codepoint_info_offset + screen_list[i]->code_point_info_bytes;
       header[61]=(size>>0)&0xff;
       header[62]=(size>>8)&0xff;
       header[63]=(size>>16)&0xff;
@@ -354,8 +362,8 @@ int main(int argc, char **argv)
       for(y=0;y<screen_list[i]->height;y++)
 	fwrite(screen_list[i]->colourram_rows[y],2*screen_list[i]->width,1,outfile);
       // Write out font info
-      if (screen_list[i]->isFont) {
-	
+      if (screen_list[i]->code_point_info_bytes) {
+	fwrite(screen_list[i]->code_point_info,screen_list[i]->code_point_info_bytes,1,outfile);
       }
       
       printf("."); fflush(stdout);
