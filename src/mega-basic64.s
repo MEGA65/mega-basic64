@@ -71,9 +71,13 @@ init:
 		INX
 		BNE	@spaceLoop
 
+		lda 	#<welcomeText
+		ldy 	#>welcomeText
+		JSR	$AB1E
+
 		;; enable wedge
 		jsr 	megabasic_enable
-
+		
 		;; Then make the demo tile set available for use
 		jsr 	tileset_point_to_start_of_area
 		jsr 	tileset_install
@@ -101,6 +105,12 @@ init:
 		
 		rts
 
+welcomeText:	
+		.byte $93,$11,"    **** MEGA65 MEGA BASIC V0.1 ****",$0D
+		.byte $11," 55296 GRAPHIC 38911 PROGRAM BYTES FREE",$0D
+		.byte $00
+	
+		
 c000blockdmalist:
 		;; Install pre-prepared tileset @ $12000+
 		.byte $0A,$00 	; F011A list follows
@@ -239,24 +249,13 @@ megabasic_enable:
 		dex
 		cpx 	#$ff
 		bne 	@tokencopy
-		
-		;; install vector
-		lda #<megabasic_tokenise
-		sta tokenise_vector
-		lda #>megabasic_tokenise
-		sta tokenise_vector+1
 
-		;; Install new detokenise routine
-		lda #<megabasic_detokenise
-		sta untokenise_vector
-		lda #>megabasic_detokenise
-		sta untokenise_vector+1
-
-		;; Install new execute routine
-		lda #<megabasic_execute
-		sta execute_vector
-		lda #>megabasic_execute
-		sta execute_vector+1
+		;; install jump table vectors for BASIC tokens
+		LDX	#$05
+@lv1:		LDA	low_vectors, X
+		STA	$0304, X
+		DEX
+		BPL	@lv1
 
 		;; Install hooks for IO access
 		;; (This is to add hooks for the M65 buffered UARTs as
@@ -269,46 +268,26 @@ megabasic_enable:
 		;; $0324 = input character from channel
 		;; $0326 = output character to channel ($FFD2)
 		;; $032A = get charater from input device (similar to $0324)
-		lda	#<megabasic_open_vector
-		STA	$031A
-		LDA	#>megabasic_open_vector
-		STA	$031B
-		lda	#<megabasic_close_vector
-		STA	$031C
-		LDA	#>megabasic_close_vector
-		STA	$031D
-		lda	#<megabasic_openin_vector
-		STA	$031E
-		LDA	#>megabasic_openin_vector
-		STA	$031F
-		lda	#<megabasic_openout_vector
-		STA	$0320
-		LDA	#>megabasic_openout_vector
-		STA	$0321
-		lda	#<megabasic_chrin_vector
-		STA	$0324
-		LDA	#>megabasic_chrin_vector
-		STA	$0325
-		lda	#<megabasic_chrout_vector
-		STA	$0326
-		LDA	#>megabasic_chrout_vector
-		STA	$0327
-		lda	#<megabasic_getchar_vector
-		STA	$032A
-		LDA	#>megabasic_getchar_vector
-		STA	$032B
-		
+		LDX	#$0d
+@hv1:		LDA	high_vectors, X
+		STA	$031A, X
+		DEX
+		BPL	@hv1
 
-		lda 	#<welcomeText
-		ldy 	#>welcomeText
-		JSR	$AB1E
-		
 		RTS
+		
+low_vectors:	.word megabasic_tokenise
+		.word megabasic_detokenise
+		.word megabasic_execute
 
-welcomeText:	
-		.byte $93,$11,"    **** MEGA65 MEGA BASIC V0.1 ****",$0D
-		.byte $11," 55296 GRAPHIC 38911 PROGRAM BYTES FREE",$0D
-		.byte $00
+high_vectors:	.word megabasic_open_vector
+		.word megabasic_close_vector
+		.word megabasic_openin_vector
+		.word megabasic_openout_vector
+		.word $F333
+		.word megabasic_chrin_vector
+		.word megabasic_chrout_vector
+		.word megabasic_getchar_vector
 		
 megabasic_disable:
 		RTS
