@@ -938,6 +938,7 @@ tokenlist:
 		token_cont	=	$9A
 		token_new	=	$A2
 		token_on	=	$91
+		token_print	=	$99
 		token_stop	=	$90
 		token_to	=	$A4
 
@@ -1378,6 +1379,8 @@ megabasic_perform_canvas:
 		JSR	$0073
 		jmp	basic2_main_loop
 @notCanvasRun:
+		CMP	#token_print
+		LBEQ	megabasic_perform_canvas_print_at
 		CMP	#token_stamp
 		LBEQ	megabasic_perform_canvas_stamp
 		CMP	#token_delete
@@ -1391,6 +1394,122 @@ megabasic_perform_canvas:
 		;; Else, its bad
 		JMP	megabasic_perform_undefined_function
 
+megabasic_perform_canvas_print_at:
+		;; CANVAS n PRINT [ON] CANVAS m AT x,y <stuff>
+		;; This routine prints the UTF-8 string referenced in <stuff>
+		;; on canvas m, using the font stored in canvas n, at position x,y
+
+		jsr	zp_scratch_stash
+
+		;; Get the size of the canvas
+		LDA	source_canvas
+		JSR	get_canvas_dimensions
+
+		;; Get token followingg PRINT
+		JSR	$0073
+
+		JSR	$0079
+		CMP	#token_canvas
+		BEQ	@skipOn
+		CMP	#token_on
+		LBNE	megabasic_perform_syntax_error
+		JSR	$0073
+		CMP	#token_canvas
+		LBNE	megabasic_perform_syntax_error
+@skipOn:
+		;; Next should be the destination canvas
+		JSR	$0073
+		JSR	$AD8A
+		JSR	$B7F7
+		LDA	$15
+		LBNE	megabasic_perform_illegal_quantity_error
+		LDA	$14
+		STA	target_canvas
+		jsr	canvas_find
+		BCS	@foundCanvas2
+		jmp	megabasic_perform_illegal_quantity_error
+@foundCanvas2:		
+		;; Finally, look for optional AT X,Y
+		jsr 	parse_at_xy
+
+		;; We now know that the source and target canvases exist,
+		;; and where we want to write text onto the target canvas.
+		;; What comes next is to parse the PRINT-like arguments and
+		;; to render them.  The main challenge here is that our ZP
+		;; scratch space is actually over the top of the ZP area that
+		;; the BASIC expression parsing stuff uses.  So we have to
+		;; remember our canvas details between calls to that.  This is
+		;; HIGHLY irritating, especially as I could have avoided the
+		;; problem by using other parts of ZP instead of the bits I
+		;; used. This should get fixed at some point.
+
+		;;  XXX - For now we just throw away what we found, and restore the BASIC
+		;; contents for the ZP locations
+		jsr	zp_scratch_restore
+
+		
+		;; Here is the logic of the C64 BASIC PRINT command, that we have
+		;; adopted to provide compatibility:
+
+		;;  XXX - Debug: keep track of what we are printing
+		LDA	#$00
+		STA	$FD
+
+		jmp	@print_entry
+
+@printOutputString:
+		;; This is the bit where we need to do the actual work.
+		;; $22/$23 points to the null-terminated string that needs to be output
+
+		;; XXX - Debug: Just write each char to $0450 
+		LDY	#$00
+@nextChar:	LDA	($22),Y
+		CMP	#$00
+		BEQ	@endOfString
+		STA	$0450,X
+		INX
+		INY
+		JMP	@nextChar
+@endOfString:
+		;; Get next token ready
+		JSR	$0073
+		
+@print_entry:	
+		JSR	$0079	; Re-read current token
+		BEQ 	@end_of_statement_with_newline
+
+		;; We only support semi-colon between things, and none of the old horizontal positioning
+		;; functions, because we already have the ability to do exact positioning.
+		CMP 	#$A3   ; TAB( code
+		LBEQ 	megabasic_perform_syntax_error
+		CMP 	#$A6   ; SPC( code
+		LBEQ 	megabasic_perform_syntax_error
+		CMP 	#$2C   ; comma
+		LBEQ 	megabasic_perform_syntax_error
+		CMP 	#$3B   ; semi-colon
+		BEQ 	@endOfString ; semi-colon means print nothing else (XXX - assumes we don't care ignoring ; at end of line, as this will cause a new-line at the end, even if string had ; at end)
+		JSR 	$AD9E    	; Evaluate expression
+		BIT 	$0D	; Check if numerical or string expression
+		BMI 	@printOutputString	; Branch taken if expression is string
+
+		;; Expression is numeric, so convert it to a string
+		JSR 	$BDDD	; Convert number in FAC to string stored at $0100 onwards
+		;; Set $22/$23 to point to $0100 so that we know where the string is
+		LDA	#$00
+		STA	$22
+		LDA	#$01
+		STA	$23
+
+		;; Now that we have turned it into a string, we can print it out
+		JMP @printOutputString
+
+@end_of_statement_with_newline:
+		;; Print end of line marker at conclusion of PRINT statement
+		;; This isn't needed for us, as we don't remember where we are upto on the screen.
+@end_of_statement:
+		jsr	zp_scratch_restore
+		jmp	basic2_main_loop
+		
 megabasic_perform_canvas_clear:
 
 		jsr	zp_scratch_stash
