@@ -3,15 +3,16 @@
 # usage: testbas <basic program as ASCII> [/dev/ttyUSBx]
 
 #set bitfile=$HOME/Projects/mega65/mega65-core/bin/nexys4ddr.bit
-set bitfile=$HOME/Projects/mega65/mega65-core/bin/lcd4ddr.bit
+#set bitfile=$HOME/Projects/mega65/mega65-core/bin/lcd4ddr.bit
 
 # Buffered UART ok for:
-set bitfile=/home/paul/Projects/mega65/mega65-core/old-bitfiles/lcd4ddr-20180306-865452c~.bit
-set bitfile=/home/paul/Projects/mega65/mega65-core/old-bitfiles/lcd4ddr-20180308-4390226~.bit
-set bitfile=/home/paul/Projects/mega65/mega65-core/old-bitfiles/lcd4ddr-20180308-4b778c3~.bit
-set bitfile=/home/paul/Projects/mega65/mega65-core/old-bitfiles/lcd4ddr-20180309-ae56a05~.bit 
-set bitfile=/home/paul/Projects/mega65/mega65-core/old-bitfiles/lcd4ddr-20180310-183313d~.bit
-set bitfile=/home/paul/Projects/mega65/mega65-core/bin/lcd4ddr.bit
+#set bitfile=/home/paul/Projects/mega65/mega65-core/old-bitfiles/lcd4ddr-20180306-865452c~.bit
+#set bitfile=/home/paul/Projects/mega65/mega65-core/old-bitfiles/lcd4ddr-20180308-4390226~.bit
+#set bitfile=/home/paul/Projects/mega65/mega65-core/old-bitfiles/lcd4ddr-20180308-4b778c3~.bit
+#set bitfile=/home/paul/Projects/mega65/mega65-core/old-bitfiles/lcd4ddr-20180309-ae56a05~.bit 
+#set bitfile=/home/paul/Projects/mega65/mega65-core/old-bitfiles/lcd4ddr-20180310-183313d~.bit
+#set bitfile=/home/paul/Projects/mega65/mega65-core/bin/lcd4ddr.bit
+set bitfile=~/dev/mega65-core/bin/nexys4-ec4b67b.bit
 
 set port=/dev/ttyUSB1
 if ( x$2 != x ) then
@@ -23,5 +24,5 @@ endif
 echo "arg1 = $1"
 src/tools/hatoucan.py < $1 > test.prg && \
 make clean bin/megabasic64.prg && \
-m65 -l ${port} -b ${bitfile} -k ../mega65-core/bin/KICKUP.M65 -R ../mega65-core/910111.bin -C ../mega65-core/charrom.bin -4 -r bin/megabasic64.prg && \
+m65 -l ${port} -b ${bitfile} -k ../mega65-core/bin/KICKUP.M65 -R ../mega65-core/bin/MEGA65.ROM -C ../mega65-core/bin/CHARROM.ROM -4 -r bin/megabasic64.prg && \
 m65 -4 -r test.prg 

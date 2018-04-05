@@ -14,8 +14,24 @@ fun for end users to create their own programs with.
 Considerable effort is being put into making the syntax as human readable as possible,
 compared with the very terse syntax of BASIC 7 and BASIC 10.
 
+
+Installation
+------------
+
+To compile this repository, you'll need the `freetype2` library and the `cbmconvert` tool.
+* freetype2
+    sudo apt install libfreetype6-dev
+* cbmconvert
+    git clone https://github.com/sasq64/cbmconvert.git
+    make -f Makefile.unix
+    sudo ln -s ~/dev/cbmconvert/cbmconvert /usr/bin/cbmconvert  # add the executable to path
+
+To execute the helper scripts, you'll need the `csh` script interpreter:
+    sudo apt install csh
+
+
 Command reference
--------------
+-----------------
 
 * FAST - Set CPU to full speed
 * SLOW - Disable MEGA65 fast CPU (C128 style and C65 style 2MHz and 3.5MHz selection is unaffected)
@@ -32,7 +48,7 @@ Command reference
 
 
 Memory Layout
-------------
+-------------
 
 For now, the memory layout is a bit sub-optimal, because the C65 DOS sits in BANK 1, meaning we have only 56KB free there
 (in fact 54KB, because the last 2KB are colour RAM).
