@@ -15,19 +15,25 @@ Considerable effort is being put into making the syntax as human readable as pos
 compared with the very terse syntax of BASIC 7 and BASIC 10.
 
 
-Installation
+Requirements
 ------------
 
 To compile this repository, you'll need the `freetype2` library and the `cbmconvert` tool.
 * freetype2
+    ```bash
     sudo apt install libfreetype6-dev
+    ```
 * cbmconvert
+    ```bash
     git clone https://github.com/sasq64/cbmconvert.git
     make -f Makefile.unix
     sudo ln -s ~/dev/cbmconvert/cbmconvert /usr/bin/cbmconvert  # add the executable to path
+    ```
 
 To execute the helper scripts, you'll need the `csh` script interpreter:
+    ```bash
     sudo apt install csh
+    ```
 
 
 Command reference

@@ -13,6 +13,7 @@
 #set bitfile=/home/paul/Projects/mega65/mega65-core/old-bitfiles/lcd4ddr-20180310-183313d~.bit
 #set bitfile=/home/paul/Projects/mega65/mega65-core/bin/lcd4ddr.bit
 set bitfile=~/dev/mega65-core/bin/nexys4-ec4b67b.bit
+set bitfile=~/dev/mega65-core/bin/nexys4.bit
 
 set port=/dev/ttyUSB1
 if ( x$2 != x ) then
