@@ -6,9 +6,10 @@
 12 print "a - AT -> hello"
 13 print "b - ATI -> request modem info"
 14 print "c - AT+GSN -> request IMEI"
-15 print "x - exit"
+80 print "w - <custom command>"
+90 print "x - exit"
 
-20 open 1,2,1
+99 open 1,2,1
 
 100 print ">";
 110 u$="": get u$: if u$="" then goto 110
@@ -32,7 +33,6 @@
 1010 b$="": get#1,b$: if b$<>"" then print b$;
 1020 return
 
-
 2000 rem "write a string to the modem, working around the print# bug"
 2010 for i=1 to len(m$): print#1,right$(left$(m$,i),1);: next: return
 
@@ -48,8 +48,13 @@
 
 4000 rem "switch on user input to get correct message for modem"
 4005 m$=""
-4010 if u$="a" then m$="at"+chr$(13): return
-4020 if u$="b" then m$="ati"+chr$(13): return
-4030 if u$="c" then m$="at+gsn"+chr$(13): return
+4012 if u$="a" then m$="at"+chr$(13): return
+4013 if u$="b" then m$="ati"+chr$(13): return
+4014 if u$="c" then m$="at+gsn"+chr$(13): return
+4080 if u$="w" then gosub 5000: return
 4090 if u$="x" goto 990
 4099 print "undefined command, try again": return
+
+5000 rem "get a custom command from the keyboard"
+5010 input "enter your command: ";m$: m$=m$+chr$(13)
+5020 return
