@@ -7,15 +7,15 @@
 
 100 end
 
-1000 rem get character from keyboard, print it and send it on serial
+1000 rem "get character from keyboard, print it and send it on serial"
 1010 a$=""
 1020 get a$: if a$<>"" then print a$;: print#1,a$;
 1030 return
 
-2000 rem get character from serial, print it
+2000 rem "get character from serial, print it"
 2010 b$=""
 2020 get#1,b$: if b$<>"" then print b$;
 2030 return
 
-20000 rem write a string to the modem, working around the print# bug
+20000 rem "write a string to the modem, working around the print# bug"
 20010 for i=1 to len(m$):print#1,right$(left$(m$,i),1): next: return
