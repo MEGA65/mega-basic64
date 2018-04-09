@@ -26,4 +26,4 @@ echo "arg1 = $1"
 src/tools/hatoucan.py < $1 > test.prg && \
 make clean bin/megabasic64.prg && \
 m65 -l ${port} -b ${bitfile} -k ../mega65-core/bin/KICKUP.M65 -R ../mega65-core/bin/MEGA65.ROM -C ../mega65-core/bin/CHARROM.ROM -4 -r bin/megabasic64.prg && \
-m65 -4 -r test.prg 
+m65 -l ${port} -4 -r test.prg 
