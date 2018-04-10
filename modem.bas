@@ -32,6 +32,7 @@
 80 print "w - <custom command>"
 85 print "x - exit"
 91 print "1 - AT+QURCCFG='urcport','uart1' -> send URC (e.g. RING) on UART"
+98 print "8 - parse last response from modem"
 99 print "9 - print last response with invisible characters"
 
 	
@@ -42,11 +43,10 @@
 130 gosub 4000
 140 if m$="" goto 105: rem "undefined command, try again"
 
-150 print "tx: ["+m$+"]"
-160 gosub 2000: rem "transmit the cmd"
-170 print "rx: [";
-180 gosub 3000: rem "get the response"
-190 print r$+"]"
+150 gosub 2000: rem "transmit the cmd"
+160 gosub 3000: rem "get the response"
+170 print "tx: ["+m$+"]"
+180 print "rx: ["+r$+"]"
 
 200 goto 105: rem "loop back at user input"
 
@@ -99,7 +99,8 @@
 4085 if u$="x" goto 990
 4091 if u$="1" then m$="at+qurccfg="+chr$(34)+"urcport"+chr$(34)+","+chr$(34)+"uart1"+chr$(34)+chr$(13): return
 4092 if u$="2" then m$="ats3?"+chr$(13)+chr$(10): return
-4092 if u$="9" then st$=r$: gosub 8000: return
+4098 if u$="8" then gosub 10000: return
+4099 if u$="9" then st$=r$: gosub 8000: return
 4100 print "undefined command, try again": return
 
 5000 rem "get a custom command from the keyboard"
@@ -116,10 +117,11 @@
 
 7000 rem "display phonebook information"
 7010 print "phonebook": print "---------"
-7020 m$="at+cpbs?": gosub 2000 : rem "query which current storage is in use, and find its size"
+7020 m$="at+cpbs?"+chr$(13): gosub 2000 : rem "query which current storage is in use, and find its size"
 7025 print "tx: ["+m$+"]"
 7030 gosub 3000 : rem "get the response"
-7040 return: rem "TODO"
+7035 print "rx: ["+r$+"]"
+7040 m$="": return: rem "TODO"
 
 8000 rem "print a string with its invisible characters (CR, LF)"
 8010 for i=1 to len(st$): ch$=right$(left$(st$,i),1): rem "iterate on characters"
@@ -131,4 +133,20 @@
 8300 return
 
 10000 rem "modem response parser"
-10010 return: rem "TODO"
+10010 ch$="": cr=0: lf=0: sep=0: echo=0: echo$=""
+10015 rem "ch=current CHaracter, cr=previous character was CR, lf=previous character was LF"
+10016 rem "sep=the two previous characters were CR+LF, echo=a CR was found without LF (-> end of echo)"
+10020 for i=1 to len(r$): ch$=right$(left$(r$,i),1): rem "iterate on characters"
+10025 rem "processing"
+10030 if echo=1 then echo$=left$(r$,i-1): print "echo="+echo$: echo=0
+10040 if sep=1 then rem "TODO"
+10050 if cr=1 then rem "TODO"
+10060 if lf=1 then rem "TODO"
+10095 rem "updating"
+10100 if ch$=chr$(13) then cr=1: lf=0: goto 10500 : rem "current char is CR"
+10110 if ch$=chr$(10) and cr=1 then cr=0: lf=1: sep=1: goto 10500 "current char is LF and previous char was CR"
+10120 if ch$=chr$(10) and cr=0 then cr=0: lf=1: sep=0: goto 10500 "current char is LF but previous char was not CR..."
+10130 if ch$<>chr$(10) and cr=1 then cr=0: lf=0: echo=1: goto 10500 : rem "former part of string was echo"
+10150 cr=0: lf=0: sep=0: echo=0 : rem "not CR, not LF, not CR+LF, not echo"
+10500 next: rem "end of loop"
+10999 return
