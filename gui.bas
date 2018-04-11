@@ -26,4 +26,24 @@
 250 print "JCCCCCCCCCCCCCCCCCCK"
 
 
-999 goto 999
+1000 rem "read input chars and update string (phone number)"
+1005 nb$=""
+1010 u$="": get u$: if u$="" goto 1010
+1020 if u$<>chr$(20) and len(nb$)>=18 goto 1010: rem "limit length is 16"
+1030 if u$="0" or u$="1" or u$="2" or u$="3" or u$="4" or u$="5" or u$="6" or u$="7" or u$="8" or u$="9" or u$="+" or u$="*" or u$="#" then nb$=nb$+u$: gosub 1100
+1040 if u$=chr$(20) and len(nb$)>=1 then nb$=left$(nb$,len(nb$)-1): gosub 1100: rem "remove a character, but only if there's at least one"
+1050 goto 1010
+
+1100 rem "screen update"
+1110 print chr$(147);
+1120 print "{yel}";
+1130 print "UCCCCCCCCCCCCCCCCCCI"
+1140 print "B                  B"
+1150 print "B";
+1152 print nb$;
+1154 for j=1 to 18-len(nb$): if len(nb$)<18 then print " ";: next j: rem "special case: for i=1 to 0 still goes into loop, so if len()=max we don't wanna print a space"
+1156 print "B"
+1160 print "B                  B"
+1170 print "JCCCCCCCCCCCCCCCCCCK"
+1199 return
+
