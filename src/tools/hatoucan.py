@@ -138,6 +138,8 @@ SPECIAL = (
 def ascii_to_petscii(o):  # int -> int
     if o <= ord('@') or o in (ord('['), ord(']')):
         return o
+    if o == ord('^'):
+        return o;
     if o >= ord('a') and o <= ord('z'):
         return o - ord('a') + 0x41
     if o >= ord('A') and o <= ord('Z'):
