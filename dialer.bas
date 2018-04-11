@@ -88,8 +88,7 @@
 
 1300 print "message is type";mn
 1310 rem "Check if jumptable is set for this message type, if so, call handler"
-
-1320 ln=jt%(mn):ln$=str$(ln):ifln=0thenreturn
+1320 ln=jt%(mn):ln$=str$(ln): if ln=0 then return
 1330 for i=0 to 5: poke ja+i,32:next: rem "first rub out with spaces in case line number is short"
 1340 for i=0 to len(ln$)-1: poke ja+i,asc(right$(left$(ln$,i+1),1)):next
 1350 if ln>0 then gosub,00000: rem "gosub to line ln"
@@ -227,7 +226,7 @@
 14100 rem "Message handler: message type 41"
 14199 return
 
-14200 rem "Message handler: incoming call (rin)"
+14200 rem "Message handler: incoming call (ring)"
 14210 print "incoming call!"
 14299 return
 
