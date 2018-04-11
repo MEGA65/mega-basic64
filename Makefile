@@ -43,7 +43,8 @@ VEHICLE_ASSETS=	\
 BINARIES=	$(BINDIR)/megabasic64.prg \
 		$(BINDIR)/megabanner.tiles \
 		$(BINDIR)/vehicle_console.tiles \
-		$(BINDIR)/fonttest.tiles
+		$(BINDIR)/fonttest.tiles \
+		$(BINDIR)/dialer.tiles
 
 MEGABASICOBJS=	$(SRCDIR)/mega-basic64.o
 
@@ -55,7 +56,7 @@ all:	$(TOOLS) $(BINDIR)/MEGABAS.D81
 # c-programs
 tools:	$(TOOLS)
 
-%.o:	%.s	$(BINDIR)/megabanner.tiles	$(BINDIR)/vehicle_console.tiles
+%.o:	%.s	$(BINDIR)/megabanner.tiles	$(BINDIR)/dialer.tiles
 	$(CA65) $< -l $*.list
 
 $(BINDIR)/megabanner.tiles:	$(TOOLDIR)/mktileset $(ASSETS)/mega65_320x64.png
