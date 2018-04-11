@@ -28,7 +28,7 @@ DIALER_ASSETS= \
 		$(ASSETS)/dialdivide.png \
 		$(ASSETS)/dialminus.png \
 		$(ASSETS)/dialplus.png \
-		$(ASSETS)/dialstar.png \
+		$(ASSETS)/dialequal.png \
 		$(ASSETS)/erase.png \
 		$(ASSETS)/greenphone.png \
 		$(ASSETS)/redphone.png \
