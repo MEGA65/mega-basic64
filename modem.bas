@@ -124,7 +124,7 @@
 7040 m$="": return: rem "TODO"
 
 8000 rem "print a string with its invisible characters (CR, LF)"
-8010 for i=1 to len(st$): ch$=right$(left$(st$,i),1): rem "iterate on characters"
+8010 for j=1 to len(st$): ch$=right$(left$(st$,j),1): rem "iterate on characters"
 8020 if ch$=chr$(13) then print "<CR>";: goto 8100
 8020 if ch$=chr$(10) then print "<LF>";: goto 8100
 8020 print ch$;
@@ -132,21 +132,38 @@
 8200 print chr$(13);: rem "carriage return at the end of loop"
 8300 return
 
+
 10000 rem "modem response parser"
-10010 ch$="": cr=0: lf=0: sep=0: echo=0: echo$=""
-10015 rem "ch=current CHaracter, cr=previous character was CR, lf=previous character was LF"
-10016 rem "sep=the two previous characters were CR+LF, echo=a CR was found without LF (-> end of echo)"
-10020 for i=1 to len(r$): ch$=right$(left$(r$,i),1): rem "iterate on characters"
-10025 rem "processing"
-10030 if echo=1 then echo$=left$(r$,i-1): print "echo="+echo$: echo=0
-10040 if sep=1 then rem "TODO"
-10050 if cr=1 then rem "TODO"
-10060 if lf=1 then rem "TODO"
-10095 rem "updating"
-10100 if ch$=chr$(13) then cr=1: lf=0: goto 10500 : rem "current char is CR"
-10110 if ch$=chr$(10) and cr=1 then cr=0: lf=1: sep=1: goto 10500 "current char is LF and previous char was CR"
-10120 if ch$=chr$(10) and cr=0 then cr=0: lf=1: sep=0: goto 10500 "current char is LF but previous char was not CR..."
-10130 if ch$<>chr$(10) and cr=1 then cr=0: lf=0: echo=1: goto 10500 : rem "former part of string was echo"
-10150 cr=0: lf=0: sep=0: echo=0 : rem "not CR, not LF, not CR+LF, not echo"
-10500 next: rem "end of loop"
+
+10005 rem "initialization"
+10010 cch$="": cr=0: lf=0
+10011 sep=0: prev=0
+10011 echo=0: echo$=""
+10012 rb=0: re=0: resp$=""
+10013 cb=0: ce=0: code$=""
+10021 rem "cch= Current CHaracter, cr= previous character was CR, lf= previous character was LF"
+10022 rem "sep= the two previous characters were CR+LF, prev= the position of the previous CR+LF (position of LF)"
+10023 rem "echo= an echo part is present"
+10024 rem "rb= position of Response information Beginning (1st char), re= position of the Response Information End (last char)"
+10025 rem "cb= position of result Code Beginning (1st char), re= position of the result Code End (last char)"
+
+10100 rem "start of loop"
+10110 for i=1 to len(r$): cch$=right$(left$(r$,i),1): rem "iterate on characters"
+
+10200 rem "processing"
+10210 if sep=1 and prev=0 and i>3 then echo=1: echo$=left$(r$,i-3): print "echo="+echo$: goto 10290: rem "first CR+LF, characters before -> echo=True"
+10220 if sep=1 and prev=0 and i<=3 then echo=0: goto 10290: rem "first CR+LF, which is the first 2 chars -> echo=False"
+10230 if sep=1 and prev>0 then print "line="+mid$(r$, prev+1, i-3): rem "another CR+LF"
+
+10250 st$=left$(r$,i): gosub 8000
+10260 print "i="+str$(i)+", cr="+str$(cr)+", lf="+str$(lf)+", sep="+str$(sep)+", prev="+str$(prev)
+
+10300 rem "updating"
+10310 if cch$=chr$(13) then cr=1: lf=0: goto 10500 : rem "current char is CR"
+10320 if cch$=chr$(10) and cr=1 then cr=0: lf=1: sep=1: prev=i: goto 10500 "current char is LF and previous char was CR"
+10330 if cch$=chr$(10) and cr=0 then cr=0: lf=1: sep=0: goto 10500 "current char is LF but previous char was not CR..."
+10340 cr=0: lf=0: sep=0 : rem "not CR, not LF, not CR+LF"
+
+10500 u$="": get u$: if u$<>chr$(13) then goto 10500
+10510 next: rem "end of loop"
 10999 return
