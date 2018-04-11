@@ -25,6 +25,14 @@ DIALER_ASSETS= \
 		$(ASSETS)/dial9.png \
 		$(ASSETS)/dialhash.png \
 		$(ASSETS)/dialstar.png \
+		$(ASSETS)/dialdivide.png \
+		$(ASSETS)/dialminus.png \
+		$(ASSETS)/dialplus.png \
+		$(ASSETS)/dialstar.png \
+		$(ASSETS)/erase.png \
+		$(ASSETS)/greenphone.png \
+		$(ASSETS)/redphone.png \
+		$(ASSETS)/satellite.png \
 
 
 VEHICLE_ASSETS=	\
