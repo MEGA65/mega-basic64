@@ -68,8 +68,8 @@ $(BINDIR)/vehicle_console.tiles:	$(TOOLDIR)/mktileset $(VEHICLE_ASSETS)
 $(BINDIR)/fonttest.tiles:	$(TOOLDIR)/mktileset
 	$(TOOLDIR)/mktileset $(BINDIR)/fonttest.tiles c64palette /usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:0:16:41-5A,61-7A,20
 
-$(BINDIR)/dialer.tiles:	$(TOOLDIR)/mktileset	$(DIALER_ASSETS)
-	$(TOOLDIR)/mktileset $(BINDIR)/dialer.tiles $(DIALER_ASSETS)
+$(BINDIR)/dialer.tiles:	$(TOOLDIR)/mktileset $(DIALER_ASSETS)
+	$(TOOLDIR)/mktileset $(BINDIR)/dialer.tiles c64palette $(DIALER_ASSETS)
 
 $(BINDIR)/megabasic64.prg:       $(MEGABASICOBJS) $(BINDIR)/megabanner.tiles
 	mkdir -p $(BINDIR)
