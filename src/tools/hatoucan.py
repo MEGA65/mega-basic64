@@ -112,7 +112,7 @@ TOKENS = (
 SPECIAL = (
     ('{rvs off}',  0x92),
     ('{SHIFT-@}',  0xba),
-    ('{rvs on}',   0x12),
+    ('{rvs on}',   0x12),    
     ('{CBM-+}',    0xa6),
     ('{CBM-E}',    0xb1),
     ('{CBM-R}',    0xb2),
@@ -131,6 +131,8 @@ SPECIAL = (
     ('{red}',      0x1c),
     ('{wht}',      0x05),
     ('{yel}',      0x9e),
+    ('{dgry}',     151),
+    ('{brn}',      149),
     ('{up}',       0x91),
 )
 
@@ -139,7 +141,7 @@ def ascii_to_petscii(o):  # int -> int
     if o <= ord('@') or o in (ord('['), ord(']')):
         return o
     if o == ord('^'):
-        return o;
+        return o
     if o >= ord('a') and o <= ord('z'):
         return o - ord('a') + 0x41
     if o >= ord('A') and o <= ord('Z'):

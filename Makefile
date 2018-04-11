@@ -12,6 +12,21 @@ ASSETS=		assets
 SRCDIR=		src
 BINDIR=		bin
 
+DIALER_ASSETS= \
+		$(ASSETS)/dial0.png \
+		$(ASSETS)/dial1.png \
+		$(ASSETS)/dial2.png \
+		$(ASSETS)/dial3.png \
+		$(ASSETS)/dial4.png \
+		$(ASSETS)/dial5.png \
+		$(ASSETS)/dial6.png \
+		$(ASSETS)/dial7.png \
+		$(ASSETS)/dial8.png \
+		$(ASSETS)/dial9.png \
+		$(ASSETS)/dialhash.png \
+		$(ASSETS)/dialstar.png \
+
+
 VEHICLE_ASSETS=	\
 		$(ASSETS)/vehicle_console_cluster.svg.png \
 		$(ASSETS)/0.png \
@@ -28,7 +43,8 @@ VEHICLE_ASSETS=	\
 BINARIES=	$(BINDIR)/megabasic64.prg \
 		$(BINDIR)/megabanner.tiles \
 		$(BINDIR)/vehicle_console.tiles \
-		$(BINDIR)/fonttest.tiles
+		$(BINDIR)/fonttest.tiles \
+		$(BINDIR)/dialer.tiles
 
 MEGABASICOBJS=	$(SRCDIR)/mega-basic64.o
 
@@ -40,7 +56,7 @@ all:	$(TOOLS) $(BINDIR)/MEGABAS.D81
 # c-programs
 tools:	$(TOOLS)
 
-%.o:	%.s	$(BINDIR)/megabanner.tiles	$(BINDIR)/vehicle_console.tiles
+%.o:	%.s	$(BINDIR)/megabanner.tiles	$(BINDIR)/dialer.tiles
 	$(CA65) $< -l $*.list
 
 $(BINDIR)/megabanner.tiles:	$(TOOLDIR)/mktileset $(ASSETS)/mega65_320x64.png
@@ -51,6 +67,9 @@ $(BINDIR)/vehicle_console.tiles:	$(TOOLDIR)/mktileset $(VEHICLE_ASSETS)
 
 $(BINDIR)/fonttest.tiles:	$(TOOLDIR)/mktileset
 	$(TOOLDIR)/mktileset $(BINDIR)/fonttest.tiles c64palette /usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:0:16:41-5A,61-7A,20
+
+$(BINDIR)/dialer.tiles:	$(TOOLDIR)/mktileset	$(DIALER_ASSETS)
+	$(TOOLDIR)/mktileset $(BINDIR)/dialer.tiles c64palette $(DIALER_ASSETS)
 
 $(BINDIR)/megabasic64.prg:       $(MEGABASICOBJS) $(BINDIR)/megabanner.tiles
 	mkdir -p $(BINDIR)

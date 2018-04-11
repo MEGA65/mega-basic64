@@ -154,7 +154,7 @@ c000blockdmalist:
 
 preloaded_tiles:
 		;; 		.incbin "bin/megabanner.tiles" 
-		.incbin "bin/vehicle_console.tiles" 
+		.incbin "bin/dialer.tiles" 
 preloaded_tiles_end:	
 		preloaded_tiles_length = preloaded_tiles_end - preloaded_tiles
 		
@@ -316,7 +316,6 @@ megabasic_disable:
 megabasic_chrout_vector:
 		PHA
 		LDA	$9A
-		STA	$0400
 		CMP	#$02
 		lbne	$F1CB
 		;; RS232 output
@@ -325,9 +324,7 @@ megabasic_chrout_vector:
 		JSR	enable_viciv
 		PLA
 		;; Check which UART
-		inc	$042a
 		LDX	$B6
-		STX	$0429
 		CPX	#$01	; UART1?
 		BNE	@uart2
 		STA	$D0E0
@@ -341,7 +338,6 @@ megabasic_chrout_vector:
 		
 megabasic_chrin_vector:
 		LDA	$99
-		STA	$0401
 		CMP	#$02
 		lbne	$F157
 		;; RS232 input
@@ -365,7 +361,6 @@ read_from_buffereduart:
 
 megabasic_getchar_vector:	
 		LDA	$99
-		STA	$0402
 		CMP	#$02
 		lbne	$F13E
 		;; RS232 input
@@ -381,7 +376,6 @@ megabasic_openin_vector:
 		lbne	$f701	; file not found
 		jsr	$f31f	; Get file details from table
 		LDA	$BA	; Get device # of the file
-		STA	$0403
 		CMP	#$02	; Is it RS232?
 		lbne	$f219	; not RS232, so return to KERNAL routine
 
@@ -405,7 +399,6 @@ megabasic_openout_vector:
 		lbne	$f701	; file not found
 		jsr	$f31f	; Get file details from table
 		LDA	$BA	; Get device # of the file
-		STA	$0404
 		CMP	#$02	; Is it RS232?
 		lbne	$f25b	; not RS232, so return to KERNAL routine
 
@@ -431,7 +424,6 @@ megabasic_close_vector:
 		TXA
 		PHA
 		LDA	$BA
-		STA	$0405
 		CMP	#$02
 		lbne	$F29D	; if not RS232, then jump back into KERNAL close routine
 		;; Ok, so it was RS232.  Jump to KERNAL routine to delete the logical file entry
@@ -441,7 +433,6 @@ megabasic_close_vector:
 megabasic_open_vector:
 		;; Check if device is RS232
 		LDA	$BA
-		STA	$0406
 		CMP	#$02
 		BNE	@notRS232
 		
