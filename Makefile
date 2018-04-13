@@ -6,7 +6,7 @@ CC=	gcc
 OPHIS=	../Ophis/bin/ophis -4
 
 CA65=  ca65 --cpu 4510
-LD65=  ld65 -t none
+LD65=  ld65 --config ./c64asm.cfg
 
 ASSETS=		assets
 SRCDIR=		src
@@ -53,6 +53,12 @@ DIALER_ASSETS= \
 		$(ASSETS)/bluephone.png \
 		$(ASSETS)/bluephone.png \
 		$(ASSETS)/satellite_pressed.png \
+		$(ASSETS)/signal0.png \
+		$(ASSETS)/signal1.png \
+		$(ASSETS)/signal2.png \
+		$(ASSETS)/signal3.png \
+		$(ASSETS)/signal4.png \
+		$(ASSETS)/signal5.png \
 
 VEHICLE_ASSETS=	\
 		$(ASSETS)/vehicle_console_cluster.svg.png \
