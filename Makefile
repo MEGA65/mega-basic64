@@ -33,7 +33,26 @@ DIALER_ASSETS= \
 		$(ASSETS)/greenphone.png \
 		$(ASSETS)/redphone.png \
 		$(ASSETS)/satellite.png \
-
+		$(ASSETS)/dial0_pressed.png \
+		$(ASSETS)/dial1_pressed.png \
+		$(ASSETS)/dial2_pressed.png \
+		$(ASSETS)/dial3_pressed.png \
+		$(ASSETS)/dial4_pressed.png \
+		$(ASSETS)/dial5_pressed.png \
+		$(ASSETS)/dial6_pressed.png \
+		$(ASSETS)/dial7_pressed.png \
+		$(ASSETS)/dial8_pressed.png \
+		$(ASSETS)/dial9_pressed.png \
+		$(ASSETS)/dialhash_pressed.png \
+		$(ASSETS)/dialstar_pressed.png \
+		$(ASSETS)/dialdivide_pressed.png \
+		$(ASSETS)/dialminus_pressed.png \
+		$(ASSETS)/dialplus_pressed.png \
+		$(ASSETS)/dialequal_pressed.png \
+		$(ASSETS)/erase_pressed.png \
+		$(ASSETS)/bluephone.png \
+		$(ASSETS)/bluephone.png \
+		$(ASSETS)/satellite_pressed.png \
 
 VEHICLE_ASSETS=	\
 		$(ASSETS)/vehicle_console_cluster.svg.png \
