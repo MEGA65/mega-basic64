@@ -9,11 +9,13 @@
 110 gosub 1000: rem "update the screen once before taking user inputs"
 120 sl%=0: rem "Signal Level integer [0:5]"
 130 cnt=0: rem "loop counter"
+140 tmr=1000: rem "timer for keystrokes"
 
 500 rem "read input chars and update string (phone number)"
 505 rem "LOOP START"
 510 u$="": get u$:
-512 cnt=cnt+1: if fn m1k(cnt)=0 then sl%=fn m6(sl%+1): gosub 1000: rem "beware of overflow of cnt (float so will be very long). We trigger an update every 1000 loops."
+512 cnt=cnt+1: if fn m1k(cnt)=0 then sl%=fn m6(sl%+1): gosub 1400: rem "we trigger a signal update every 1000 loops"
+513 tmr=tmr-1: if tmr=0 then gosub 1200: rem "we trigger a dial tiles update every 1000 loops since last"
 514 if u$="" goto 510
 520 if u$<>chr$(20) and u$<>chr$(13) and len(nb$)>=19 goto 510: rem "limit length is 18, go to loop start"
 530 if u$="0" or u$="1" or u$="2" or u$="3" or u$="4" or u$="5" or u$="6" or u$="7" or u$="8" or u$="9" or u$="+" or u$="*" or u$="#" or u$="a" or u$="b" or u$="c" or u$="d" then nb$=nb$+u$: gosub 1000
@@ -42,6 +44,7 @@
 1199 return
 
 1200 rem "screen dial tiles update"
+1205 tmr=1000: rem "reinitialize timer"
 1210 for x=1 to 3: for y=1 to 3
 1212 if val(u$)=x+(y-1)*3 then gosub 1312: goto 1214
 1213 gosub 1313
