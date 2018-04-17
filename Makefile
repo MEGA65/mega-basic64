@@ -59,6 +59,8 @@ DIALER_ASSETS= \
 		$(ASSETS)/signal3.png \
 		$(ASSETS)/signal4.png \
 		$(ASSETS)/signal5.png \
+		$(ASSETS)/dualsim.png \
+		$(ASSETS)/dualsim_pressed.png \
 
 VEHICLE_ASSETS=	\
 		$(ASSETS)/vehicle_console_cluster.svg.png \
