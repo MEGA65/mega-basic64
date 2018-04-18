@@ -113,6 +113,9 @@ $(BINDIR)/megabasic64.prg:       $(MEGABASICOBJS) $(BINDIR)/megabanner.tiles
 $(BINDIR)/vehicle-console.prg:	src/vehicle-console.a65 $(BINDIR)/vehicle_console.tiles
 	$(OPHIS) src/vehicle-console.a65
 
+$(TOOLDIR)/bpp:	$(TOOLDIR)/bpp.c Makefile
+	$(CC) $(COPT) -o $(TOOLDIR)/bpp $(TOOLDIR)/bpp.c
+
 MKTILESET_SRCS=	$(TOOLDIR)/mktileset.c \
 		$(TOOLDIR)/mktileset_png.c \
 		$(TOOLDIR)/mktileset_ttf.c
