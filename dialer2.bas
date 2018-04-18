@@ -39,6 +39,7 @@
 320 sc=1: rem "current screen to be displayed and user input to be taken"
 322 su=0: rem "flag su (screen update): a change in the program requires a screen update"
 330 cid$="": rem "caller id (number)"
+332 dr$="": rem "dr (dialing result): user friendly information about dialing state"
 399 return
 
 400 rem "=== setup for modem parser ==="
@@ -117,6 +118,12 @@
 1936 gosub 6100: rem "trigger initial screen update"
 1939 return
 
+1940 rem "=== change to screen 4 ==="
+1942 sc=4
+1944 if peek(53272)=20 or peek(53272)=132 then poke 53272,23: rem "we want text mode"
+1946 gosub 6200: rem "trigger initial screen update"
+1949 return
+
 
 
 2000 rem "### handle modem line ###"
@@ -183,7 +190,7 @@
 
 3000 rem "### SC 1 (DIALER) HANDLER ###"
 3002 rem "read input chars and update string (phone number)"
-3009 if su=1 then su gosub 5000: su=0
+3009 if su=1 then gosub 5000: su=0
 3010 u$="": get u$
 3012 cnt=cnt+1: if fn m1k(cnt)=0 then sl%=fn m6(sl%+1): gosub 5400: rem "we trigger a signal update every 1000 loops"
 3013 tmr=tmr-1: if tmr=0 then gosub 5200: rem "we trigger a dial tiles update every 1000 loops since last"
@@ -192,11 +199,11 @@
 3030 if u$="0" or u$="1" or u$="2" or u$="3" or u$="4" or u$="5" or u$="6" or u$="7" or u$="8" or u$="9" or u$="+" or u$="*" or u$="#" or u$="a" or u$="b" or u$="c" or u$="d" then nb$=nb$+u$: gosub 5000
 3035 if u$="-" or u$="/" or u$="=" or u$="@" or u$="<" or u$=">" then gosub 5000: rem "these characters don't update the string (for now)"
 3040 if u$=chr$(20) and len(nb$)>=1 then nb$=left$(nb$,len(nb$)-1): gosub 5000: rem "remove a character, but only if there's at least one"
-3045 if u$=chr$(13) then gosub 5000: rem "TODO: goto a subroutine to actually place the call"
+3050 if u$=chr$(13) then gosub 5000: gosub 1940: s$="atd"+nb$+";"+chr$(13): gosub 1200: rem "dial the number and switch to screen 4"
 3099 return
 
 3100 rem "### SC 2 (RING) HANDLER ###"
-3110 if su=1 then su gosub 6000: su=0
+3110 if su=1 then gosub 6000: su=0
 3112 cnt=cnt+1: if fn m1k(cnt)=0 then gosub 6000
 3120 u$="": get u$
 3122 if u$="a" or u$="A" then goto 3150
@@ -214,7 +221,7 @@
 3199 return
 
 3200 rem "### SC 3 (IN-CALL) HANDLER ###"
-3110 if su=1 then su gosub 6100: su=0
+3110 if su=1 then gosub 6100: su=0
 3112 cnt=cnt+1: if fn m1k(cnt)=0 then gosub 6100
 3220 u$="": get u$
 3222 if u$="h" or u$="H" then goto 3250
@@ -224,6 +231,19 @@
 3262 gosub 1910: rem "SCREEN 1 (DIALER)"
 3264 rem "we should wait for OK (OR ERROR)!!"
 3299 return
+
+3300 rem "### SC 4 (DIALING) HANDLER ###"
+3310 if su=1 then gosub 6200: su=0
+3312 cnt=cnt+1: if fn m1k(cnt)=0 then gosub 6200
+3320 u$="":get u$
+3322 if u$="h" or u$="H" then goto 3350
+3326 return: rem "not H"
+3350 rem "--- Hang-up call (H) ---"
+3360 s$="ath"+chr$(13): gosub 1200: rem "send ATH (hang up)"
+3362 gosub 1910: rem "SCREEN 1 (DIALER)"
+3364 rem "we should wait for OK (OR ERROR)!!"
+3366 dr$="": rem "reset dialing result"
+3399 return
 
 5000 rem "### SC 1 (DIALER) SCREEN UPDATE ###"
 5001 rem "=== dialer screen update subroutine ==="
@@ -317,6 +337,13 @@
 6120 print "{down}[h]ang up"
 6199 return
 
+6200 rem "### SC 4 (DIALING) SCREEN UPDATE ###"
+6205 canvas 0 clr : print "{clr}"
+6210 print "Dialing ";nb$;"..."
+6220 if dr$<>"" then print dr$: goto 6240
+6230 print "{down}";
+6240 print "{down}[h]ang up"
+6299 return
 
 9999 rem "### MESSAGE HANDLERS ###"
 
@@ -440,7 +467,8 @@
 13900 rem "Message handler: message type 39"
 13999 return
 
-14000 rem "Message handler: message type 40"
+14000 rem "Message handler: OK"
+14010 if sc=4 then cid$=nb$: gosub 1930: dr$="": rem "connection established with target number"
 14099 return
 
 14100 rem "Message handler: message type 41"
@@ -448,7 +476,7 @@
 
 14200 rem "Message handler: incoming call (ring)"
 14205 s$="at+clcc"+chr$(13):gosub 1200: rem "send AT+CLCC (list current calls)"
-14210 gosub 1920: rem "SCREEN 2 (RING)"
+14210 if sc<>2 then gosub 1920: rem "SCREEN 2 (RING)"
 14299 return
 
 14300 rem "Message handler: no carrier"
@@ -456,6 +484,7 @@
 14311 if sc=1 then gosub 1910: cid$="": return
 14312 if sc=2 then gosub 1910: cid$="": return
 14313 if sc=3 then gosub 1910: cid$="": return
+14314 if sc=4 then dr$="connection cannot be established"
 14399 return
 
 14400 rem "Message handler: message type 44"
@@ -464,13 +493,15 @@
 14500 rem "Message handler: message type 45"
 14599 return
 
-14600 rem "Message handler: message type 46"
+14600 rem "Message handler: no dial tone"
+14610 if sc=4 then dr$="no dial tone"
 14699 return
 
-14700 rem "Message handler: message type 47"
+14700 rem "Message handler: busy"
+14710 if sc=4 then dr$="target is busy"
 14799 return
 
-14800 rem "Message handler: message type 48"
+14800 rem "Message handler: no answer"
 14899 return
 
 14900 rem "Message handler: message type 49"
