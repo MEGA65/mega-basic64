@@ -58,7 +58,7 @@ int main(int argc,char **argv)
     int fl=1;
     line[0]=0; fgets(line,1024,f);
     while(line[0]) {
-      if (line[0]=='\t') {
+      if (line[0]=='\t'||(line[0]>='a'&&line[0]<='z')) {
 	// Line starts with TAB, so allocate line number
 	line_number++;
       } else if (line[0]>='0'&&line[0]<='9') {
@@ -127,10 +127,11 @@ int main(int argc,char **argv)
       
       int j;
       for(j=0;line[j];j++) {
-	if ((!j)&&(line[j]=='\t')) {
-	  snprintf(lineout,1024,"%d ",line_number);
-	  outlen=strlen(lineout);
-	} else if (line[j]=='\"') {
+	if ((!j)&&((line[j]=='\t')||(line[0]>'9'))) {
+	    snprintf(lineout,1024,"%d ",line_number);
+	    outlen=strlen(lineout);
+	    if (line[j]!='\t') lineout[outlen++]=line[j];
+	  } else if (line[j]=='\"') {
 	  if (symbol_len) {
 	    // Replace symbol with line number
 	    if (resolve_symbol(symbol,lineout,&outlen)) {
@@ -143,6 +144,8 @@ int main(int argc,char **argv)
 	  lineout[outlen++]=line[j];
 	  quote_mode^=1;
 	} else if (((!j)||(line[j-1]==' ')||symbol_len)
+		   &&
+		   (!quote_mode)
 		   &&
 		   ((line[j]>='A'&&line[j]<='Z')
 		    ||(symbol_len&&(line[j]>='0'&&line[j]<='9'))
