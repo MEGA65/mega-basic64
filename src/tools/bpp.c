@@ -123,15 +123,22 @@ int main(int argc,char **argv)
       if (line[0]>='0'&&line[0]<='9') {
 	// Line with number
 	line_number=atoi(line);
-      } else line_number++;
+      } else
+	if (line[0]>=' ') line_number++;
       
       int j;
       for(j=0;line[j];j++) {
-	if ((!j)&&((line[j]=='\t')||(line[0]>'9'))) {
-	    snprintf(lineout,1024,"%d ",line_number);
-	    outlen=strlen(lineout);
-	    if (line[j]!='\t') lineout[outlen++]=line[j];
-	  } else if (line[j]=='\"') {
+	if ((!j)
+	    &&((line[j]=='\t')
+	       ||((line[0]>'9')
+		  &&(!(line[0]>='A'&&line[0]<='Z'))
+		  )
+	       )
+	    ) {
+	  snprintf(lineout,1024,"%d ",line_number);
+	  outlen=strlen(lineout);
+	  if (line[j]!='\t') lineout[outlen++]=line[j];
+	} else if (line[j]=='\"') {
 	  if (symbol_len) {
 	    // Replace symbol with line number
 	    if (resolve_symbol(symbol,lineout,&outlen)) {
@@ -139,8 +146,8 @@ int main(int argc,char **argv)
 		      argv[i],fl,symbol);
 	      errors++;
 	    }
+	    symbol_len=0;
 	  }
-	  symbol_len=0;
 	  lineout[outlen++]=line[j];
 	  quote_mode^=1;
 	} else if (((!j)||(line[j-1]==' ')||symbol_len)
@@ -163,8 +170,8 @@ int main(int argc,char **argv)
 		      argv[i],fl,symbol);
 	      errors++;
 	    }
+	    symbol_len=0;
 	  }
-	  symbol_len=0;
 	  lineout[outlen++]=line[j];
 	}      
       }
