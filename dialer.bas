@@ -1,11 +1,14 @@
-0 poke 53295,asc("g"): poke 53295,asc("s"): poke 53248+111,128
-1 poke 0,65: rem "fast mode"
-2 print chr$(14);: rem "switch to upper/lower charset"
+1 poke 53280,0: poke 53281,0: rem "border and screen color (0: black)"
+2 poke 0,65: rem "fast mode (50mhz cpu clock)"
+3 poke 53248+111,128: rem "fix screen artifacts (60hz display)"
+4 print chr$(14);: rem "switch to upper/lower charset"
 
-10 gosub 700: rem "one-time only lookup patch address"
-20 gosub 800: rem "program state setup"
-30 gosub 900: gosub 600
-40 goto 500
+10 print chr$(147);: rem "clear screen"
+
+100 gosub 700: rem "one-time only lookup patch address"
+110 gosub 800: rem "program state setup"
+120 gosub 900: gosub 600
+130 goto 500
 
 200 rem "== goto X subroutine =="
 201 rem "goes to line ln, if ln>0"
@@ -35,6 +38,7 @@
 799 return
 
 800 rem "program state setup"
+805 db=0: rem "flag db (debug): print debugging information"
 810 sd=1: rem "flag send: send characters typed on keyboard to modem right away"
 820 ui=0: rem "flag ui (user input): we're waiting on a 1-char keyboard input from the user"
 830 ring=0: rem "flag ring (incoming call)"
@@ -60,10 +64,10 @@
 1100 rem "received complete line from modem"
 1102 if mf$<>"" and fc<20 then mf$(fc)=mf$: fc=fc+1
 1105 if ml$="" then return
-1110 print "modem line: ";ml$
-1120 print "modem field count: ";fc
-1130 print "modem fields: ";
-1140 for i=0 to(fc-1): print"[";mf$(i);"]",: next i
+1110 if db=1 then print "modem line: ";ml$
+1120 if db=1 then print "modem field count: ";fc
+1130 if db=1 then print "modem fields: ";
+1140 if db=1 then for i=0 to(fc-1): print"[";mf$(i);"]",: next i
 1150 print
 1180 f1$="": ml$="": fc=0: mf$=""
 1190 mn=0
@@ -109,8 +113,9 @@
 1248 if mf$(0)="no answer" then mn=48
 
 1250 rem "TODO: all other messages (responses to AT commands)"
+1251 if mf$(0)="+clcc" then mn=51
 
-1300 print "message is type";mn
+1300 if db=1 then print "message is type";mn
 1310 rem "Check if jumptable is set for this message type, if so, call handler"
 1320 ln=jt%(mn): if ln>0 then gosub 200
 
@@ -252,11 +257,13 @@
 14199 return
 
 14200 rem "Message handler: incoming call (ring)"
-14210 print "Incoming call! Do you want to answer it? y/n"
-14215 gosub 5100
-14220 if u$="y" or u$="Y" then goto 14250
-14230 if u$="n" or u$="N" then goto 14280
-14240 print "Type y or n": goto 14215: rem "unexpected char"
+14205 canvas0clr:s$="at+clcc"+chr$(13):gosub 5000: rem "send AT+CLCC (list current calls)"
+14210 print "{clr}Incoming call on SIM";sn
+14211 print "{down}{down}[a]ccept or [r]eject?"
+14215 gosub 1000:getu$
+14220 if u$="a" or u$="A" then goto 14250
+14230 if u$="r" or u$="R" then goto 14280
+14240 goto 14215: rem "unexpected char"
 14250 rem "--- Answer call (Y) ---"
 14260 s$="ata"+chr$(13): gosub 5000: rem "send ATA (answer)"
 14265 return
@@ -266,6 +273,8 @@
 14299 return
 
 14300 rem "Message handler: message type 43"
+14305 canvas0clr: print "{clr}";
+14310 print "{down}{down}call ended"
 14399 return
 
 14400 rem "Message handler: message type 44"
@@ -289,7 +298,8 @@
 15000 rem "Message handler: message type 50"
 15099 return
 
-15100 rem "Message handler: message type 51"
+15100 rem "Message handler: message type 51 (+clcc: list current calls)"
+15110 if mf$(4)="0" then print "caller id: ";mf$(6)
 15199 return
 
 15200 rem "Message handler: message type 52"
