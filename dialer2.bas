@@ -39,7 +39,8 @@
 320 sc=1: rem "current screen to be displayed and user input to be taken"
 322 su=0: rem "flag su (screen update): a change in the program requires a screen update"
 330 cid$="": rem "caller id (number)"
-332 dr$="": rem "dr (dialing result): user friendly information about dialing state"
+332 dr$="": rem "dr (dialling result): user friendly information about dialling state"
+334 dia=0: rem "flag dia (dialling): the modem is currently dialling"
 399 return
 
 400 rem "=== setup for modem parser ==="
@@ -66,6 +67,7 @@
 1020 if sc=1 then gosub 3000: rem "user input and screen update for screen 1 (dialer)"
 1020 if sc=2 then gosub 3100
 1030 if sc=3 then gosub 3200
+1040 if sc=4 then gosub 3300
 
 1070 rem "--- get modem input ---"
 1075 gosub 1100
@@ -232,7 +234,7 @@
 3264 rem "we should wait for OK (OR ERROR)!!"
 3299 return
 
-3300 rem "### SC 4 (DIALING) HANDLER ###"
+3300 rem "### SC 4 (DIALLING) HANDLER ###"
 3310 if su=1 then gosub 6200: su=0
 3312 cnt=cnt+1: if fn m1k(cnt)=0 then gosub 6200
 3320 u$="":get u$
@@ -242,7 +244,7 @@
 3360 s$="ath"+chr$(13): gosub 1200: rem "send ATH (hang up)"
 3362 gosub 1910: rem "SCREEN 1 (DIALER)"
 3364 rem "we should wait for OK (OR ERROR)!!"
-3366 dr$="": rem "reset dialing result"
+3366 dr$="": rem "reset dialling result"
 3399 return
 
 5000 rem "### SC 1 (DIALER) SCREEN UPDATE ###"
@@ -324,7 +326,7 @@
 
 
 6000 rem "### SC 2 (RING) SCREEN UPDATE ###"
-6005 canvas 0 clr : print "{clr}"
+6005 canvas 0 clr : print "{clr}";
 6010 print "Incoming call!"
 6020 if cid$<>"" then print "Caller: ";cid$: goto 6040
 6030 print "{down}";
@@ -332,14 +334,14 @@
 6099 return
 
 6100 rem "### SC 3 (IN-CALL) SCREEN UPDATE ###"
-6105 canvas 0 clr : print "{clr}"
+6105 canvas 0 clr : print "{clr}";
 6110 print "In-call with ";cid$
 6120 print "{down}[h]ang up"
 6199 return
 
-6200 rem "### SC 4 (DIALING) SCREEN UPDATE ###"
-6205 canvas 0 clr : print "{clr}"
-6210 print "Dialing ";nb$;"..."
+6200 rem "### SC 4 (DIALLING) SCREEN UPDATE ###"
+6205 canvas 0 clr : print "{clr}";
+6210 print "Dialling ";nb$
 6220 if dr$<>"" then print dr$: goto 6240
 6230 print "{down}";
 6240 print "{down}[h]ang up"
@@ -468,7 +470,7 @@
 13999 return
 
 14000 rem "Message handler: OK"
-14010 if sc=4 then cid$=nb$: gosub 1930: dr$="": rem "connection established with target number"
+14010 if sc=4 then dia=1: s$="at+clcc"+chr$(13): gosub 1200: rem "ATD succeeded, dialling..."
 14099 return
 
 14100 rem "Message handler: message type 41"
@@ -481,9 +483,9 @@
 
 14300 rem "Message handler: no carrier"
 14310 rem "TODO: depending on which screen we are, we can set different messages to be displayed to the user when the call is hung up"
-14311 if sc=1 then gosub 1910: cid$="": return
-14312 if sc=2 then gosub 1910: cid$="": return
-14313 if sc=3 then gosub 1910: cid$="": return
+14311 if sc=1 then s$="ath"+chr$(13): gosub 1200: gosub 1910: cid$="": return
+14312 if sc=2 then s$="ath"+chr$(13): gosub 1200: gosub 1910: cid$="": return
+14313 if sc=3 then s$="ath"+chr$(13): gosub 1200: gosub 1910: cid$="": return
 14314 if sc=4 then dr$="connection cannot be established"
 14399 return
 
@@ -511,7 +513,13 @@
 15099 return
 
 15100 rem "Message handler: +clcc (list current calls)"
-15110 if mf$(4)="0" then cid$=right$(left$(mf$(6),len(mf$(6))-1),len(mf$(6))-2)
+15110 if sc<>4 and mf$(4)="0" then cid$=right$(left$(mf$(6),len(mf$(6))-1),len(mf$(6))-2): su=1
+15150 if sc=4 and dia=1 and mf$(4)="0" then goto 15170
+15160 return
+15170 if mf$(3)="2" then dr$="Dialling...": su=1
+15172 if mf$(3)="3" then dr$="Alerting target...!": su=1
+15174 if mf$(3)="0" then dr$="": cid$=nb$: gosub 1930: rem "call is active, switch to screen 3"
+15179 s$="at+clcc"+chr$(13): gosub 1200: rem "send again the at+clcc command"
 15199 return
 
 15200 rem "Message handler: message type 52"
