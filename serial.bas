@@ -14,7 +14,10 @@
 
 2000 rem "get character from serial, print it"
 2010 b$=""
-2020 get#1,b$: if b$<>"" then print b$;
+2020 get#1,b$
+2022 if b$<>"" and b$<>chr$(13) and b$<>chr$(10) then print b$;
+2024 if b$=chr$(13) then print chr$(13)+"<cr>";
+2026 if b$=chr$(10) then print "<lf>"+chr$(13);
 2030 return
 
 20000 rem "write a string to the modem, working around the print# bug"
