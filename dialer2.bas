@@ -14,9 +14,12 @@
 80 rem "--- functions definition ---"
 81 def fn m6(x) = x-(int(x/6)*6): rem "x modulo 6; x % 6"
 82 def fn m1k(x) = x-(int(x/1000)*1000): rem "x modulo 1000; x % 1000"
+85 mdv=1 : rem "modulo divisor"
+86 def fn mod(x) = x-(int(x/mdv)*mdv): rem "x modulo mdv; x % mdv"
 
 
-90 gosub 1910: rem "start the program on screen 1 (dialer)"
+90 if db=1 then gosub 1900: goto 99: rem "if db=1, sc=0 (debug screen)"
+91 gosub 1910: rem "start the program on screen 1 (dialer)"
 99 goto 1000
 
 
@@ -41,6 +44,9 @@
 330 cid$="": rem "caller id (number)"
 332 dr$="": rem "dr (dialling result): user friendly information about dialling state"
 334 dia=0: rem "flag dia (dialling): the modem is currently dialling"
+336 rssi=99: rem "rssi: received signal strength indicator"
+337 ber=99: rem "ber: channel bit error rate"
+340 cnt=0: rem "loop counter"
 399 return
 
 400 rem "=== setup for modem parser ==="
@@ -52,25 +58,32 @@
 499 return
 
 500 rem "=== modem setup ==="
+510 s$="ate0"+chr$(13): gosub 1200: rem "no echo from modem"
 599 return
 
 600 rem "=== GUI-related setup ==="
 610 u$="": nb$="": rem "user-input char and number initialization"
 630 sl%=0: rem "Signal Level integer [0:5]"
-640 cnt=0: rem "loop counter"
+635 ber$="?": rem "Bit Error Rate string to be displayed"
 650 tmr=1000: rem "timer for keystrokes"
 699 return
 
 
 1000 rem "### main loop ###"
-1010 rem "--- get user input ---"
-1020 if sc=1 then gosub 3000: rem "user input and screen update for screen 1 (dialer)"
-1020 if sc=2 then gosub 3100
-1030 if sc=3 then gosub 3200
-1040 if sc=4 then gosub 3300
+1005 cnt=cnt+1
+1010 rem "--- get user input / update screen ---"
+1020 if sc=0 then gosub 9000
+1021 if sc=1 then gosub 3000: rem "user input and screen update for screen 1 (dialer)"
+1022 if sc=2 then gosub 3100
+1023 if sc=3 then gosub 3200
+1024 if sc=4 then gosub 3300
 
-1070 rem "--- get modem input ---"
-1075 gosub 1100
+1050 rem "--- get modem input ---"
+1052 gosub 1100
+
+1080 rem "--- perform regular tasks ---"
+1082 mdv=500: if fn mod(cnt)=0 then s$="at+csq"+chr$(13): gosub 1200: rem "request signal quality report every 500 loops"
+
 1098 rem "--- end main loop ---"
 1099 goto 1000
 
@@ -96,11 +109,15 @@
 1599 return
 
 
-
 1900 rem "### change SCREEN ###"
 1901 rem "change the current screen"
 1902 rem "it switches graphics/text mode only if necessary"
 1903 rem "it triggers an initial update of the screen"
+
+1905 rem "=== change to screen 0 (debug) ==="
+1906 sc=0 
+1907 gosub 9000
+1909 return
 
 1910 rem "=== change to screen 1 ==="
 1912 sc=1
@@ -137,7 +154,6 @@
 2120 if db=1 then print "modem field count: ";fc
 2130 if db=1 then print "modem fields: ";
 2140 if db=1 then for i=0 to(fc-1): print"[";mf$(i);"]",: next i
-2150 print
 2180 f1$="": ml$="": fc=0: mf$=""
 2190 mn=0
 
@@ -181,6 +197,7 @@
 
 2250 rem "--- AT commands responses ---"
 2251 if mf$(0)="+clcc" then mn=51
+2252 if mf$(0)="+csq" then mn=52
 
 2300 rem "=== Jump to handler ==="
 2310 if db=1 then print "message is type";mn
@@ -194,7 +211,7 @@
 3002 rem "read input chars and update string (phone number)"
 3009 if su=1 then gosub 5000: su=0
 3010 u$="": get u$
-3012 cnt=cnt+1: if fn m1k(cnt)=0 then sl%=fn m6(sl%+1): gosub 5400: rem "we trigger a signal update every 1000 loops"
+3012 if fn m1k(cnt)=0 then gosub 5000: rem "we trigger a screen update every 1000 loops"
 3013 tmr=tmr-1: if tmr=0 then gosub 5200: rem "we trigger a dial tiles update every 1000 loops since last"
 3014 if u$="" then return
 3020 if u$<>chr$(20) and u$<>chr$(13) and len(nb$)>=19 then return: rem "limit length is 18, go to loop start"
@@ -206,7 +223,7 @@
 
 3100 rem "### SC 2 (RING) HANDLER ###"
 3110 if su=1 then gosub 6000: su=0
-3112 cnt=cnt+1: if fn m1k(cnt)=0 then gosub 6000
+3112 if fn m1k(cnt)=0 then gosub 6000
 3120 u$="": get u$
 3122 if u$="a" or u$="A" then goto 3150
 3124 if u$="r" or u$="R" then goto 3180
@@ -224,7 +241,7 @@
 
 3200 rem "### SC 3 (IN-CALL) HANDLER ###"
 3110 if su=1 then gosub 6100: su=0
-3112 cnt=cnt+1: if fn m1k(cnt)=0 then gosub 6100
+3112 if fn m1k(cnt)=0 then gosub 6100
 3220 u$="": get u$
 3222 if u$="h" or u$="H" then goto 3250
 3226 return: rem "not H"
@@ -236,7 +253,7 @@
 
 3300 rem "### SC 4 (DIALLING) HANDLER ###"
 3310 if su=1 then gosub 6200: su=0
-3312 cnt=cnt+1: if fn m1k(cnt)=0 then gosub 6200
+3312 if fn m1k(cnt)=0 then gosub 6200
 3320 u$="":get u$
 3322 if u$="h" or u$="H" then goto 3350
 3326 return: rem "not H"
@@ -253,16 +270,20 @@
 5099 return
 
 5100 rem "=== screen text update ==="
-5110 print chr$(147);: rem "clr text"
-5120 print "{yel}";
+5110 print "{clr}";: rem "clr text"
+5112 print "{yel}";: rem "yellow text"
+5120 print "{home}";: 
 5130 print "UCCCCCCCCCCCCCCCCCCCI"
 5140 print "B                   B"
 5150 print "B";
 5152 print nb$;
 5154 for j=1 to 19-len(nb$): if len(nb$)<19 then print " ";: next j: rem "special case: for i=1 to 0 still goes into loop, so if len()=max we don't wanna print a space; TODO: use SPC(x) command!"
 5156 print "B"
-5160 print "B                   B"
+5160 print "B                   B             "
 5170 print "JCCCCCCCCCCCCCCCCCCCK"
+
+5180 rem "BER is always 99" xx=35: yy=3: gosub 5900: print "ber";ber$;: rem "print the BER under signal strength"
+
 5199 return
 
 5200 rem "=== screen dial tiles update ==="
@@ -322,8 +343,13 @@
 
 5400 rem "=== screen signal icon update ==="
 5410 canvas 40+1+sl% stamp on canvas 0 at 40-5,0: rem "print the signal level canvas in the top right-hand corner"
-5420 return
+5499 return
 
+5900 rem "=== move the cursor to position xx,yy ==="
+5910 print "{home}";
+5920 if xx>0 then for i=1 to xx: print "{rght}";: next i
+5930 if yy>0 then for j=1 to yy: print "{down}";: next j
+5999 return
 
 6000 rem "### SC 2 (RING) SCREEN UPDATE ###"
 6005 canvas 0 clr : print "{clr}";
@@ -346,6 +372,10 @@
 6230 print "{down}";
 6240 print "{down}[h]ang up"
 6299 return
+
+9000 rem "### SC 0 (DEBUG) SCREEN UPDATE ###"
+9010 rem "we don't clr or print, and let debug messages be"
+9099 return
 
 9999 rem "### MESSAGE HANDLERS ###"
 
@@ -522,7 +552,14 @@
 15179 s$="at+clcc"+chr$(13): gosub 1200: rem "send again the at+clcc command"
 15199 return
 
-15200 rem "Message handler: message type 52"
+15200 rem "Message handler: +csq (signal quality report)"
+15210 rssi=val(mf$(1)): ber=val(mf$(2))
+15220 if rssi=99 or rssi=199 then sl%=0
+15222 if rssi>=0 and rssi<=31 then sl%=int((rssi/32*5)+1)
+15224 if rssi>=100 and rssi<=191 then sl%=int(((rssi-100)/92*5)+1)
+15230 if ber>=0 and ber<=7 then ber$=str$(ber)
+15232 if ber=99 then ber$="?"
+15298 su=1: rem "trigger screen update"
 15299 return
 
 15300 rem "Message handler: message type 53"
