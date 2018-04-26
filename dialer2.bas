@@ -41,6 +41,7 @@
 310 sd=1: rem "flag send: send characters typed on keyboard to modem right away"
 320 sc=1: rem "current screen to be displayed and user input to be taken"
 322 su=0: rem "flag su (screen update): a change in the program requires a screen update"
+323 us=0: rem "flag us (updated screen): is set to 1 when the screen if actually updated"
 330 cid$="": rem "caller id (number)"
 332 dr$="": rem "dr (dialling result): user friendly information about dialling state"
 334 dia=0: rem "flag dia (dialling): the modem is currently dialling"
@@ -77,6 +78,9 @@
 1022 if sc=2 then gosub 3100
 1023 if sc=3 then gosub 3200
 1024 if sc=4 then gosub 3300
+
+1026 rem if us=1 then print "{home}+";: us=0: goto 1050: rem "print a char when screen is updated"
+1027 rem if us=0 then print "{home} ";: goto 1050: rem "remove the char when screen wasn't updated"
 
 1050 rem "--- get modem input ---"
 1052 gosub 1100
@@ -212,7 +216,7 @@
 3009 if su=1 then gosub 5000: su=0
 3010 u$="": get u$
 3012 if fn m1k(cnt)=0 then gosub 5000: rem "we trigger a screen update every 1000 loops"
-3013 tmr=tmr-1: if tmr=0 then gosub 5200: rem "we trigger a dial tiles update every 1000 loops since last"
+3013 tmr=tmr-1: if tmr=0 then gosub 5200: us=1: rem "we trigger a dial tiles update every 1000 loops since last"
 3014 if u$="" then return
 3020 if u$<>chr$(20) and u$<>chr$(13) and len(nb$)>=19 then return: rem "limit length is 18, go to loop start"
 3030 if u$="0" or u$="1" or u$="2" or u$="3" or u$="4" or u$="5" or u$="6" or u$="7" or u$="8" or u$="9" or u$="+" or u$="*" or u$="#" or u$="a" or u$="b" or u$="c" or u$="d" then nb$=nb$+u$: gosub 5000
@@ -267,19 +271,19 @@
 5000 rem "### SC 1 (DIALER) SCREEN UPDATE ###"
 5001 rem "=== dialer screen update subroutine ==="
 5010 gosub 5100: gosub 5200: gosub 5400: rem "call update subroutines"
+5020 us=1
 5099 return
 
 5100 rem "=== screen text update ==="
 5110 print "{clr}";: rem "clr text"
-5112 print "{yel}";: rem "yellow text"
-5120 print "{home}";: 
+5120 print "{yel}";: rem "yellow text"
 5130 print "UCCCCCCCCCCCCCCCCCCCI"
 5140 print "B                   B"
 5150 print "B";
 5152 print nb$;
 5154 for j=1 to 19-len(nb$): if len(nb$)<19 then print " ";: next j: rem "special case: for i=1 to 0 still goes into loop, so if len()=max we don't wanna print a space; TODO: use SPC(x) command!"
 5156 print "B"
-5160 print "B                   B             "
+5160 print "B                   B"
 5170 print "JCCCCCCCCCCCCCCCCCCCK"
 
 5180 rem "BER is always 99" xx=35: yy=3: gosub 5900: print "ber";ber$;: rem "print the BER under signal strength"
@@ -352,6 +356,7 @@
 5999 return
 
 6000 rem "### SC 2 (RING) SCREEN UPDATE ###"
+6002 us=1
 6005 canvas 0 clr : print "{clr}";
 6010 print "Incoming call!"
 6020 if cid$<>"" then print "Caller: ";cid$: goto 6040
@@ -360,12 +365,14 @@
 6099 return
 
 6100 rem "### SC 3 (IN-CALL) SCREEN UPDATE ###"
+6102 us=1
 6105 canvas 0 clr : print "{clr}";
 6110 print "In-call with ";cid$
 6120 print "{down}[h]ang up"
 6199 return
 
 6200 rem "### SC 4 (DIALLING) SCREEN UPDATE ###"
+6202 us=1
 6205 canvas 0 clr : print "{clr}";
 6210 print "Dialling ";nb$
 6220 if dr$<>"" then print dr$: goto 6240
