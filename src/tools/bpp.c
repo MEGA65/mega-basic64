@@ -73,7 +73,7 @@ int main(int argc,char **argv)
 	// Line starts with a label, so record and allocate
 	// line number.
 	char label[1024]="";
-	sscanf(line,"%[A-Z0-9_]* ",label);
+	sscanf(line,"%[A-Z0-9_+-]* ",label);
 	if (!label[0]) {
 	  fprintf(stderr,"%s:%d: Could not parse label at start of line.\n",
 		  argv[i],fl);
@@ -156,7 +156,9 @@ int main(int argc,char **argv)
 		   &&
 		   ((line[j]>='A'&&line[j]<='Z')
 		    ||(symbol_len&&(line[j]>='0'&&line[j]<='9'))
-		    ||(symbol_len&&line[j]=='_'))
+		    ||(symbol_len&&line[j]=='_')
+		    ||(symbol_len&&line[j]=='+')
+		    ||(symbol_len&&line[j]=='-'))
 		   ) {
 	  // beginning or continuation of symbol
 	  symbol[symbol_len++]=line[j];
