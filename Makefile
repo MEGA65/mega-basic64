@@ -53,14 +53,25 @@ DIALER_ASSETS= \
 		$(ASSETS)/bluephone.png \
 		$(ASSETS)/bluephone.png \
 		$(ASSETS)/satellite_pressed.png \
-		$(ASSETS)/signal0.png \
-		$(ASSETS)/signal1.png \
-		$(ASSETS)/signal2.png \
-		$(ASSETS)/signal3.png \
-		$(ASSETS)/signal4.png \
-		$(ASSETS)/signal5.png \
+		$(ASSETS)/signal0_24x16.png \
+		$(ASSETS)/signal1_24x16.png \
+		$(ASSETS)/signal2_24x16.png \
+		$(ASSETS)/signal3_24x16.png \
+		$(ASSETS)/signal4_24x16.png \
+		$(ASSETS)/signal5_24x16.png \
 		$(ASSETS)/dualsim.png \
 		$(ASSETS)/dualsim_pressed.png \
+		$(ASSETS)/battery0.png \
+		$(ASSETS)/battery10.png \
+		$(ASSETS)/battery20.png \
+		$(ASSETS)/battery30.png \
+		$(ASSETS)/battery40.png \
+		$(ASSETS)/battery50.png \
+		$(ASSETS)/battery60.png \
+		$(ASSETS)/battery70.png \
+		$(ASSETS)/battery80.png \
+		$(ASSETS)/battery90.png \
+		$(ASSETS)/battery100.png \
 
 VEHICLE_ASSETS=	\
 		$(ASSETS)/vehicle_console_cluster.svg.png \

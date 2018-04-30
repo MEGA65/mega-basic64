@@ -23,6 +23,20 @@ if xx>0 then for i=1 to xx: print "{rght}";: next i
 if yy>0 then for j=1 to yy: print "{down}";: next j
 return
 
+BATTERY_UPDATE rem "=== update the battery level ==="
+if btp>=0 and btp <=5 then bl%=0
+if btp>5 and btp <=15 then bl%=1
+if btp>15 and btp <=25 then bl%=2
+if btp>25 and btp <=35 then bl%=3
+if btp>35 and btp <=45 then bl%=4
+if btp>45 and btp <=55 then bl%=5
+if btp>55 and btp <=65 then bl%=6
+if btp>65 and btp <=75 then bl%=7
+if btp>75 and btp <=85 then bl%=8
+if btp>85 and btp <=95 then bl%=9
+if btp>95 and btp <=100 then bl%=10
+return
+
 
 rem "### switch to SCREEN ###"
 rem "change the current screen"
@@ -30,30 +44,35 @@ rem "it switches graphics/text mode only if necessary"
 rem "it triggers an initial update of the screen"
 
 SWITCH_TO_SCREEN_0 rem "=== switch to screen 0 (debug) ==="
-sc=0 
+sc=0
+print "{clr}";: canvas 0 clr: rem "clear screen"
 gosub DRAW_SCREEN_0
 return
 
 SWITCH_TO_SCREEN_1 rem "=== switch to screen 1 ==="
 sc=1
+print "{clr}";: canvas 0 clr: rem "clear screen"
 if peek(53272)=22 or peek(53272)=134 then poke 53272,21: rem "we want graphics mode"
 gosub DRAW_SCREEN_1: rem "trigger initial screen update"
 return
 
 SWITCH_TO_SCREEN_2 rem "=== switch to screen 2 ==="
 sc=2
+print "{clr}";: canvas 0 clr: rem "clear screen"
 if peek(53272)=20 or peek(53272)=132 then poke 53272,23: rem "we want text mode"
 gosub DRAW_SCREEN_2: rem "trigger initial screen update"
 return
 
 SWITCH_TO_SCREEN_3 rem "=== switch to screen 3 ==="
 sc=3
+print "{clr}";: canvas 0 clr: rem "clear screen"
 if peek(53272)=20 or peek(53272)=132 then poke 53272,23: rem "we want text mode"
 gosub DRAW_SCREEN_3: rem "trigger initial screen update"
 return
 
 SWITCH_TO_SCREEN_4 rem "=== switch to screen 4 ==="
 sc=4
+print "{clr}";: canvas 0 clr: rem "clear screen"
 if peek(53272)=20 or peek(53272)=132 then poke 53272,23: rem "we want text mode"
 gosub DRAW_SCREEN_4: rem "trigger initial screen update"
 return

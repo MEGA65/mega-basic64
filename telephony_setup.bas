@@ -13,6 +13,7 @@ dr$="": rem "dr (dialling result): user friendly information about dialling stat
 dia=0: rem "flag dia (dialling): the modem is currently dialling"
 rssi=99: rem "rssi: received signal strength indicator"
 ber=99: rem "ber: channel bit error rate"
+btp=100.0: rem "remaining battery percentage [0:100]"
 cnt=0: rem "loop counter"
 return
 
@@ -32,6 +33,7 @@ SETUP_GUI rem "=== GUI-related setup ==="
 u$="": nb$="": rem "user-input char and number initialization"
 sl%=0: rem "Signal Level integer [0:5]"
 ber$="?": rem "Bit Error Rate string to be displayed"
+bl%=10: rem "Battery Level integer [0:10]"
 tmr=1000: rem "timer for keystrokes"
 return
 

@@ -2,7 +2,7 @@ poke 53280,0: poke 53281,0: rem "border and screen color (0: black)"
 poke 0,65: rem "fast mode (50mhz cpu clock)"
 poke 53248+111,128: rem "fix screen artifacts (60hz display)"
 
-print chr$(147);: canvas 0 clr: rem "clear screen"
+print "{clr}";: canvas 0 clr: rem "clear screen"
 
 goto INIT
 
@@ -32,5 +32,7 @@ ML1 rem "--- get modem input ---"
 gosub POLL_MODEM
 rem "--- perform regular tasks ---"
 mdv=500: if fn mod(cnt)=0 then s$="at+csq"+chr$(13): gosub WRITE_STRING_TO_MODEM: rem "request signal quality report every 500 loops"
+mdv=1000: if fn mod(cnt)=0 then mdv=100: btp=fn mod(btp-1): gosub BATTERY_UPDATE: rem "[test] decrease battery level"
+
 rem "--- end main loop ---"
 goto MAIN_LOOP

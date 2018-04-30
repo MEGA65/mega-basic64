@@ -1,21 +1,52 @@
+DRAW_STATUS_BAR rem "### STATUS BAR DRAWER ###"
+print "{wht}";: rem "white text"
+gosub PRINT_CLOCK: gosub STAMP_SIGNAL_ICON: gosub STAMP_BATTERY_ICON
+return
+
+STAMP_SIGNAL_ICON rem "=== screen signal icon update ==="
+xx=30: yy=0: gosub MOVE_CURSOR_XX_YY: print "3g+";
+canvas 40+1+sl% stamp on canvas 0 at 32,0: rem "print the signal level canvas in the status bar"
+rem "BER is always 99" xx=25: yy=3: gosub MOVE_CURSOR_XX_YY: print "ber";ber$;: rem "print the BER under signal strength"
+return
+
+STAMP_BATTERY_ICON rem "=== screen battery icon update ==="
+shi=0: bls$=""
+if len(str$(int(btp+0.5)))= 4 then shi=0: rem "btp=100"
+if len(str$(int(btp+0.5)))= 3 then shi=1: rem "10<=btp<=99"
+if len(str$(int(btp+0.5)))= 2 then shi=2: rem "0<=btp<=9" 
+for i=1 to shi: if shi<>0 then bls$=bls$+" ": next i: rem "we add shi spaces at the beginning of the printed string"
+bls$=bls$+right$(str$(int(btp+0.5)),3-shi)+"%": rem "e.g.: '100%', ' 75%', '  9%'"
+if len(str$(int(btp+0.5)))<2 or len(str$(int(btp+0.5)))>4 then bls$="   ?%": rem "unexpected length -> unexpected number"
+xx=35: yy=0: gosub MOVE_CURSOR_XX_YY: print bls$;
+canvas 49+bl% stamp on canvas 0 at 39,0: rem "print the battery level canvas in the status bar"
+return
+
+PRINT_CLOCK rem "=== print clock in status bar ==="
+t$=time$
+xx=16: yy=0: gosub MOVE_CURSOR_XX_YY:
+print left$(t$,2);":";
+print mid$(t$,3,2);":";
+print right$(t$,2);
+return
+
+
+
 DRAW_SCREEN_1 rem "### SC 1 (DIALER) SCREEN UPDATE ###"
 rem "=== dialer screen update subroutine ==="
-gosub DRAW_SCREEN_1_TEXT: gosub DRAW_SCREEN_1_TILES: gosub STAMP_SIGNAL_BARS: rem "call update subroutines"
+gosub DRAW_STATUS_BAR
+gosub DRAW_SCREEN_1_TEXT: gosub DRAW_SCREEN_1_TILES: rem "call update subroutines"
 us=1
 return
 
 DRAW_SCREEN_1_TEXT rem "=== screen text update ==="
-print "{clr}";: rem "clr text"
 print "{yel}";: rem "yellow text"
+xx=0: yy=2: gosub MOVE_CURSOR_XX_YY
 print "UCCCCCCCCCCCCCCCCCCCI"
-print "B                   B"
 print "B";
 print nb$;
 for j=1 to 19-len(nb$): if len(nb$)<19 then print " ";: next j: rem "special case: for i=1 to 0 still goes into loop, so if len()=max we don't wanna print a space; TODO: use SPC(x) command!"
 print "B"
-print "B                   B"
 print "JCCCCCCCCCCCCCCCCCCCK"
-rem "BER is always 99" xx=35: yy=3: gosub MOVE_CURSOR_XX_YY: print "ber";ber$;: rem "print the BER under signal strength"
 return
 
 DRAW_SCREEN_1_TILES rem "=== screen dial tiles update ==="
@@ -73,11 +104,8 @@ STAMP_SATTELITE canvas 20 stamp on canvas 0 at 16,5: return: rem "satellite"
 STAMP_DUALSIM_PRESSED canvas 48 stamp on canvas 0 at 16,21: return: rem "dual sim (pressed)"
 STAMP_DUALSIM canvas 47 stamp on canvas 0 at 16,21: return: rem "dual sim"
 
-STAMP_SIGNAL_BARS rem "=== screen signal icon update ==="
-canvas 40+1+sl% stamp on canvas 0 at 40-5,0: rem "print the signal level canvas in the top right-hand corner"
-return
-
 DRAW_SCREEN_2 rem "### SC 2 (RING) SCREEN UPDATE ###"
+gosub DRAW_STATUS_BAR
 us=1
 canvas 0 clr : print "{clr}";
 print "Incoming call!"
@@ -87,6 +115,7 @@ DS2_K print "{down}[a]ccept or [r]eject?"
 return
 
 DRAW_SCREEN_3 rem "### SC 3 (IN-CALL) SCREEN UPDATE ###"
+gosub DRAW_STATUS_BAR
 us=1
 canvas 0 clr : print "{clr}";
 print "In-call with ";cid$
@@ -94,6 +123,7 @@ print "{down}[h]ang up"
 return
 
 DRAW_SCREEN_4 rem "### SC 4 (DIALLING) SCREEN UPDATE ###"
+gosub DRAW_STATUS_BAR
 us=1
 canvas 0 clr : print "{clr}";
 print "Dialling ";nb$

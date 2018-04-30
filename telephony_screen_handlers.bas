@@ -2,7 +2,7 @@ HANDLER_SCREEN_1 rem "### SC 1 (DIALER) HANDLER ###"
 rem "read input chars and update string (phone number)"
 if su=1 then gosub DRAW_SCREEN_1: su=0
 u$="": get u$
-if fn m1k(cnt)=0 then gosub DRAW_SCREEN_1: rem "we trigger a screen update every 1000 loops"
+mdv=50: if fn mod(cnt)=0 then gosub DRAW_SCREEN_1: rem "we trigger a screen update every 1000 loops"
 tmr=tmr-1: if tmr=0 then gosub DRAW_SCREEN_1_TILES: us=1: rem "we trigger a dial tiles update every 1000 loops since last"
 if u$="" then return
 if u$<>chr$(20) and u$<>chr$(13) and len(nb$)>=19 then return: rem "limit length is 18, go to loop start"
@@ -14,7 +14,7 @@ return
 
 HANDLER_SCREEN_2 rem "### SC 2 (RING) HANDLER ###"
 if su=1 then gosub DRAW_SCREEN_2: su=0
-if fn m1k(cnt)=0 then gosub DRAW_SCREEN_2
+mdv=50: if fn mod(cnt)=0 then gosub DRAW_SCREEN_2
 u$="": get u$
 if u$="a" or u$="A" then goto HS2_A
 if u$="r" or u$="R" then goto HS2_R
@@ -32,7 +32,7 @@ return
 
 HANDLER_SCREEN_3 rem "### SC 3 (IN-CALL) HANDLER ###"
 if su=1 then gosub DRAW_SCREEN_3: su=0
-if fn m1k(cnt)=0 then gosub DRAW_SCREEN_3
+mdv=50: if fn mod(cnt)=0 then gosub DRAW_SCREEN_3
 u$="": get u$
 if u$="h" or u$="H" then goto HS3_H
 return : rem "not H"
@@ -44,7 +44,7 @@ return
 
 HANDLER_SCREEN_4 rem "### SC 4 (DIALLING) HANDLER ###"
 if su=1 then gosub DRAW_SCREEN_4: su=0
-if fn m1k(cnt)=0 then gosub DRAW_SCREEN_4
+mdv=50: if fn mod(cnt)=0 then gosub DRAW_SCREEN_4
 u$="":get u$
 if u$="h" or u$="H" then goto HS4_H
 return : rem "not H"
