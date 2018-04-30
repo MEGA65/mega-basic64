@@ -12,6 +12,9 @@ HANDLE_MODEM_LINE rem "=== handle modem line ==="
 rem "received complete line from modem"
 if mf$<>"" and fc<20 then mf$(fc)=mf$: fc=fc+1
 if ml$="" then return
+for i=0 to(fc-1)
+if left$(mf$(i),1)=" " then mf$(i)=right$(mf$(i),len(mf$(i))-1): rem "trim one space at the beginning of each field, if there is a whitespace"
+next i
 if db=1 then print "modem line: ";ml$
 if db=1 then print "modem field count: ";fc
 if db=1 then print "modem fields: ";
@@ -67,4 +70,6 @@ if mf$(0)="no answer" then mn=48
 rem "--- AT commands responses ---"
 if mf$(0)="+clcc" then mn=51
 if mf$(0)="+csq" then mn=52
+if mf$(0)="+qnwinfo" then mn=53
+if mf$(0)="+qspn" then mn=54
 return

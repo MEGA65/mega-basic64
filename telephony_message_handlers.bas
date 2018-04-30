@@ -185,7 +185,27 @@ MESSAGE_HANDLER_+CSQ rem "Message handler: +csq (signal quality report)"
 15298 su=1: rem "trigger screen update"
 15299 return
 
-MESSAGE_HANDLER_53 rem "Message handler: message type 53"
+MESSAGE_HANDLER_53 rem "Message handler: +qnwinfo (network information report)"
+nact$=right$(left$(mf$(1),len(mf$(1))-1),len(mf$(1))-2): rem "get nwact, without quotes"
+nt$="?": rem "nwact is not in the following list (should not happen)"
+if nact$="none" then nt$=""
+if nact$="cdma1x" then nt$="3g": rem "3g? abbreviation to check"
+if nact$="cdma1x and hdr" then nt$="3g": rem "3g? abbreviation to check"
+if nact$="cdma1x and ehrpd" then nt$="3g": rem "3g? abbreviation to check"
+if nact$="hdr" then nt$="2g": rem "2g? abbreviation to check"
+if nact$="hdr-ehrpd" then nt$="3g": rem "3g? abbreviation to check"
+if nact$="gsm" then nt$="2g"
+if nact$="gprs" then nt$="g"
+if nact$="edge" then nt$="e"
+if nact$="wcdma" then nt$="3g"
+if nact$="hsdpa" then nt$="h"
+if nact$="hsupa" then nt$="h"
+if nact$="hspa+" then nt$="h+"
+if nact$="tdscdma" then nt$="3g"
+if nact$="tdd lte" then nt$="lte"
+if nact$="fdd lte" then nt$="lte"
+su=1: rem "trigger screen update"
+
 15399 return
 
 MESSAGE_HANDLER_54 rem "Message handler: message type 54"

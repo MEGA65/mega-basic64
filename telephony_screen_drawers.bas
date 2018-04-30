@@ -4,7 +4,13 @@ gosub PRINT_CLOCK: gosub STAMP_SIGNAL_ICON: gosub STAMP_BATTERY_ICON
 return
 
 STAMP_SIGNAL_ICON rem "=== screen signal icon update ==="
-xx=30: yy=0: gosub MOVE_CURSOR_XX_YY: print "3g+";
+shi=0
+if len(nt$)=3 then shi=0
+if len(nt$)=2 then shi=1
+if len(nt$)=1 then shi=2
+xx=30: yy=0: gosub MOVE_CURSOR_XX_YY
+for i=1 to shi: if shi<>0 then print " ";: next i: rem "print shi spaces"
+print nt$;: rem "print the network type (abbreviation)"
 canvas 40+1+sl% stamp on canvas 0 at 32,0: rem "print the signal level canvas in the status bar"
 rem "BER is always 99" xx=25: yy=3: gosub MOVE_CURSOR_XX_YY: print "ber";ber$;: rem "print the BER under signal strength"
 return

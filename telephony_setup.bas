@@ -15,6 +15,9 @@ rssi=99: rem "rssi: received signal strength indicator"
 ber=99: rem "ber: channel bit error rate"
 btp=100.0: rem "remaining battery percentage [0:100]"
 cnt=0: rem "loop counter"
+nact$="": rem "network access technology (GSM, EDGE, HSPA, LTE...)"
+nt$="": rem "network type, to be displayed (2G, 3G, 4G...)"
+
 return
 
 SETUP_PARSER rem "=== setup for modem parser ==="

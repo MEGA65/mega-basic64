@@ -33,6 +33,8 @@ gosub POLL_MODEM
 rem "--- perform regular tasks ---"
 mdv=500: if fn mod(cnt)=0 then s$="at+csq"+chr$(13): gosub WRITE_STRING_TO_MODEM: rem "request signal quality report every 500 loops"
 mdv=1000: if fn mod(cnt)=0 then mdv=100: btp=fn mod(btp-1): gosub BATTERY_UPDATE: rem "[test] decrease battery level"
+mdv=1000: if fn mod(cnt+250)=0 then s$="at+qnwinfo"+chr$(13): gosub WRITE_STRING_TO_MODEM: rem "request network info report every 1000 loops"
+mdv=1000: if fn mod(cnt+500)=0 then s$="at+qspn"+chr$(13): gosub WRITE_STRING_TO_MODEM: rem "request network name every 1000 loops"
 
 rem "--- end main loop ---"
 goto MAIN_LOOP
