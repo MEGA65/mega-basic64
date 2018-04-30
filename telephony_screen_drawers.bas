@@ -1,6 +1,6 @@
 DRAW_STATUS_BAR rem "### STATUS BAR DRAWER ###"
 print "{wht}";: rem "white text"
-gosub PRINT_CLOCK: gosub STAMP_SIGNAL_ICON: gosub STAMP_BATTERY_ICON
+gosub PRINT_NETWORK_NAME: gosub PRINT_CLOCK: gosub STAMP_SIGNAL_ICON: gosub STAMP_BATTERY_ICON
 return
 
 STAMP_SIGNAL_ICON rem "=== screen signal icon update ==="
@@ -29,12 +29,17 @@ return
 
 PRINT_CLOCK rem "=== print clock in status bar ==="
 t$=time$
-xx=16: yy=0: gosub MOVE_CURSOR_XX_YY:
+xx=16: yy=0: gosub MOVE_CURSOR_XX_YY
 print left$(t$,2);":";
 print mid$(t$,3,2);":";
 print right$(t$,2);
 return
 
+PRINT_NETWORK_NAME rem "=== print network name in status bar ==="
+xx=0: yy=0: gosub MOVE_CURSOR_XX_YY
+print left$(nname$,10): rem "limit to 10 characters"
+if len(nname$)>10 then print "..."
+return
 
 
 DRAW_SCREEN_1 rem "### SC 1 (DIALER) SCREEN UPDATE ###"

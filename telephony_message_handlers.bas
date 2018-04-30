@@ -185,7 +185,7 @@ MESSAGE_HANDLER_+CSQ rem "Message handler: +csq (signal quality report)"
 15298 su=1: rem "trigger screen update"
 15299 return
 
-MESSAGE_HANDLER_53 rem "Message handler: +qnwinfo (network information report)"
+MESSAGE_HANDLER_+QNWINFO rem "Message handler: +qnwinfo (network information report)"
 nact$=right$(left$(mf$(1),len(mf$(1))-1),len(mf$(1))-2): rem "get nwact, without quotes"
 nt$="?": rem "nwact is not in the following list (should not happen)"
 if nact$="none" then nt$=""
@@ -205,10 +205,12 @@ if nact$="tdscdma" then nt$="3g"
 if nact$="tdd lte" then nt$="lte"
 if nact$="fdd lte" then nt$="lte"
 su=1: rem "trigger screen update"
-
 15399 return
 
-MESSAGE_HANDLER_54 rem "Message handler: message type 54"
+MESSAGE_HANDLER_+QSPN rem "Message handler: +QSPN (registered network name report)"
+nname$=right$(left$(mf$(2),len(mf$(2))-1),len(mf$(2))-2): rem "get SNN, without quotes"
+rem "mf$(1) is FNN (Full Network Name), mf$(2) is SNN (Short Network Name)"
+su=1: rem "trigger screen update"
 15499 return
 
 MESSAGE_HANDLER_55 rem "Message handler: message type 55"
