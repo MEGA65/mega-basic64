@@ -59,6 +59,8 @@ DIALER_ASSETS= \
 		$(ASSETS)/signal3.png \
 		$(ASSETS)/signal4.png \
 		$(ASSETS)/signal5.png \
+		$(ASSETS)/dualsim.png \
+		$(ASSETS)/dualsim_pressed.png \
 
 VEHICLE_ASSETS=	\
 		$(ASSETS)/vehicle_console_cluster.svg.png \
@@ -110,6 +112,9 @@ $(BINDIR)/megabasic64.prg:       $(MEGABASICOBJS) $(BINDIR)/megabanner.tiles
 
 $(BINDIR)/vehicle-console.prg:	src/vehicle-console.a65 $(BINDIR)/vehicle_console.tiles
 	$(OPHIS) src/vehicle-console.a65
+
+$(TOOLDIR)/bpp:	$(TOOLDIR)/bpp.c Makefile
+	$(CC) $(COPT) -o $(TOOLDIR)/bpp $(TOOLDIR)/bpp.c
 
 MKTILESET_SRCS=	$(TOOLDIR)/mktileset.c \
 		$(TOOLDIR)/mktileset_png.c \

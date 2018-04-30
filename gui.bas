@@ -19,7 +19,7 @@
 514 if u$="" goto 510
 520 if u$<>chr$(20) and u$<>chr$(13) and len(nb$)>=19 goto 510: rem "limit length is 18, go to loop start"
 530 if u$="0" or u$="1" or u$="2" or u$="3" or u$="4" or u$="5" or u$="6" or u$="7" or u$="8" or u$="9" or u$="+" or u$="*" or u$="#" or u$="a" or u$="b" or u$="c" or u$="d" then nb$=nb$+u$: gosub 1000
-535 if u$="-" or u$="/" or u$="=" or u$="@" then gosub 1000: rem "these characters don't update the string (for now)"
+535 if u$="-" or u$="/" or u$="=" or u$="@" or u$="<" or u$=">" then gosub 1000: rem "these characters don't update the string (for now)"
 540 if u$=chr$(20) and len(nb$)>=1 then nb$=left$(nb$,len(nb$)-1): gosub 1000: rem "remove a character, but only if there's at least one"
 545 if u$=chr$(13) then gosub 1000: rem "TODO: goto a subroutine to actually place the call"
 550 goto 510: rem "LOOP END"
@@ -69,6 +69,8 @@
 1245 gosub 1345
 1246 if u$="@" then gosub 1346: goto 1299
 1247 gosub 1347
+1248 if u$="<" or u$=">" then gosub 1348: goto 1299
+1249 gosub 1349
 1299 return
 
 1312 canvas x+(y-1)*3+1+20 stamp on canvas 0 at x*5-4,y*4+1: return: rem "1 to 9 (pressed)"
@@ -93,6 +95,8 @@
 1345 canvas 16 stamp on canvas 0 at 16,17: return: rem "="
 1346 canvas 20+20 stamp on canvas 0 at 16,5: return: rem "satellite (pressed)"
 1347 canvas 20 stamp on canvas 0 at 16,5: return: rem "satellite"
+1348 canvas 48 stamp on canvas 0 at 16,21: return: rem "dual sim (pressed)"
+1349 canvas 47 stamp on canvas 0 at 16,21: return: rem "dual sim"
 
 1400 rem "screen signal icon update"
 1410 canvas 40+1+sl% stamp on canvas 0 at 40-5,0: rem "print the signal level canvas in the top right-hand corner"

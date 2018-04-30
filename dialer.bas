@@ -1,30 +1,58 @@
-0 poke 53295,asc("g"): poke 53295,asc("s"): poke 53248+111,128
-1 poke 0,65: rem "fast mode"
-2 print chr$(14);: rem "switch to upper/lower charset"
+1 poke 53280,0: poke 53281,0: rem "border and screen color (0: black)"
+2 poke 0,65: rem "fast mode (50mhz cpu clock)"
+3 poke 53248+111,128: rem "fix screen artifacts (60hz display)"
+4 print chr$(14);: rem "switch to upper/lower charset"
 
-10 gosub 700: rem "one-time only lookup patch address"
+10 print chr$(147);: rem "clear screen"
 
-100 gosub 900: gosub 600
-500 gosub 1000
-510 get a$: if a$<>"" then print#1,a$;
+100 gosub 700: rem "one-time only lookup patch address"
+110 gosub 800: rem "program state setup"
+120 gosub 900: gosub 600
+130 goto 500
+
+200 rem "== goto X subroutine =="
+201 rem "goes to line ln, if ln>0"
+210 ln$=str$(ln): if ln<=0 then return
+220 for i=0 to 5: poke ja+i,32:next: rem "first rub out with spaces in case line number is short"
+230 for i=0 to len(ln$)-1: poke ja+i,asc(right$(left$(ln$,i+1),1)):next
+240 if ln>0 then gosub,00000: rem "gosub to line ln"
+250 poke ja,44: rem "put the comma back in case we want to run again"
+299 return
+
+500 rem "=== main loop ==="
+505 rem "--- get user input ---"
+510 get a$: if a$<>"" then goto 550: rem "get one keyboard char"
+520 goto 570
+550 if sd=1 then print#1,a$;: goto 500: rem "send mode, send char to modem"
+560 if sd=0 and ui=1 then 
+570 rem "--- get modem input ---"
+575 gosub 1000
+598 rem "--- end main loop ---"
 599 goto 500
 
 600 rem "setup modem"
+699 return
 
-700 for ja=2048 to 40959: if peek(ja-1)<>141 or peek(ja)<>44 then next: return
+700 rem "jump table: one-time only lookup patch address"
+701 for ja=2048 to 40959: if peek(ja-1)<>141 or peek(ja)<>44 then next: return
+799 return
 
+800 rem "program state setup"
+805 db=0: rem "flag db (debug): print debugging information"
+810 sd=1: rem "flag send: send characters typed on keyboard to modem right away"
+820 ui=0: rem "flag ui (user input): we're waiting on a 1-char keyboard input from the user"
+830 ring=0: rem "flag ring (incoming call)"
 899 return
 
 900 rem "setup for modem parser"
 910 dim mf$(20): rem "fields from colon-comma formatted messages"
 920 dim ol$(20): rem "lines from modem that don't conform to any normal message format"
-930 dim jt%(100):rem "jump table for message handling"
+930 dim jt%(100): rem "jump table for message handling"
 940 for i=0 to 99: jt%(i)=10000+100*i: next i
 950 open 1,2,1
-
 999 return
 
-1000 rem "read from cellular modem"
+1000 rem "read from cellular modem and parse received fields"
 1010 get#1,c$: if c$="" then return
 1020 if c$=chr$(13) or c$=chr$(10) then goto 1100
 1030 if c$=":" and fc=0 then mf$(0)=mf$: fc=1: mf$="": rem "first field is separated with a column"
@@ -36,15 +64,15 @@
 1100 rem "received complete line from modem"
 1102 if mf$<>"" and fc<20 then mf$(fc)=mf$: fc=fc+1
 1105 if ml$="" then return
-1110 print "modem line: ";ml$
-1120 print "modem field count: ";fc
-1130 print "modem fields: ";
-1140 for i=0 to(fc-1): print"[";mf$(i);"]",: next i
+1110 if db=1 then print "modem line: ";ml$
+1120 if db=1 then print "modem field count: ";fc
+1130 if db=1 then print "modem fields: ";
+1140 if db=1 then for i=0 to(fc-1): print"[";mf$(i);"]",: next i
 1150 print
 1180 f1$="": ml$="": fc=0: mf$=""
 1190 mn=0
 
-1200 rem "Parse modem messages"
+1200 rem "Parse modem messages": rem "URC (Unsollicited Result Codes)"
 
 1201 if mf$(0)="+creg" then mn=1
 1203 if mf$(0)="+cgreg" then mn=3
@@ -85,20 +113,22 @@
 1248 if mf$(0)="no answer" then mn=48
 
 1250 rem "TODO: all other messages (responses to AT commands)"
+1251 if mf$(0)="+clcc" then mn=51
 
-1300 print "message is type";mn
+1300 if db=1 then print "message is type";mn
 1310 rem "Check if jumptable is set for this message type, if so, call handler"
-1320 ln=jt%(mn):ln$=str$(ln): if ln=0 then return
-1330 for i=0 to 5: poke ja+i,32:next: rem "first rub out with spaces in case line number is short"
-1340 for i=0 to len(ln$)-1: poke ja+i,asc(right$(left$(ln$,i+1),1)):next
-1350 if ln>0 then gosub,00000: rem "gosub to line ln"
-1360 poke ja,44: rem "put the comma back in case we want to run again"
+1320 ln=jt%(mn): if ln>0 then gosub 200
 
 1999 return
+
 
 5000 rem "send string in s$ to modem"
 5010 for i=1 to len(s$): c$=right$(left$(s$,i),1): print#1,c$;: next i
 5099 return
+
+5100 rem "receive one non-empty char from keyboard"
+5110 u$="": get u$: if u$="" goto 5110
+5120 return
 
 10000 rem "Message handler: unknown/free-form"
 10099 return
@@ -227,10 +257,24 @@
 14199 return
 
 14200 rem "Message handler: incoming call (ring)"
-14210 print "incoming call!"
+14205 canvas0clr:s$="at+clcc"+chr$(13):gosub 5000: rem "send AT+CLCC (list current calls)"
+14210 print "{clr}Incoming call on SIM";sn
+14211 print "{down}{down}[a]ccept or [r]eject?"
+14215 gosub 1000:getu$
+14220 if u$="a" or u$="A" then goto 14250
+14230 if u$="r" or u$="R" then goto 14280
+14240 goto 14215: rem "unexpected char"
+14250 rem "--- Answer call (Y) ---"
+14260 s$="ata"+chr$(13): gosub 5000: rem "send ATA (answer)"
+14265 return
+14280 rem "--- Decline call (N) ---"
+14290 s$="at+chup"+chr$(13): gosub 5000: rem "send AT+CHUP (call hang up)"
+14295 return
 14299 return
 
 14300 rem "Message handler: message type 43"
+14305 canvas0clr: print "{clr}";
+14310 print "{down}{down}call ended"
 14399 return
 
 14400 rem "Message handler: message type 44"
@@ -254,7 +298,8 @@
 15000 rem "Message handler: message type 50"
 15099 return
 
-15100 rem "Message handler: message type 51"
+15100 rem "Message handler: message type 51 (+clcc: list current calls)"
+15110 if mf$(4)="0" then print "caller id: ";mf$(6)
 15199 return
 
 15200 rem "Message handler: message type 52"
