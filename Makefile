@@ -53,12 +53,12 @@ DIALER_ASSETS= \
 		$(ASSETS)/bluephone.png \
 		$(ASSETS)/bluephone.png \
 		$(ASSETS)/satellite_pressed.png \
-		$(ASSETS)/signal0_24x16.png \
-		$(ASSETS)/signal1_24x16.png \
-		$(ASSETS)/signal2_24x16.png \
-		$(ASSETS)/signal3_24x16.png \
-		$(ASSETS)/signal4_24x16.png \
-		$(ASSETS)/signal5_24x16.png \
+		$(ASSETS)/signal0_24x16-s.png \
+		$(ASSETS)/signal1_24x16-s.png \
+		$(ASSETS)/signal2_24x16-s.png \
+		$(ASSETS)/signal3_24x16-s.png \
+		$(ASSETS)/signal4_24x16-s.png \
+		$(ASSETS)/signal5_24x16-s.png \
 		$(ASSETS)/dualsim.png \
 		$(ASSETS)/dualsim_pressed.png \
 		$(ASSETS)/battery0.png \
