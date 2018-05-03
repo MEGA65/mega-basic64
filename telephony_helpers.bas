@@ -19,8 +19,8 @@ return
 
 MOVE_CURSOR_XX_YY rem "=== move the cursor to position xx,yy ==="
 print "{home}";
-if xx>0 then for i=1 to xx: print "{rght}";: next i
-if yy>0 then for j=1 to yy: print "{down}";: next j
+if xx>0 then for ii=1 to xx: print "{rght}";: next ii
+if yy>0 then for jj=1 to yy: print "{down}";: next jj
 return
 
 BATTERY_UPDATE rem "=== update the battery level ==="

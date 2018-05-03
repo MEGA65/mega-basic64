@@ -67,22 +67,11 @@ print "{lblu}";
 print "UCCCCCCCCCCCCCCCCCI"; : xx=21: yy=3: gosub MOVE_CURSOR_XX_YY
 print "B    contacts     B"; : xx=21: yy=4: gosub MOVE_CURSOR_XX_YY
 print "BCCCCCCCCCCCCCCCCCB"; : xx=21: yy=5: gosub MOVE_CURSOR_XX_YY
-print "B contact 1       B"; : xx=21: yy=6: gosub MOVE_CURSOR_XX_YY
-print "B contact 2       B"; : xx=21: yy=7: gosub MOVE_CURSOR_XX_YY
-print "B contact 3       B"; : xx=21: yy=8: gosub MOVE_CURSOR_XX_YY
-print "B contact 4       B"; : xx=21: yy=9: gosub MOVE_CURSOR_XX_YY
-print "B contact 5       B"; : xx=21: yy=10: gosub MOVE_CURSOR_XX_YY
-print "B contact 6       B"; : xx=21: yy=11: gosub MOVE_CURSOR_XX_YY
-print "B contact 7       B"; : xx=21: yy=12: gosub MOVE_CURSOR_XX_YY
-print "B contact 8       B"; : xx=21: yy=13: gosub MOVE_CURSOR_XX_YY
-print "B contact 9       B"; : xx=21: yy=14: gosub MOVE_CURSOR_XX_YY
-print "B contact 10      B"; : xx=21: yy=15: gosub MOVE_CURSOR_XX_YY
-print "B contact 11      B"; : xx=21: yy=16: gosub MOVE_CURSOR_XX_YY
-print "B contact 12      B"; : xx=21: yy=17: gosub MOVE_CURSOR_XX_YY
-print "B contact 13      B"; : xx=21: yy=18: gosub MOVE_CURSOR_XX_YY
-print "B contact 14      B"; : xx=21: yy=19: gosub MOVE_CURSOR_XX_YY
-print "B contact 15      B"; : xx=21: yy=20: gosub MOVE_CURSOR_XX_YY
-print "B contact 16      B"; : xx=21: yy=21: gosub MOVE_CURSOR_XX_YY
+for i=1 to cmaxindex%
+print "B";: if cpane$(i)<>"" then print cpane$(i);
+for j=1 to clngth%-len(cpane$(i)): if len(cpane$(i))<clngth% then print " ";: next j: rem "special case: for i=1 to 0 still goes into loop, so if len()=max we don't wanna print a space; TODO: use SPC(x) command!"
+print "B"; : xx=21: yy=5+i: gosub MOVE_CURSOR_XX_YY
+next i
 print "BCCCCCCCCCCCCCCCCCB"; : xx=21: yy=22: gosub MOVE_CURSOR_XX_YY
 print "B           searchB"; : xx=21: yy=23: gosub MOVE_CURSOR_XX_YY
 print "JCCCCCCCCCCCCCCCCCK";

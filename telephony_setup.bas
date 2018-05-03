@@ -16,7 +16,7 @@ ber=99: rem "ber: channel bit error rate"
 btp=100.0: rem "remaining battery percentage [0:100]"
 cnt=0: rem "loop counter"
 nact$="": rem "network access technology (GSM, EDGE, HSPA, LTE...)"
-nt$="": rem "network type, to be displayed (2G, 3G, 4G...)"
+ntype$="": rem "network type, to be displayed (2G, 3G, 4G...)"
 nname$="": rem "network name to be displayed"
 
 return
@@ -39,6 +39,22 @@ sl%=0: rem "Signal Level integer [0:5]"
 ber$="?": rem "Bit Error Rate string to be displayed"
 bl%=10: rem "Battery Level integer [0:10]"
 tmr=1000: rem "timer for keystrokes"
+return
+
+SETUP_PHONEBOOK rem "=== phonebook setup ==="
+plngth%=200: rem "maximum number of contacts in the phonebook"
+dim pindex%(plngth%): rem "index array"
+dim pnumber$(plngth%): rem "phone number array"
+dim ptype%(plngth%): rem "phone number type array [129, 145, 161]"
+dim ptxt$(plngth%): rem "text array"
+dim psim%(plngth%): rem "sim index array"
+cmaxindex%=16: rem "dim of contact array"
+clngth%=17: rem "max length that can be displayed in the contact pane"
+dim cpane$(cmaxindex%): rem "contact pane array: names to be displayed in the contact pane"
+dim cindex$(cmaxindex%): rem "contact pane <-> phonebook index mapping"
+gosub LOAD_PHONEBOOK
+gosub PHONEBOOK_TO_CONTACT_PANE
+gosub TRIM_CONTACT_PANE
 return
 
 DEFINE_FUNCTIONS rem "=== functions definition ==="
