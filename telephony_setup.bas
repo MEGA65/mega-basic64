@@ -39,6 +39,7 @@ sl%=0: rem "Signal Level integer [0:5]"
 ber$="?": rem "Bit Error Rate string to be displayed"
 bl%=10: rem "Battery Level integer [0:10]"
 tmr=1000: rem "timer for keystrokes"
+hl%=0: rem "highlighted line (for example in contact pane)"
 return
 
 SETUP_PHONEBOOK rem "=== phonebook setup ==="
@@ -51,7 +52,8 @@ dim psim%(plngth%): rem "sim index array"
 cmaxindex%=16: rem "dim of contact array"
 clngth%=17: rem "max length that can be displayed in the contact pane"
 dim cpane$(cmaxindex%): rem "contact pane array: names to be displayed in the contact pane"
-dim cindex$(cmaxindex%): rem "contact pane <-> phonebook index mapping"
+dim cindex%(cmaxindex%): rem "contact pane <-> phonebook index mapping"
+centry%=0: rem "number of entries in contact pane (<= cmaxindex%)"
 gosub LOAD_PHONEBOOK
 gosub PHONEBOOK_TO_CONTACT_PANE
 gosub TRIM_CONTACT_PANE

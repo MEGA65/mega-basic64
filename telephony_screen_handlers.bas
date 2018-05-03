@@ -5,6 +5,10 @@ u$="": get u$
 mdv=50: if fn mod(cnt)=0 then gosub DRAW_SCREEN_1: rem "we trigger a screen update every 1000 loops"
 tmr=tmr-1: if tmr=0 then gosub DRAW_SCREEN_1_TILES: us=1: rem "we trigger a dial tiles update every 1000 loops since last"
 if u$="" then return
+rem "navigation in contact pane"
+if u$="{up}" then mdv=centry%: hl%=fn mod(hl%-2)+1 : gosub DRAW_SCREEN_1
+if u$="{down}" then mdv=centry%: hl%=fn mod(hl%)+1: gosub DRAW_SCREEN_1
+rem "dialler"
 if u$<>chr$(20) and u$<>chr$(13) and len(nb$)>=19 then return: rem "limit length is 18, go to loop start"
 if u$="0" or u$="1" or u$="2" or u$="3" or u$="4" or u$="5" or u$="6" or u$="7" or u$="8" or u$="9" or u$="+" or u$="*" or u$="#" or u$="a" or u$="b" or u$="c" or u$="d" then nb$=nb$+u$: gosub DRAW_SCREEN_1
 if u$="-" or u$="/" or u$="=" or u$="@" or u$="<" or u$=">" then gosub DRAW_SCREEN_1: rem "these characters don't update the string (for now)"

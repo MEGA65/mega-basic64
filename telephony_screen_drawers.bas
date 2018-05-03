@@ -66,13 +66,15 @@ xx=21: yy=2: gosub MOVE_CURSOR_XX_YY
 print "{lblu}";
 print "UCCCCCCCCCCCCCCCCCI"; : xx=21: yy=3: gosub MOVE_CURSOR_XX_YY
 print "B    contacts     B"; : xx=21: yy=4: gosub MOVE_CURSOR_XX_YY
-print "BCCCCCCCCCCCCCCCCCB"; : xx=21: yy=5: gosub MOVE_CURSOR_XX_YY
+print chr$(171)+"CCCCCCCCCCCCCCCCC"+chr$(179); : xx=21: yy=5: gosub MOVE_CURSOR_XX_YY
 for i=1 to cmaxindex%
-print "B";: if cpane$(i)<>"" then print cpane$(i);
+print "B";: if hl%=i then print "{yel}";
+if cpane$(i)<>"" then print cpane$(i);
 for j=1 to clngth%-len(cpane$(i)): if len(cpane$(i))<clngth% then print " ";: next j: rem "special case: for i=1 to 0 still goes into loop, so if len()=max we don't wanna print a space; TODO: use SPC(x) command!"
+print "{lblu}";
 print "B"; : xx=21: yy=5+i: gosub MOVE_CURSOR_XX_YY
 next i
-print "BCCCCCCCCCCCCCCCCCB"; : xx=21: yy=22: gosub MOVE_CURSOR_XX_YY
+print chr$(171)+"CCCCCCCCCCCCCCCCC"+chr$(179); : xx=21: yy=22: gosub MOVE_CURSOR_XX_YY
 print "B           searchB"; : xx=21: yy=23: gosub MOVE_CURSOR_XX_YY
 print "JCCCCCCCCCCCCCCCCCK";
 return

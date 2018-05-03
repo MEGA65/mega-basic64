@@ -11,15 +11,16 @@ gosub PHONEBOOK_ENTRIES: rem "This subroutine is in another file, not uploaded t
 return
 
 PHONEBOOK_TO_CONTACT_PANE
-j=1
+rem "WARNING: probably bugs if O entries in phonebook"
+centry%=0: j=1
 for i=1 to plngth%: if j<cmaxindex% then goto PHBK_THEN_1: rem "contact pane not full"
 goto PHBK_ELSE_1: rem "contact pane full"
 PHBK_THEN_1 if pindex%(i)=1 then goto PHBK_THEN_2: rem "entry at index i"
 goto PHBK_ELSE_2 "no entry at index i"
-PHBK_THEN_2 cpane$(j)=ptxt$(i): cindex$(j)=i: j=j+1: next i: rem "phonebook i -> contact j"
+PHBK_THEN_2 cpane$(j)=ptxt$(i): cindex%(j)=i: j=j+1: next i: rem "phonebook i -> contact j"
 PHBK_ELSE_2 next i: rem 
-PHBK_ELSE_1 return: rem "j=16 (contact pane full) or i=plength% (end of phonebook)"
-return
+PHBK_ELSE_1 centry%=j-1: return: rem "j=16 (contact pane full) or i=plength% (end of phonebook)"
+centry%=j-1: return
 
 TRIM_CONTACT_PANE
 rem "trim contact pane entries to clength chars, adding ... if necessary"
