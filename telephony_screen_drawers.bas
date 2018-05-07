@@ -172,24 +172,23 @@ gosub DRAW_STATUS_BAR
 canvas 60 stamp on canvas 0 at 0,2
 # "contact name/number"
 gosub TRIM_CONTACT_DISPLAY_TEXT
-xx=3: yy=2: gosub MOVE_CURSOR_XX_YY
+
 print "{wht}";
-print "UCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCI"; : xx=3: yy=3: gosub MOVE_CURSOR_XX_YY
-print "B";
+x=4: y=2: w=36: h=3: gosub DRAW_BOX
+
+xx=5: yy=3: gosub MOVE_CURSOR_XX_YY
 if cdisplay$<>"" then print cdisplay$;
-for j=1 to 35-len(cdisplay$): if len(cdisplay$)<35 then print " ";: next j
-print "B";: xx=3: yy=4: gosub MOVE_CURSOR_XX_YY
-print "JCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCK";
+for j=1 to 34-len(cdisplay$): if len(cdisplay$)<35 then print " ";: next j
 
 print "{wht}";
-x=0: y=5: w=36: h=20: r(2)=1: r(15)=1: gosub DRAW_BOX
+x=4: y=5: w=36: h=20: r(2)=1: r(15)=1: gosub DRAW_BOX
 
-canvas 18 stamp on canvas 0 at 36,5: rem "greephone"
-canvas 61 stamp on canvas 0 at 36,9: rem "edit"
-canvas 62 stamp on canvas 0 at 36,13: rem "trash bin"
+canvas 18 stamp on canvas 0 at 0,6: rem "greephone"
+canvas 61 stamp on canvas 0 at 0,10: rem "cog"
+#canvas 62 stamp on canvas 0 at 0,14: rem "trash bin"
 
-canvas 63 stamp on canvas 0 at 1,21: rem "globe"
-canvas 64 stamp on canvas 0 at 31,21: rem "globe"
+canvas 63 stamp on canvas 0 at 5,21: rem "globe"
+canvas 64 stamp on canvas 0 at 35,21: rem "message"
 
 return
 

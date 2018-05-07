@@ -43,6 +43,7 @@ if r(i)=1 then print chr$(171);: for j=1 to w-2: print "C";: next j: print chr$(
 r(i)=0: next i
 xx=x: yy=y+h-1: gosub MOVE_CURSOR_XX_YY
 print "J";: for i=1 to w-2: print "C";: next i: print "K";
+print "{home}"
 return
 
 DRAW_HORIZONTAL_LINE rem

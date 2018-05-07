@@ -72,12 +72,12 @@ DIALER_ASSETS= \
 		$(ASSETS)/battery80.png \
 		$(ASSETS)/battery90.png \
 		$(ASSETS)/battery100.png \
-		$(ASSETS)/control_back.png \
-		$(ASSETS)/edit_sinc.png \
-		$(ASSETS)/trash_bin_sinc.png \
+		$(ASSETS)/control_back_2.png \
+		$(ASSETS)/cog_1.png \
+		$(ASSETS)/trash_bin.png \
 		$(ASSETS)/globe.png \
 		$(ASSETS)/message.png \
-		$(ASSETS)/send.png \
+		$(ASSETS)/send_1.png \
 
 VEHICLE_ASSETS=	\
 		$(ASSETS)/vehicle_console_cluster.svg.png \

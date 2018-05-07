@@ -31,7 +31,7 @@ return
 
 TRIM_CONTACT_DISPLAY_TEXT rem
 # "generates and trim if necessary the text to be displayed at the top of the contact screen"
-if len(ptxt$(cselected%))>20 and len(pnumber$(cselected%))>12 then cdisplay$=left$(ptxt$(cselected%),20-3)+"... ("+left$(pnumber$(cselected%),12-3)+"...)": return
-if len(pnumber$(cselected%))<12 and len(ptxt$(cselected%))>35-3-len(pnumber$(cselected%)) then cdisplay$=left$(ptxt$(cselected%),35-3-3-len(pnumber$(cselected%)))+"... ("+pnumber$(cselected%)+")": return
-if len(ptxt$(cselected%))<20 and len(pnumber$(cselected%))>35-3-len(ptxt$(cselected%)) then cdisplay$=ptxt$(cselected%)+" ("+left$(pnumber$(cselected%),35-3-3-len(ptxt$(cselected%)))+"...)": return
+if len(ptxt$(cselected%))>19 and len(pnumber$(cselected%))>12 then cdisplay$=left$(ptxt$(cselected%),19-3)+"... ("+left$(pnumber$(cselected%),12-3)+"...)": return
+if len(pnumber$(cselected%))<12 and len(ptxt$(cselected%))>34-3-len(pnumber$(cselected%)) then cdisplay$=left$(ptxt$(cselected%),34-3-3-len(pnumber$(cselected%)))+"... ("+pnumber$(cselected%)+")": return
+if len(ptxt$(cselected%))<19 and len(pnumber$(cselected%))>34-3-len(ptxt$(cselected%)) then cdisplay$=ptxt$(cselected%)+" ("+left$(pnumber$(cselected%),34-3-3-len(ptxt$(cselected%)))+"...)": return
 cdisplay$=ptxt$(cselected%)+" ("+pnumber$(cselected%)+")": return
