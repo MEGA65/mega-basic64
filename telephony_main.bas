@@ -26,6 +26,7 @@ if sc=1 then gosub HANDLER_SCREEN_1: rem "user input and screen update for scree
 if sc=2 then gosub HANDLER_SCREEN_2
 if sc=3 then gosub HANDLER_SCREEN_3
 if sc=4 then gosub HANDLER_SCREEN_4
+if sc=5 then gosub HANDLER_SCREEN_CONTACT
 rem "screen updates debugging"
 rem if us=1 then print "{home}+";: us=0: goto ML1: rem "print a char when screen is updated"
 rem if us=0 then print "{home} ";: goto ML1: rem "remove the char when screen wasn't updated"
@@ -36,6 +37,6 @@ mdv=500: if fn mod(cnt)=0 then s$="at+csq"+chr$(13): gosub WRITE_STRING_TO_MODEM
 mdv=1000: if fn mod(cnt)=0 then mdv=100: btp=fn mod(btp-1): gosub BATTERY_UPDATE: rem "[test] decrease battery level"
 mdv=1000: if fn mod(cnt+250)=0 then s$="at+qnwinfo"+chr$(13): gosub WRITE_STRING_TO_MODEM: rem "request network info report every 1000 loops"
 mdv=1000: if fn mod(cnt+500)=0 then s$="at+qspn"+chr$(13): gosub WRITE_STRING_TO_MODEM: rem "request network name every 1000 loops"
-if (peek(53272)and 7)=0 then poke 53272,20
+if (peek(53272)and 7)=0 then poke 53272,20: rem "fix charset bug"
 rem "--- end main loop ---"
 goto MAIN_LOOP

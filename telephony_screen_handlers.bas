@@ -2,13 +2,14 @@ HANDLER_SCREEN_1 rem "### SC 1 (DIALER) HANDLER ###"
 rem "read input chars and update string (phone number)"
 if su=1 then gosub DRAW_SCREEN_1: su=0
 u$="": get u$
-mdv=50: if fn mod(cnt)=0 then gosub DRAW_SCREEN_1: rem "we trigger a screen update every 1000 loops"
+mdv=sr: if fn mod(cnt)=0 then gosub DRAW_SCREEN_1: rem "we trigger a screen update every 1000 loops"
 tmr=tmr-1: if tmr=0 then gosub DRAW_SCREEN_1_TILES: us=1: rem "we trigger a dial tiles update every 1000 loops since last"
 if u$="" then return
-rem "navigation in contact pane"
+# "navigation in contact pane"
 if u$="{up}" then mdv=centry%: hl%=fn mod(hl%-2)+1 : gosub DRAW_SCREEN_1
 if u$="{down}" then mdv=centry%: hl%=fn mod(hl%)+1: gosub DRAW_SCREEN_1
-rem "dialler"
+if u$="{rght}" and hl%<>0 then cselected%=cindex%(hl%): gosub SWITCH_TO_SCREEN_CONTACT
+# "dialler"
 if u$<>chr$(20) and u$<>chr$(13) and len(nb$)>=19 then return: rem "limit length is 18, go to loop start"
 if u$="0" or u$="1" or u$="2" or u$="3" or u$="4" or u$="5" or u$="6" or u$="7" or u$="8" or u$="9" or u$="+" or u$="*" or u$="#" or u$="a" or u$="b" or u$="c" or u$="d" then nb$=nb$+u$: gosub DRAW_SCREEN_1
 if u$="-" or u$="/" or u$="=" or u$="@" or u$="<" or u$=">" then gosub DRAW_SCREEN_1: rem "these characters don't update the string (for now)"
@@ -18,7 +19,7 @@ return
 
 HANDLER_SCREEN_2 rem "### SC 2 (RING) HANDLER ###"
 if su=1 then gosub DRAW_SCREEN_2: su=0
-mdv=50: if fn mod(cnt)=0 then gosub DRAW_SCREEN_2
+mdv=sr: if fn mod(cnt)=0 then gosub DRAW_SCREEN_2
 u$="": get u$
 if u$="a" or u$="A" then goto HS2_A
 if u$="r" or u$="R" then goto HS2_R
@@ -36,7 +37,7 @@ return
 
 HANDLER_SCREEN_3 rem "### SC 3 (IN-CALL) HANDLER ###"
 if su=1 then gosub DRAW_SCREEN_3: su=0
-mdv=50: if fn mod(cnt)=0 then gosub DRAW_SCREEN_3
+mdv=sr: if fn mod(cnt)=0 then gosub DRAW_SCREEN_3
 u$="": get u$
 if u$="h" or u$="H" then goto HS3_H
 return : rem "not H"
@@ -48,7 +49,7 @@ return
 
 HANDLER_SCREEN_4 rem "### SC 4 (DIALLING) HANDLER ###"
 if su=1 then gosub DRAW_SCREEN_4: su=0
-mdv=50: if fn mod(cnt)=0 then gosub DRAW_SCREEN_4
+mdv=sr: if fn mod(cnt)=0 then gosub DRAW_SCREEN_4
 u$="":get u$
 if u$="h" or u$="H" then goto HS4_H
 return : rem "not H"
@@ -57,4 +58,12 @@ s$="ath"+chr$(13): gosub WRITE_STRING_TO_MODEM: rem "send ATH (hang up)"
 gosub SWITCH_TO_SCREEN_1: rem "SCREEN 1 (DIALER)"
 rem "we should wait for OK (OR ERROR)!!"
 dr$="": rem "reset dialling result"
+return
+
+HANDLER_SCREEN_CONTACT rem "### screen CONTACT handler ###"
+mdv=sr: if fn mod(cnt)=0 then gosub DRAW_SCREEN_CONTACT
+rem "TODO: handle user actions"
+u$="": get u$
+if u$="" then return
+if u$=chr$(20) then gosub SWITCH_TO_SCREEN_1
 return

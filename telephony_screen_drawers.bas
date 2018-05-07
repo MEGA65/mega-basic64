@@ -165,3 +165,19 @@ return
 DRAW_SCREEN_0 rem "### SC 0 (DEBUG) SCREEN UPDATE ###"
 rem "we don't clr or print, and let debug messages be"
 return
+
+DRAW_SCREEN_CONTACT rem
+gosub DRAW_STATUS_BAR
+# "back button"
+canvas 17 stamp on canvas 0 at 0,2
+# "contact name/number"
+gosub TRIM_CONTACT_DISPLAY_TEXT
+xx=3: yy=2: gosub MOVE_CURSOR_XX_YY
+print "{wht}";
+print "UCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCI"; : xx=3: yy=3: gosub MOVE_CURSOR_XX_YY
+print "B";
+if cdisplay$<>"" then print cdisplay$;
+for j=1 to 35-len(cdisplay$): if len(cdisplay$)<35 then print " ";: next j
+print "B";: xx=3: yy=4: gosub MOVE_CURSOR_XX_YY
+print "JCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCK";
+return

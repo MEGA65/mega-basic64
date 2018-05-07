@@ -72,3 +72,9 @@ sc=4
 print "{clr}";: canvas 0 clr: rem "clear screen"
 gosub DRAW_SCREEN_4: rem "trigger initial screen update"
 return
+
+SWITCH_TO_SCREEN_CONTACT rem "=== switch to screen CONTACT ==="
+sc=5
+print "{clr}";: canvas 0 clr: rem "clear screen"
+gosub DRAW_SCREEN_CONTACT: rem "trigger initial screen update"
+return

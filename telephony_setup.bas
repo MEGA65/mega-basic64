@@ -6,6 +6,7 @@ SETUP_PROGRAM rem "=== program flags and variables setup ==="
 db=0: rem "flag db (debug): print debugging information"
 sd=1: rem "flag send: send characters typed on keyboard to modem right away"
 sc=1: rem "current screen to be displayed and user input to be taken"
+sr=50: rem "screen refresh rate: number of loops between 2 screen updates"
 su=0: rem "flag su (screen update): a change in the program requires a screen update"
 us=0: rem "flag us (updated screen): is set to 1 when the screen if actually updated"
 cid$="": rem "caller id (number)"
@@ -54,6 +55,8 @@ clngth%=17: rem "max length that can be displayed in the contact pane"
 dim cpane$(cmaxindex%): rem "contact pane array: names to be displayed in the contact pane"
 dim cindex%(cmaxindex%): rem "contact pane <-> phonebook index mapping"
 centry%=0: rem "number of entries in contact pane (<= cmaxindex%)"
+cselected%=0: rem "selected contact index (in phonebook)"
+cdisplay$="": rem "the text to be displayed on the contact screen"
 gosub LOAD_PHONEBOOK
 gosub PHONEBOOK_TO_CONTACT_PANE
 gosub TRIM_CONTACT_PANE
