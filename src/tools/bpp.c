@@ -58,6 +58,7 @@ int main(int argc,char **argv)
 		int fl=1;
 		line[0]=0; fgets(line,1024,f);
 		while(line[0]) {
+			if (line[0]=='#') goto skipline1;
 			if (line[0]=='\t' || (line[0]>='a' && line[0]<='z')) {
 				// Line starts with TAB, so allocate line number
 				line_number++;
@@ -84,6 +85,7 @@ int main(int argc,char **argv)
 				label_names[label_count]=strdup(label);
 				label_lines[label_count++]=line_number;
 			}
+skipline1:
 			line[0]=0; fgets(line,1024,f);
 			fl++;
 		}
@@ -109,6 +111,7 @@ int main(int argc,char **argv)
 		int fl=1;
 		line[0]=0; fgets(line,1024,f);
 		while(line[0]) {
+			if (line[0]=='#') goto skipline2;
 			int outlen=0;
 			char lineout[1024];
 			int quote_mode=0;
@@ -191,6 +194,7 @@ int main(int argc,char **argv)
 			printf("%s",lineout);
 			if (outlen>0) if (lineout[outlen-1]>=' ') printf("\n");
 			
+	skipline2:
 			line[0]=0; fgets(line,1024,f);
 			fl++;
 		}
