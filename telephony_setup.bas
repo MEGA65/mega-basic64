@@ -41,6 +41,7 @@ ber$="?": rem "Bit Error Rate string to be displayed"
 bl%=10: rem "Battery Level integer [0:10]"
 tmr=1000: rem "timer for keystrokes"
 hl%=0: rem "highlighted line (for example in contact pane)"
+dim r(24): rem "rows to be printed in a box"
 return
 
 SETUP_PHONEBOOK rem "=== phonebook setup ==="

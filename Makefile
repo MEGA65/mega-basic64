@@ -75,6 +75,9 @@ DIALER_ASSETS= \
 		$(ASSETS)/control_back.png \
 		$(ASSETS)/edit_sinc.png \
 		$(ASSETS)/trash_bin_sinc.png \
+		$(ASSETS)/globe.png \
+		$(ASSETS)/message.png \
+		$(ASSETS)/send.png \
 
 VEHICLE_ASSETS=	\
 		$(ASSETS)/vehicle_console_cluster.svg.png \

@@ -181,30 +181,16 @@ for j=1 to 35-len(cdisplay$): if len(cdisplay$)<35 then print " ";: next j
 print "B";: xx=3: yy=4: gosub MOVE_CURSOR_XX_YY
 print "JCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCK";
 
-xx=0: yy=5: gosub MOVE_CURSOR_XX_YY
-print "UCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCI"; : xx=0: yy=6: gosub MOVE_CURSOR_XX_YY
-print "B sms conversation                 B"; : xx=0: yy=7: gosub MOVE_CURSOR_XX_YY
-print chr$(171)+"CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"+chr$(179); : xx=0: yy=8: gosub MOVE_CURSOR_XX_YY
-print "B                                  B"; : xx=0: yy=9: gosub MOVE_CURSOR_XX_YY
-print "B                                  B"; : xx=0: yy=10: gosub MOVE_CURSOR_XX_YY
-print "B                                  B"; : xx=0: yy=11: gosub MOVE_CURSOR_XX_YY
-print "B                                  B"; : xx=0: yy=12: gosub MOVE_CURSOR_XX_YY
-print "B                                  B"; : xx=0: yy=13: gosub MOVE_CURSOR_XX_YY
-print "B                                  B"; : xx=0: yy=14: gosub MOVE_CURSOR_XX_YY
-print "B                                  B"; : xx=0: yy=15: gosub MOVE_CURSOR_XX_YY
-print "B                                  B"; : xx=0: yy=16: gosub MOVE_CURSOR_XX_YY
-print "B                                  B"; : xx=0: yy=17: gosub MOVE_CURSOR_XX_YY
-print "B                                  B"; : xx=0: yy=18: gosub MOVE_CURSOR_XX_YY
-print "B                                  B"; : xx=0: yy=19: gosub MOVE_CURSOR_XX_YY
-print "B                                  B"; : xx=0: yy=20: gosub MOVE_CURSOR_XX_YY
-print "B                                  B"; : xx=0: yy=21: gosub MOVE_CURSOR_XX_YY
-print "B                                  B"; : xx=0: yy=22: gosub MOVE_CURSOR_XX_YY
-print chr$(171)+"CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"+chr$(179); : xx=0: yy=23: gosub MOVE_CURSOR_XX_YY
-print "B                                  B"; : xx=0: yy=24: gosub MOVE_CURSOR_XX_YY
-print "JCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCK";
+print "{wht}";
+x=0: y=5: w=36: h=20: r(2)=1: r(15)=1: gosub DRAW_BOX
 
 canvas 18 stamp on canvas 0 at 36,5: rem "greephone"
 canvas 61 stamp on canvas 0 at 36,9: rem "edit"
 canvas 62 stamp on canvas 0 at 36,13: rem "trash bin"
 
+canvas 63 stamp on canvas 0 at 1,21: rem "globe"
+canvas 64 stamp on canvas 0 at 31,21: rem "globe"
+
 return
+
+
