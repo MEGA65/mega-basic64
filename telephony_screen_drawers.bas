@@ -169,7 +169,7 @@ return
 DRAW_SCREEN_CONTACT rem
 gosub DRAW_STATUS_BAR
 # "back button"
-canvas 17 stamp on canvas 0 at 0,2
+canvas 60 stamp on canvas 0 at 0,2
 # "contact name/number"
 gosub TRIM_CONTACT_DISPLAY_TEXT
 xx=3: yy=2: gosub MOVE_CURSOR_XX_YY
@@ -203,8 +203,8 @@ print chr$(171)+"CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"+chr$(179); : xx=0: yy=23: g
 print "B                                  B"; : xx=0: yy=24: gosub MOVE_CURSOR_XX_YY
 print "JCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCK";
 
-canvas 18 stamp on canvas 0 at 36,6: rem "greephone"
-canvas 18 stamp on canvas 0 at 36,10: rem "greephone"
-canvas 18 stamp on canvas 0 at 36,14: rem "greephone"
+canvas 18 stamp on canvas 0 at 36,5: rem "greephone"
+canvas 61 stamp on canvas 0 at 36,9: rem "edit"
+canvas 62 stamp on canvas 0 at 36,13: rem "trash bin"
 
 return
