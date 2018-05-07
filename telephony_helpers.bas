@@ -52,27 +52,23 @@ return
 SWITCH_TO_SCREEN_1 rem "=== switch to screen 1 ==="
 sc=1
 print "{clr}";: canvas 0 clr: rem "clear screen"
-if peek(53272)=22 or peek(53272)=134 then poke 53272,132: rem "we want graphics mode"
 gosub DRAW_SCREEN_1: rem "trigger initial screen update"
 return
 
 SWITCH_TO_SCREEN_2 rem "=== switch to screen 2 ==="
 sc=2
 print "{clr}";: canvas 0 clr: rem "clear screen"
-if peek(53272)=20 or peek(53272)=132 then poke 53272,134: rem "we want text mode"
 gosub DRAW_SCREEN_2: rem "trigger initial screen update"
 return
 
 SWITCH_TO_SCREEN_3 rem "=== switch to screen 3 ==="
 sc=3
 print "{clr}";: canvas 0 clr: rem "clear screen"
-if peek(53272)=20 or peek(53272)=132 then poke 53272,134: rem "we want text mode"
 gosub DRAW_SCREEN_3: rem "trigger initial screen update"
 return
 
 SWITCH_TO_SCREEN_4 rem "=== switch to screen 4 ==="
 sc=4
 print "{clr}";: canvas 0 clr: rem "clear screen"
-if peek(53272)=20 or peek(53272)=132 then poke 53272,134: rem "we want text mode"
 gosub DRAW_SCREEN_4: rem "trigger initial screen update"
 return
