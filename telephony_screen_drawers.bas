@@ -73,7 +73,7 @@ for j=1 to clngth%-len(cpane$(i)): if len(cpane$(i))<clngth% then print " ";: ne
 print "{lblu}"
 next i
 # "stamp search icon"
-canvas 66 stamp on canvas 0 at 35,21: rem "search"
+canvas 66 stamp on canvas 0 at 37,22: rem "search"
 return
 
 DRAW_SCREEN_1_TILES rem "=== screen dial tiles update ==="

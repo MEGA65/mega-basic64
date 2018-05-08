@@ -72,13 +72,13 @@ DIALER_ASSETS= \
 		$(ASSETS)/battery80.png \
 		$(ASSETS)/battery90.png \
 		$(ASSETS)/battery100.png \
-		$(ASSETS)/control_back_2.png \
+		$(ASSETS)/arrow_back.png \
 		$(ASSETS)/cog.png \
 		$(ASSETS)/trash_bin.png \
 		$(ASSETS)/globe.png \
 		$(ASSETS)/message_1.png \
 		$(ASSETS)/send_1.png \
-		$(ASSETS)/search.png \
+		$(ASSETS)/search-s.png \
 		$(ASSETS)/contact_new.png \
 		$(ASSETS)/contact_new_pressed.png \
 

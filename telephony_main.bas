@@ -28,9 +28,9 @@ if sc=2 then gosub HANDLER_SCREEN_2
 if sc=3 then gosub HANDLER_SCREEN_3
 if sc=4 then gosub HANDLER_SCREEN_4
 if sc=5 then gosub HANDLER_SCREEN_CONTACT
-rem "screen updates debugging"
-rem if us=1 then print "{home}+";: us=0: goto ML1: rem "print a char when screen is updated"
-rem if us=0 then print "{home} ";: goto ML1: rem "remove the char when screen wasn't updated"
+# "screen updates debugging"
+# if us=1 then print "{home}+";: us=0: goto ML1: rem "print a char when screen is updated"
+# if us=0 then print "{home} ";: goto ML1: rem "remove the char when screen wasn't updated"
 ML1 rem "--- get modem input ---"
 gosub POLL_MODEM
 rem "--- perform regular tasks ---"

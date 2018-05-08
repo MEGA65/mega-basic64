@@ -66,4 +66,5 @@ rem "TODO: handle user actions"
 u$="": get u$
 if u$="" then return
 if u$=chr$(20) then gosub SWITCH_TO_SCREEN_1
+if u$=chr$(13) then gosub DRAW_SCREEN_CONTACT: gosub SWITCH_TO_SCREEN_4: s$="atd"+pnumber$(cselected%)+";"+chr$(13): gosub WRITE_STRING_TO_MODEM: rem "dial the number and switch to screen 4"
 return

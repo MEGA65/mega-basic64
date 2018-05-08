@@ -31,6 +31,7 @@ DRAW_BOX rem
 # "   h: width of the box, frame included (h>=3)"
 # "   x: horizontal position of the upper-left corner (0<=x<=39)"
 # "   y: vertical position of the upper-left corner (0<=y<=24)"
+# "   r(): array of rows' index to be printed as lines [0:24]"
 # "returns"
 # "   none"
 if w<3 or h<3 then return
