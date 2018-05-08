@@ -130,17 +130,33 @@ MESSAGE_HANDLER_41 rem "Message handler: message type 41"
 14199 return
 
 MESSAGE_HANDLER_RING rem "Message handler: incoming call (ring)"
-14205 s$="at+clcc"+chr$(13):gosub WRITE_STRING_TO_MODEM: rem "send AT+CLCC (list current calls)"
-14210 if sc<>2 then gosub SWITCH_TO_SCREEN_2: rem "SCREEN 2 (RING)"
+s$="at+clcc"+chr$(13):gosub WRITE_STRING_TO_MODEM: rem "send AT+CLCC (list current calls)"
+if dactive=0 then dactive=1: dstat=4: gosub SWITCH_TO_SCREEN_CALL
+# "else: already in-call"
 14299 return
 
+
+
 MESSAGE_HANDLER_NO_CARRIER rem "Message handler: no carrier"
-14310 rem "TODO: depending on which screen we are, we can set different messages to be displayed to the user when the call is hung up"
-14311 if sc=1 then s$="ath"+chr$(13): gosub WRITE_STRING_TO_MODEM: gosub SWITCH_TO_SCREEN_1: cid$="": return
-14312 if sc=2 then s$="ath"+chr$(13): gosub WRITE_STRING_TO_MODEM: gosub SWITCH_TO_SCREEN_1: cid$="": return
-14313 if sc=3 then s$="ath"+chr$(13): gosub WRITE_STRING_TO_MODEM: gosub SWITCH_TO_SCREEN_1: cid$="": return
-14314 if sc=4 then dr$="connection cannot be established"
+# "TODO: depending on which screen we are, we can set different messages to be displayed to the user when the call is hung up"
+if dactive=1 then goto MH_NC_ACTIVE
+goto MH_NC_END
+
+MH_NC_ACTIVE rem "active call"
+# "hang-up the active call"
+s$="ath"+chr$(13): gosub WRITE_STRING_TO_MODEM
+dactive=0
+# "if dialing, present user with error"
+if dia=1 then dr$="connection cannot be established": dia=0
+# "clean up"
+cid$=""
+gosub SWITCH_TO_SCREEN_1
+goto MH_NC_END
+
+MH_NC_END rem
 14399 return
+
+
 
 MESSAGE_HANDLER_44 rem "Message handler: message type 44"
 14499 return
@@ -165,15 +181,39 @@ MESSAGE_HANDLER_49 rem "Message handler: message type 49"
 MESSAGE_HANDLER_50 rem "Message handler: message type 50"
 15099 return
 
+
+
 MESSAGE_HANDLER_+CLCC rem "Message handler: +clcc (list current calls)"
-15110 if sc<>4 and mf$(4)="0" then cid$=right$(left$(mf$(6),len(mf$(6))-1),len(mf$(6))-2): su=1
-15150 if sc=4 and dia=1 and mf$(4)="0" then goto CLCC_DIALLING
-15160 return
-CLCC_DIALLING if mf$(3)="2" then dr$="Dialling...": su=1
-15172 if mf$(3)="3" then dr$="Alerting target...!": su=1
-15174 if mf$(3)="0" then dr$="": cid$=nb$: gosub SWITCH_TO_SCREEN_3: rem "call is active, switch to screen 3"
-15179 s$="at+clcc"+chr$(13): gosub WRITE_STRING_TO_MODEM: rem "send again the at+clcc command"
+if mf$(4)="0" then goto MH_CLCC_VOICE
+
+MH_CLCC_VOICE rem "voice call"
+# "set caller id (cid$)"
+cid$=right$(left$(mf$(6),len(mf$(6))-1),len(mf$(6))-2): su=1
+# "update call state (dstat)"
+dstat=-1
+if mf$(3)="0" then dstat=0
+if mf$(3)="1" then dstat=1
+if mf$(3)="2" then dstat=2
+if mf$(3)="3" then dstat=3
+if mf$(3)="4" then dstat=4
+if mf$(3)="5" then dstat=5
+
+if dia=1 then goto MH_CLCC_DIALLING
+goto MH_CLCC_END
+
+MH_CLCC_DIALLING rem "dialling"
+if dstat=2 then dr$="Dialling..."
+if dstat=3 then dr$="Alerting target...!"
+# "0: the call has been established"
+if dstat=0 then dr$="": dia=0: cid$=nb$
+goto MH_CLCC_END
+
+MH_CLCC_END rem
+# "send again the at+clcc command"
+s$="at+clcc"+chr$(13): gosub WRITE_STRING_TO_MODEM
 15199 return
+
+
 
 MESSAGE_HANDLER_+CSQ rem "Message handler: +csq (signal quality report)"
 15210 rssi=val(mf$(1)): ber=val(mf$(2))

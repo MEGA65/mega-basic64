@@ -165,7 +165,7 @@ return
 
 DRAW_SCREEN_CONTACT rem
 gosub DRAW_STATUS_BAR
-# "back button"
+# "buttons"
 canvas 60 stamp on canvas 0 at 0,2
 canvas 18 stamp on canvas 0 at 0,6: rem "greephone"
 canvas 61 stamp on canvas 0 at 0,10: rem "cog"
@@ -182,6 +182,10 @@ print "{wht}";
 x=4: y=5: w=36: h=20: r(15)=1: gosub DRAW_BOX
 canvas 63 stamp on canvas 0 at 5,21: rem "globe"
 canvas 64 stamp on canvas 0 at 35,21: rem "message"
+return
+
+DRAW_SCREEN_CALL rem
+gosub DRAW_STATUS_BAR
 return
 
 

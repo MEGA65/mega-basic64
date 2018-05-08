@@ -120,6 +120,13 @@ gosub SWITCH_SCREEN_CLEANUP
 gosub DRAW_SCREEN_CONTACT: rem "trigger initial screen update"
 return
 
+SWITCH_TO_SCREEN_CALL rem
+# "=== switch to screen CALL ==="
+sc=6
+gosub SWITCH_SCREEN_CLEANUP
+gosub DRAW_SCREEN_CALL: rem "trigger initial screen update"
+return
+
 SWITCH_SCREEN_CLEANUP rem
 u$=""
 print "{clr}";: canvas 0 clr: rem "clear screen"

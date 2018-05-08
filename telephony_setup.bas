@@ -4,7 +4,7 @@ return
 
 SETUP_PROGRAM rem "=== program flags and variables setup ==="
 db=0: rem "flag db (debug): print debugging information"
-sd=1: rem "flag send: send characters typed on keyboard to modem right away"
+#sd=1: rem "flag send: send characters typed on keyboard to modem right away"
 sc=1: rem "current screen to be displayed and user input to be taken"
 sr=10: rem "screen refresh rate: number of loops between 2 screen updates"
 su=0: rem "flag su (screen update): a change in the program requires a screen update"
@@ -19,7 +19,20 @@ cnt=0: rem "loop counter"
 nact$="": rem "network access technology (GSM, EDGE, HSPA, LTE...)"
 ntype$="": rem "network type, to be displayed (2G, 3G, 4G...)"
 nname$="": rem "network name to be displayed"
-
+# "dactive"
+# "   0: no call active"
+# "   1: call in progress"
+dactive=0
+# "dstat"
+# "call/dialing state"
+# "  -1: unknown/error/no call"
+# "   0: active"
+# "   1: held"
+# "   2: dialing (outbound call)"
+# "   3: dialing (outbound call)"
+# "   4: incoming (inbound call)"
+# "   5: waiting (inbound call)"
+dstat=-1
 return
 
 SETUP_PARSER rem "=== setup for modem parser ==="

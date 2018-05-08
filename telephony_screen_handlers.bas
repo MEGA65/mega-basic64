@@ -62,9 +62,25 @@ return
 
 HANDLER_SCREEN_CONTACT rem "### screen CONTACT handler ###"
 mdv=sr: if fn mod(cnt)=0 then gosub DRAW_SCREEN_CONTACT
-rem "TODO: handle user actions"
+# "handle user actions"
 u$="": get u$
 if u$="" then return
 if u$=chr$(20) then gosub SWITCH_TO_SCREEN_1
 if u$=chr$(13) then gosub DRAW_SCREEN_CONTACT: gosub SWITCH_TO_SCREEN_4: s$="atd"+pnumber$(cselected%)+";"+chr$(13): gosub WRITE_STRING_TO_MODEM: rem "dial the number and switch to screen 4"
+return
+
+HANDLER_SCREEN_CALL rem
+# "handle user actions"
+u$="": get u$
+if dstat=0 goto HS_CALL_ACTIVE
+if dstat=2 or dstat=3 goto HS_CALL_DIALING
+if dstat=4 goto HS_CALL_RINGING
+
+HS_CALL_ACTIVE rem
+
+HS_CALL_DIALING rem
+
+HS_CALL_RINGING rem
+
+mdv=sr: if fn mod(cnt)=0 then gosub DRAW_SCREEN_CALL
 return
