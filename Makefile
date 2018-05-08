@@ -30,8 +30,8 @@ DIALER_ASSETS= \
 		$(ASSETS)/dialplus.png \
 		$(ASSETS)/dialequal.png \
 		$(ASSETS)/erase.png \
-		$(ASSETS)/greenphone.png \
-		$(ASSETS)/redphone.png \
+		$(ASSETS)/phone_green.png \
+		$(ASSETS)/phone_red.png \
 		$(ASSETS)/satellite.png \
 		$(ASSETS)/dial0_pressed.png \
 		$(ASSETS)/dial1_pressed.png \
@@ -50,8 +50,8 @@ DIALER_ASSETS= \
 		$(ASSETS)/dialplus_pressed.png \
 		$(ASSETS)/dialequal_pressed.png \
 		$(ASSETS)/erase_pressed.png \
-		$(ASSETS)/bluephone.png \
-		$(ASSETS)/bluephone.png \
+		$(ASSETS)/phone_blue.png \
+		$(ASSETS)/phone_blue.png \
 		$(ASSETS)/satellite_pressed.png \
 		$(ASSETS)/signal0_24x16-s.png \
 		$(ASSETS)/signal1_24x16-s.png \
@@ -73,11 +73,14 @@ DIALER_ASSETS= \
 		$(ASSETS)/battery90.png \
 		$(ASSETS)/battery100.png \
 		$(ASSETS)/control_back_2.png \
-		$(ASSETS)/cog_1.png \
+		$(ASSETS)/cog.png \
 		$(ASSETS)/trash_bin.png \
 		$(ASSETS)/globe.png \
-		$(ASSETS)/message.png \
+		$(ASSETS)/message_1.png \
 		$(ASSETS)/send_1.png \
+		$(ASSETS)/search.png \
+		$(ASSETS)/contact_new.png \
+		$(ASSETS)/contact_new_pressed.png \
 
 VEHICLE_ASSETS=	\
 		$(ASSETS)/vehicle_console_cluster.svg.png \

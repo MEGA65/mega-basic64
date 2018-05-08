@@ -51,32 +51,29 @@ us=1
 return
 
 DRAW_SCREEN_1_TEXT rem "=== screen text update ==="
-xx=0: yy=2: gosub MOVE_CURSOR_XX_YY
-print "{yel}";: rem "yellow text"
-print "UCCCCCCCCCCCCCCCCCCCI"; : xx=0: yy=3: gosub MOVE_CURSOR_XX_YY
-print "B";
+# "draw dialling box"
+print "{yel}";
+x=0: y=2: w=21: h=3: gosub DRAW_BOX
+xx=1: yy=3: gosub MOVE_CURSOR_XX_YY
 if nb$<>"" then print nb$;
-for j=1 to 19-len(nb$): if len(nb$)<19 then print " ";: next j: rem "special case: for i=1 to 0 still goes into loop, so if len()=max we don't wanna print a space; TODO: use SPC(x) command!"
-print "B";: xx=0: yy=4: gosub MOVE_CURSOR_XX_YY
-print "JCCCCCCCCCCCCCCCCCCCK";
+for j=1 to 19-len(nb$): if len(nb$)<19 then print " ";: next j: rem "special case: for i=1 to 0 still goes into loop, so if len()=max we don't wanna print a space"
 return
 
 DRAW_CONTACTS_PANE rem "=== draw full-size contact pane ==="
-xx=21: yy=2: gosub MOVE_CURSOR_XX_YY
+# "draw contact pane box"
 print "{lblu}";
-print "UCCCCCCCCCCCCCCCCCI"; : xx=21: yy=3: gosub MOVE_CURSOR_XX_YY
-print "B    contacts     B"; : xx=21: yy=4: gosub MOVE_CURSOR_XX_YY
-print chr$(171)+"CCCCCCCCCCCCCCCCC"+chr$(179); : xx=21: yy=5: gosub MOVE_CURSOR_XX_YY
+x=21: y=2: w=19: h=23: r(2)=1: r(19)=1: gosub DRAW_BOX
+xx=22: yy=3: gosub MOVE_CURSOR_XX_YY: print "    contacts     ";
+# "print contact names"
 for i=1 to cmaxindex%
-print "B";: if hl%=i then print "{yel}";
+xx=22: yy=4+i: gosub MOVE_CURSOR_XX_YY
+if hl%=i then print "{yel}";
 if cpane$(i)<>"" then print cpane$(i);
-for j=1 to clngth%-len(cpane$(i)): if len(cpane$(i))<clngth% then print " ";: next j: rem "special case: for i=1 to 0 still goes into loop, so if len()=max we don't wanna print a space; TODO: use SPC(x) command!"
-print "{lblu}";
-print "B"; : xx=21: yy=5+i: gosub MOVE_CURSOR_XX_YY
+for j=1 to clngth%-len(cpane$(i)): if len(cpane$(i))<clngth% then print " ";: next j
+print "{lblu}"
 next i
-print chr$(171)+"CCCCCCCCCCCCCCCCC"+chr$(179); : xx=21: yy=22: gosub MOVE_CURSOR_XX_YY
-print "B           searchB"; : xx=21: yy=23: gosub MOVE_CURSOR_XX_YY
-print "JCCCCCCCCCCCCCCCCCK";
+# "stamp search icon"
+canvas 66 stamp on canvas 0 at 35,21: rem "search"
 return
 
 DRAW_SCREEN_1_TILES rem "=== screen dial tiles update ==="
@@ -103,8 +100,8 @@ T8 if u$="/" then gosub STAMP_DIVIDE_PRESSED: goto T9
 gosub STAMP_DIVIDE
 T9 if u$="=" then gosub STAMP_EQUAL_PRESSED: goto T10
 gosub STAMP_EQUAL
-T10 if u$="@" then gosub STAMP_SATTELITE_PRESSED: goto T11
-gosub STAMP_SATTELITE
+T10 if u$="@" then gosub STAMP_CONTACT_NEW_PRESSED: goto T11
+gosub STAMP_CONTACT_NEW
 T11 if u$="<" or u$=">" then gosub STAMP_DUALSIM_PRESSED: goto T99
 gosub STAMP_DUALSIM
 T99 return
@@ -129,10 +126,10 @@ STAMP_DIVIDE_PRESSED canvas 13+20 stamp on canvas 0 at 16,13: return: rem "divid
 STAMP_DIVIDE canvas 13 stamp on canvas 0 at 16,13: return: rem "divide"
 STAMP_EQUAL_PRESSED canvas 16+20 stamp on canvas 0 at 16,17: return: rem "= (pressed)"
 STAMP_EQUAL canvas 16 stamp on canvas 0 at 16,17: return: rem "="
-STAMP_SATTELITE_PRESSED canvas 20+20 stamp on canvas 0 at 16,5: return: rem "satellite (pressed)"
-STAMP_SATTELITE canvas 20 stamp on canvas 0 at 16,5: return: rem "satellite"
-STAMP_DUALSIM_PRESSED canvas 48 stamp on canvas 0 at 16,21: return: rem "dual sim (pressed)"
-STAMP_DUALSIM canvas 47 stamp on canvas 0 at 16,21: return: rem "dual sim"
+STAMP_CONTACT_NEW_PRESSED canvas 68 stamp on canvas 0 at 16,21: return: rem "contact new (pressed)"
+STAMP_CONTACT_NEW canvas 67 stamp on canvas 0 at 16,21: return: rem "contact new"
+STAMP_DUALSIM_PRESSED canvas 48 stamp on canvas 0 at 16,5: return: rem "dual sim (pressed)"
+STAMP_DUALSIM canvas 47 stamp on canvas 0 at 16,5: return: rem "dual sim"
 
 DRAW_SCREEN_2 rem "### SC 2 (RING) SCREEN UPDATE ###"
 gosub DRAW_STATUS_BAR
@@ -170,26 +167,21 @@ DRAW_SCREEN_CONTACT rem
 gosub DRAW_STATUS_BAR
 # "back button"
 canvas 60 stamp on canvas 0 at 0,2
-# "contact name/number"
-gosub TRIM_CONTACT_DISPLAY_TEXT
-
-print "{wht}";
-x=4: y=2: w=36: h=3: gosub DRAW_BOX
-
-xx=5: yy=3: gosub MOVE_CURSOR_XX_YY
-if cdisplay$<>"" then print cdisplay$;
-for j=1 to 34-len(cdisplay$): if len(cdisplay$)<35 then print " ";: next j
-
-print "{wht}";
-x=4: y=5: w=36: h=20: r(2)=1: r(15)=1: gosub DRAW_BOX
-
 canvas 18 stamp on canvas 0 at 0,6: rem "greephone"
 canvas 61 stamp on canvas 0 at 0,10: rem "cog"
 #canvas 62 stamp on canvas 0 at 0,14: rem "trash bin"
-
+# "contact name/number box"
+gosub TRIM_CONTACT_DISPLAY_TEXT
+print "{wht}";
+x=4: y=2: w=36: h=3: gosub DRAW_BOX
+xx=5: yy=3: gosub MOVE_CURSOR_XX_YY
+if cdisplay$<>"" then print cdisplay$;
+for j=1 to 34-len(cdisplay$): if len(cdisplay$)<35 then print " ";: next j
+# "SMS box"
+print "{wht}";
+x=4: y=5: w=36: h=20: r(15)=1: gosub DRAW_BOX
 canvas 63 stamp on canvas 0 at 5,21: rem "globe"
 canvas 64 stamp on canvas 0 at 35,21: rem "message"
-
 return
 
 

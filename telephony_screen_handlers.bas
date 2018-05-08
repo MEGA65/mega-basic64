@@ -2,13 +2,13 @@ HANDLER_SCREEN_1 rem "### SC 1 (DIALER) HANDLER ###"
 rem "read input chars and update string (phone number)"
 if su=1 then gosub DRAW_SCREEN_1: su=0
 u$="": get u$
-mdv=sr: if fn mod(cnt)=0 then gosub DRAW_SCREEN_1: rem "we trigger a screen update every 1000 loops"
+mdv=sr: if fn mod(cnt)=0 then gosub DRAW_SCREEN_1: rem "we trigger a screen update every sr loops"
 tmr=tmr-1: if tmr=0 then gosub DRAW_SCREEN_1_TILES: us=1: rem "we trigger a dial tiles update every 1000 loops since last"
 if u$="" then return
 # "navigation in contact pane"
 if u$="{up}" then mdv=centry%: hl%=fn mod(hl%-2)+1 : gosub DRAW_SCREEN_1
 if u$="{down}" then mdv=centry%: hl%=fn mod(hl%)+1: gosub DRAW_SCREEN_1
-if u$="{rght}" and hl%<>0 then cselected%=cindex%(hl%): gosub SWITCH_TO_SCREEN_CONTACT
+if u$="{rght}" and hl%<>0 then cselected%=cindex%(hl%): gosub DRAW_SCREEN_1: gosub SWITCH_TO_SCREEN_CONTACT
 # "dialler"
 if u$<>chr$(20) and u$<>chr$(13) and len(nb$)>=19 then return: rem "limit length is 18, go to loop start"
 if u$="0" or u$="1" or u$="2" or u$="3" or u$="4" or u$="5" or u$="6" or u$="7" or u$="8" or u$="9" or u$="+" or u$="*" or u$="#" or u$="a" or u$="b" or u$="c" or u$="d" then nb$=nb$+u$: gosub DRAW_SCREEN_1

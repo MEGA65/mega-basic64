@@ -42,7 +42,8 @@ if r(i)=0 then print "B";: for j=1 to w-2: print "{rght}";: next j: print "B";
 if r(i)=1 then print chr$(171);: for j=1 to w-2: print "C";: next j: print chr$(179);
 r(i)=0: next i
 xx=x: yy=y+h-1: gosub MOVE_CURSOR_XX_YY
-print "J";: for i=1 to w-2: print "C";: next i: print "K";
+print "J";: for i=1 to w-2: print "C";: next i: c=peek(646): poke 55296+(y+h-1)*40+x+w-1,c: poke 1024+(y+h-1)*40+x+w-1,75
+# "we poke the last character to the screen RAM (1024) and the color to the color RAM (55296), in case it's in the lower-right-hand corner, to avoid a CR/LF"
 print "{home}"
 return
 
@@ -84,36 +85,41 @@ rem "it triggers an initial update of the screen"
 
 SWITCH_TO_SCREEN_0 rem "=== switch to screen 0 (debug) ==="
 sc=0
-print "{clr}";: canvas 0 clr: rem "clear screen"
+gosub SWITCH_SCREEN_CLEANUP
 gosub DRAW_SCREEN_0
 return
 
 SWITCH_TO_SCREEN_1 rem "=== switch to screen 1 ==="
 sc=1
-print "{clr}";: canvas 0 clr: rem "clear screen"
+gosub SWITCH_SCREEN_CLEANUP
 gosub DRAW_SCREEN_1: rem "trigger initial screen update"
 return
 
 SWITCH_TO_SCREEN_2 rem "=== switch to screen 2 ==="
 sc=2
-print "{clr}";: canvas 0 clr: rem "clear screen"
+gosub SWITCH_SCREEN_CLEANUP
 gosub DRAW_SCREEN_2: rem "trigger initial screen update"
 return
 
 SWITCH_TO_SCREEN_3 rem "=== switch to screen 3 ==="
 sc=3
-print "{clr}";: canvas 0 clr: rem "clear screen"
+gosub SWITCH_SCREEN_CLEANUP
 gosub DRAW_SCREEN_3: rem "trigger initial screen update"
 return
 
 SWITCH_TO_SCREEN_4 rem "=== switch to screen 4 ==="
 sc=4
-print "{clr}";: canvas 0 clr: rem "clear screen"
+gosub SWITCH_SCREEN_CLEANUP
 gosub DRAW_SCREEN_4: rem "trigger initial screen update"
 return
 
 SWITCH_TO_SCREEN_CONTACT rem "=== switch to screen CONTACT ==="
 sc=5
-print "{clr}";: canvas 0 clr: rem "clear screen"
+gosub SWITCH_SCREEN_CLEANUP
 gosub DRAW_SCREEN_CONTACT: rem "trigger initial screen update"
+return
+
+SWITCH_SCREEN_CLEANUP rem
+u$=""
+print "{clr}";: canvas 0 clr: rem "clear screen"
 return

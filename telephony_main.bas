@@ -1,6 +1,7 @@
 poke 53280,0: poke 53281,0: rem "border and screen color (0: black)"
 poke 0,65: rem "fast mode (50mhz cpu clock)"
 poke 53248+111,128: rem "fix screen artifacts (60hz display)"
+poke 53272,20: rem "uppercase charset"
 
 print "{clr}";: canvas 0 clr: rem "clear screen"
 
