@@ -123,33 +123,28 @@ MESSAGE_HANDLER_39 rem "Message handler: message type 39"
 13999 return
 
 MESSAGE_HANDLER_OK rem "Message handler: OK"
-14010 if sc=4 then dia=1: s$="at+clcc"+chr$(13): gosub WRITE_STRING_TO_MODEM: rem "ATD succeeded, dialling..."
+if dia=1 then gosub SEND_AT+CLCC: rem "ATD succeeded, dialling..."
 14099 return
 
 MESSAGE_HANDLER_41 rem "Message handler: message type 41"
 14199 return
 
 MESSAGE_HANDLER_RING rem "Message handler: incoming call (ring)"
-s$="at+clcc"+chr$(13):gosub WRITE_STRING_TO_MODEM: rem "send AT+CLCC (list current calls)"
-if dactive=0 then dactive=1: dstat=4: gosub SWITCH_TO_SCREEN_CALL
+gosub SEND_AT+CLCC
+if dactive=0 then dactive=1: gosub SWITCH_TO_SCREEN_CALL
 # "else: already in-call"
 14299 return
-
 
 
 MESSAGE_HANDLER_NO_CARRIER rem "Message handler: no carrier"
 # "TODO: depending on which screen we are, we can set different messages to be displayed to the user when the call is hung up"
 if dactive=1 then goto MH_NC_ACTIVE
+# "else: already in-call"
 goto MH_NC_END
 
 MH_NC_ACTIVE rem "active call"
 # "hang-up the active call"
-s$="ath"+chr$(13): gosub WRITE_STRING_TO_MODEM
-dactive=0
-# "if dialing, present user with error"
-if dia=1 then dr$="connection cannot be established": dia=0
-# "clean up"
-cid$=""
+gosub CALL_HANGUP
 gosub SWITCH_TO_SCREEN_1
 goto MH_NC_END
 
@@ -184,45 +179,49 @@ MESSAGE_HANDLER_50 rem "Message handler: message type 50"
 
 
 MESSAGE_HANDLER_+CLCC rem "Message handler: +clcc (list current calls)"
-if mf$(4)="0" then goto MH_CLCC_VOICE
+# "update state and caller id only if voice call, and call active"
+if mf$(4)="0" and dactive=1 then goto MH_CLCC_VOICE
+return
 
-MH_CLCC_VOICE rem "voice call"
+MH_CLCC_VOICE rem
+# "--- voice call ---"
 # "set caller id (cid$)"
 cid$=right$(left$(mf$(6),len(mf$(6))-1),len(mf$(6))-2): su=1
-# "update call state (dstat)"
-dstat=-1
-if mf$(3)="0" then dstat=0
-if mf$(3)="1" then dstat=1
-if mf$(3)="2" then dstat=2
-if mf$(3)="3" then dstat=3
-if mf$(3)="4" then dstat=4
-if mf$(3)="5" then dstat=5
+# "update call state (dsta)"
+dsta=-1
+if mf$(3)="0" then dsta=0
+if mf$(3)="1" then dsta=1
+if mf$(3)="2" then dsta=2
+if mf$(3)="3" then dsta=3
+if mf$(3)="4" then dsta=4
+if mf$(3)="5" then dsta=5
 
 if dia=1 then goto MH_CLCC_DIALLING
 goto MH_CLCC_END
 
-MH_CLCC_DIALLING rem "dialling"
-if dstat=2 then dr$="Dialling..."
-if dstat=3 then dr$="Alerting target...!"
+MH_CLCC_DIALLING rem
+# "--- dialling ---"
+if dsta=2 then dr$="dialling..."
+if dsta=3 then dr$="alerting..."
 # "0: the call has been established"
-if dstat=0 then dr$="": dia=0: cid$=nb$
+if dsta=0 then dr$="": dia=0: cid$=dnumber$
 goto MH_CLCC_END
 
 MH_CLCC_END rem
 # "send again the at+clcc command"
-s$="at+clcc"+chr$(13): gosub WRITE_STRING_TO_MODEM
+gosub SEND_AT+CLCC
 15199 return
 
 
 
 MESSAGE_HANDLER_+CSQ rem "Message handler: +csq (signal quality report)"
-15210 rssi=val(mf$(1)): ber=val(mf$(2))
-15220 if rssi=99 or rssi=199 then sl%=0
-15222 if rssi>=0 and rssi<=31 then sl%=int((rssi/32*5)+1)
-15224 if rssi>=100 and rssi<=191 then sl%=int(((rssi-100)/92*5)+1)
-15230 if ber>=0 and ber<=7 then ber$=str$(ber)
-15232 if ber=99 then ber$="?"
-15298 su=1: rem "trigger screen update"
+rssi=val(mf$(1)): ber=val(mf$(2))
+if rssi=99 or rssi=199 then sl%=0
+if rssi>=0 and rssi<=31 then sl%=int((rssi/32*5)+1)
+if rssi>=100 and rssi<=191 then sl%=int(((rssi-100)/92*5)+1)
+if ber>=0 and ber<=7 then ber$=str$(ber)
+if ber=99 then ber$="?"
+su=1: rem "trigger screen update"
 15299 return
 
 MESSAGE_HANDLER_+QNWINFO rem "Message handler: +qnwinfo (network information report)"

@@ -131,33 +131,6 @@ STAMP_CONTACT_NEW canvas 67 stamp on canvas 0 at 16,21: return: rem "contact new
 STAMP_DUALSIM_PRESSED canvas 48 stamp on canvas 0 at 16,5: return: rem "dual sim (pressed)"
 STAMP_DUALSIM canvas 47 stamp on canvas 0 at 16,5: return: rem "dual sim"
 
-DRAW_SCREEN_2 rem "### SC 2 (RING) SCREEN UPDATE ###"
-gosub DRAW_STATUS_BAR
-us=1
-canvas 0 clr : print "{clr}";
-print "Incoming call!"
-if cid$<>"" then print "Caller: ";cid$: goto DS2_K
-print "{down}";
-DS2_K print "{down}[a]ccept or [r]eject?"
-return
-
-DRAW_SCREEN_3 rem "### SC 3 (IN-CALL) SCREEN UPDATE ###"
-gosub DRAW_STATUS_BAR
-us=1
-canvas 0 clr : print "{clr}";
-print "In-call with ";cid$
-print "{down}[h]ang up"
-return
-
-DRAW_SCREEN_4 rem "### SC 4 (DIALLING) SCREEN UPDATE ###"
-gosub DRAW_STATUS_BAR
-us=1
-canvas 0 clr : print "{clr}";
-print "Dialling ";nb$
-if dr$<>"" then print dr$: goto DS3_K
-print "{down}";
-DS3_K print "{down}[h]ang up"
-return
 
 DRAW_SCREEN_0 rem "### SC 0 (DEBUG) SCREEN UPDATE ###"
 rem "we don't clr or print, and let debug messages be"
@@ -186,6 +159,54 @@ return
 
 DRAW_SCREEN_CALL rem
 gosub DRAW_STATUS_BAR
+# "call status box"
+print "{wht}";
+x=0: y=2: w=40: h=3: gosub DRAW_BOX
+
+xx=1: yy=5: gosub MOVE_CURSOR_XX_YY
+print "call active=";dactive;"          ";
+xx=1: yy=6: gosub MOVE_CURSOR_XX_YY
+print "call state=";dsta;"          ";
+xx=1: yy=7: gosub MOVE_CURSOR_XX_YY
+print "dialing=";dia;"          ";
+xx=1: yy=8: gosub MOVE_CURSOR_XX_YY
+print "cid$=";cid$;"          ";
+xx=1: yy=9: gosub MOVE_CURSOR_XX_YY
+print "dnumber$=";dnumber$;"          ";
+xx=1: yy=10: gosub MOVE_CURSOR_XX_YY
+print "u$=";u$;"          ";
+
+if dsta=0 goto DS_CALL_ACTIVE
+if dsta=2 or dsta=3 goto DS_CALL_DIALING
+if dsta=4 or dsta=5 goto DS_CALL_RINGING
+ddisplay$="unknown status": gosub DS_CALL_DDISPLAY
 return
+
+DS_CALL_ACTIVE rem
+# "=== Call state: active ==="
+ddisplay$="in-call with "+cid$
+gosub DS_CALL_DDISPLAY
+return
+
+DS_CALL_DIALING rem
+# "=== Call state: dialing ==="
+ddsiplay$="dialling "+dnumber$
+if dr$<>"" then ddisplay$=ddisplay$+" ("+dr$+")"
+gosub DS_CALL_DDISPLAY
+return
+
+DS_CALL_RINGING rem
+# "=== Call state: ringing ==="
+ddisplay$="incoming call from "+cid$
+gosub DS_CALL_DDISPLAY
+return
+
+DS_CALL_DDISPLAY rem
+xx=1: yy=3: gosub MOVE_CURSOR_XX_YY
+if ddisplay$<>"" then print ddisplay$;
+for j=1 to 38-len(ddisplay$): if len(ddisplay$)<38 then print " ";: next j
+return
+
+
 
 
