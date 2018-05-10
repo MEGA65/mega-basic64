@@ -3,10 +3,6 @@ if sc=0 then gosub DRAW_SCREEN_DEBUG
 if sc=1 then gosub HANDLER_SCREEN_DIALLER
 if sc=2 then gosub HANDLER_SCREEN_CONTACT
 if sc=3 then gosub HANDLER_SCREEN_CALL
-
-# "we trigger a screen update every sr loops, and only if needed (su=1)"
-mdv=sr: if fn mod(cnt)=0 and su=1 then gosub SCREEN_DRAWER: su=0: us=1
-
 return
 
 
@@ -26,13 +22,13 @@ if u$="{rght}" and hl%<>0 then cselected%=cindex%(hl%): su=1: gosub SWITCH_TO_SC
 # "dialler"
 # "limit length is 18, go to loop start if over it or not enter or backspace"
 if u$<>chr$(20) and u$<>chr$(13) and len(nb$)>=19 then return
-if u$="0" or u$="1" or u$="2" or u$="3" or u$="4" or u$="5" or u$="6" or u$="7" or u$="8" or u$="9" or u$="+" or u$="*" or u$="#" or u$="a" or u$="b" or u$="c" or u$="d" then nb$=nb$+u$: su=1
+if u$="0" or u$="1" or u$="2" or u$="3" or u$="4" or u$="5" or u$="6" or u$="7" or u$="8" or u$="9" or u$="+" or u$="*" or u$="#" or u$="a" or u$="b" or u$="c" or u$="d" then nb$=nb$+u$: u0$=u$: su=1
 # "these characters don't update the string (for now)"
-if u$="-" or u$="/" or u$="=" or u$="@" or u$="<" or u$=">" then su=1
+if u$="-" or u$="/" or u$="=" or u$="@" or u$="<" or u$=">" then  u0$=u$: su=1
 # "backspace: remove a character, but only if there's at least one"
-if u$=chr$(20) and len(nb$)>=1 then nb$=left$(nb$,len(nb$)-1): su=1
+if u$=chr$(20) and len(nb$)>=1 then nb$=left$(nb$,len(nb$)-1):  u0$=u$: su=1
 # "enter: call the dialled number"
-if u$=chr$(13) then su=1: dnumber$=nb$: gosub CALL_DIAL: gosub SWITCH_TO_SCREEN_CALL
+if u$=chr$(13) then  u0$=u$: su=1: dnumber$=nb$: gosub CALL_DIAL: gosub SWITCH_TO_SCREEN_CALL
 return
 
 
@@ -41,8 +37,8 @@ HANDLER_SCREEN_CONTACT rem
 # "handle user actions"
 u$="": get u$
 if u$="" then return
-if u$=chr$(20) then su=1: gosub SWITCH_TO_SCREEN_DIALLER
-if u$=chr$(13) then su=1: dnumber$=pnumber$(cselected%): gosub CALL_DIAL: gosub SWITCH_TO_SCREEN_CALL
+if u$=chr$(20) then  u0$=u$: su=1: gosub SWITCH_TO_SCREEN_DIALLER
+if u$=chr$(13) then  u0$=u$: su=1: dnumber$=pnumber$(cselected%): gosub CALL_DIAL: gosub SWITCH_TO_SCREEN_CALL
 return
 
 
@@ -69,7 +65,7 @@ if dsta=0 goto HS_CALL_ACTIVE
 if dsta=2 or dsta=3 goto HS_CALL_DIALING
 if dsta=4 or dsta=5 goto HS_CALL_RINGING
 # "else, we want to always be able to hangup with H"
-if u$="h" or u$="H" then su=1: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER
+if u$="h" or u$="H" then  u0$=u$: su=1: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER
 return
 
 HS_CALL_ACTIVE rem
@@ -78,7 +74,7 @@ HS_CALL_ACTIVE rem
 # "   h: hang-up call"
 # "   TODO: more (mute, speaker, dialpad...)"
 # "--- Hang-up call (H) ---"
-if u$="h" or u$="H" then su=1: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER: return
+if u$="h" or u$="H" then  u0$=u$: su=1: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER: return
 return
 
 HS_CALL_DIALING rem
@@ -86,7 +82,7 @@ HS_CALL_DIALING rem
 # " Possible actions:"
 # "   h: hang-up call"
 # "   TODO: more (mute, speaker, dialpad...)"
-if u$="h" or u$="H" then su=1: gosub CALL_HANGUP: gosub SWITCH_TO_SCREEN_DIALLER: return
+if u$="h" or u$="H" then  u0$=u$: su=1: gosub CALL_HANGUP: gosub SWITCH_TO_SCREEN_DIALLER: return
 return
 
 HS_CALL_RINGING rem
@@ -95,8 +91,8 @@ HS_CALL_RINGING rem
 # "   a: answer call"
 # "   r: reject call"
 # "   TODO: more (mute, speaker, dialpad...)"
-if u$="a" or u$="A" then su=1: gosub CALL_ANSWER: return
-if u$="r" or u$="R" or u$="h" or u$="H" then su=1: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER: return
+if u$="a" or u$="A" then  u0$=u$: su=1: gosub CALL_ANSWER: return
+if u$="r" or u$="R" or u$="h" or u$="H" then  u0$=u$: su=1: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER: return
 return
 
 return

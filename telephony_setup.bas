@@ -3,21 +3,38 @@ for ja=2048 to 40959: if peek(ja-1)<>141 or peek(ja)<>44 then next
 return
 
 SETUP_PROGRAM rem "=== program flags and variables setup ==="
-db=0: rem "flag db (debug): print debugging information"
-sc=1: rem "current screen to be displayed and user input to be taken"
-sr=10: rem "screen refresh rate: number of loops between 2 screen updates"
-su=0: rem "flag su (screen update): a change in the program requires a screen update"
-us=0: rem "flag us (updated screen): is set to 1 when the screen if actually updated"
-cid$="": rem "caller id (number)"
-dr$="": rem "dr (dialling result): user friendly information about dialling state"
-dia=0: rem "flag dia (dialling): the modem is currently dialling"
-rssi=99: rem "rssi: received signal strength indicator"
-ber=99: rem "ber: channel bit error rate"
-btp=100.0: rem "remaining battery percentage [0:100]"
-cnt=0: rem "loop counter"
-nact$="": rem "network access technology (GSM, EDGE, HSPA, LTE...)"
-ntype$="": rem "network type, to be displayed (2G, 3G, 4G...)"
-nname$="": rem "network name to be displayed"
+# "flag db (debug): print debugging information"
+db=0
+# "current screen to be displayed and user input to be taken"
+sc=1
+# "screen refresh rate: number of loops between 2 screen updates"
+sr=10
+# "flag su (screen update): a change in the program requires a screen update"
+su=0
+# "flag us (updated screen): is set to 1 when the screen if actually updated"
+us=0
+# "last call to POLL_MODEM resulted in a call to HANDLE_MODEM_LINE"
+ml=0
+# "caller id (number)"
+cid$=""
+# "dr (dialling result): user friendly information about dialling state"
+dr$=""
+# "flag dia (dialling): the modem is currently dialling"
+dia=0
+# "rssi: received signal strength indicator"
+rssi=99
+# "ber: channel bit error rate"
+ber=99
+# "remaining battery percentage [0:100]"
+btp=100.0
+# "loop counter"
+cnt=0
+# "network access technology (GSM, EDGE, HSPA, LTE...)"
+nact$=""
+# "network type, to be displayed (2G, 3G, 4G...)"
+ntype$=""
+# "network name to be displayed"
+nname$=""
 # "dactive"
 # "   0: no call active"
 # "   1: call in progress"
@@ -47,15 +64,23 @@ dtmr$="000000"
 
 # "=== arrays to time different parts of the program ==="
 # "  0: loop time"
-# "  1: screen handlers"
-# "  2: modem polling and message handling"
-# "  3: regular tasks"
+# "  1: screen handler"
+# "  2: screen drawer"
+# "  3: modem polling and message handling"
+# "  4: regular tasks"
+# "  5: screen drawer: redraw"
+# "  6: screen drawer: no redraw"
+# "  7: poll modem: line handled"
+# "  8: screen drawer: no line handle"
 # "======"
 # "t0: time at the beginning of the program"
 # "t1: time at the beginning of a subpart"
 # "tl: time at the beginning of a loop"
 # "tt: total time spent in program"
-t0=time: t1=0: tl=0: tt=0
+# "tu: time at last screen update"
+t0=0: t1=0: tl=0: tt=0: tu=0
+# "diverse counters"
+c5=0: c7=0
 # "array containing the total time spent"
 dim ttmr(10)
 # "array containing the average time spent"

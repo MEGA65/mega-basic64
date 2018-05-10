@@ -4,6 +4,7 @@ if sc=0 then gosub DRAW_SCREEN_DEBUG
 if sc=1 then gosub DRAW_SCREEN_DIALLER
 if sc=2 then gosub DRAW_SCREEN_CONTACT
 if sc=3 then gosub DRAW_SCREEN_CALL
+u0$="": us=1
 return
 
 
@@ -81,7 +82,6 @@ return
 DRAW_SCREEN_DIALLER rem
 # "call update subroutines"
 gosub DS_DIALLER_NUMBER: gosub DS_DIALLER_CONTACT: gosub DS_DIALLER_DIALPAD
-us=1
 return
 
 # "=== print dialling field ==="
@@ -116,30 +116,30 @@ return
 DS_DIALLER_DIALPAD rem
 tmr=1000: rem "reinitialize timer"
 for x=1 to 3: for y=1 to 3
-if val(u$)=x+(y-1)*3 then gosub STAMP_1_TO_9_PRESSED: goto NEXTYX
+if val(u0$)=x+(y-1)*3 then gosub STAMP_1_TO_9_PRESSED: goto NEXTYX
 gosub STAMP_1_TO_9
 NEXTYX next y,x
-T1 if u$="#" then gosub STAMP_HASH_PRESSED: goto T2
+T1 if u0$="#" then gosub STAMP_HASH_PRESSED: goto T2
 gosub STAMP_HASH
-T2 if u$="0" then gosub STAMP_0_PRESSED: goto T3
+T2 if u0$="0" then gosub STAMP_0_PRESSED: goto T3
 gosub STAMP_0
-T3 if u$="*" then gosub STAMP_STAR_PRESSED: goto T4
+T3 if u0$="*" then gosub STAMP_STAR_PRESSED: goto T4
 gosub STAMP_STAR
-T4 if u$=chr$(13) then gosub STAMP_GREENPHONE_PRESSED: goto T5
+T4 if u0$=chr$(13) then gosub STAMP_GREENPHONE_PRESSED: goto T5
 gosub STAMP_GREENPHONE
-T5 if u$="+" then gosub STAMP_PLUS_PRESSED: goto T6
+T5 if u0$="+" then gosub STAMP_PLUS_PRESSED: goto T6
 gosub STAMP_PLUS
-T6 if u$=chr$(20) then gosub STAMP_BACKSPACE_PRESSED: goto T7
+T6 if u0$=chr$(20) then gosub STAMP_BACKSPACE_PRESSED: goto T7
 gosub STAMP_BACKSPACE
-T7 if u$="-" then gosub STAMP_MINUS_PRESSED: goto T8
+T7 if u0$="-" then gosub STAMP_MINUS_PRESSED: goto T8
 gosub STAMP_MINUS
-T8 if u$="/" then gosub STAMP_DIVIDE_PRESSED: goto T9
+T8 if u0$="/" then gosub STAMP_DIVIDE_PRESSED: goto T9
 gosub STAMP_DIVIDE
-T9 if u$="=" then gosub STAMP_EQUAL_PRESSED: goto T10
+T9 if u0$="=" then gosub STAMP_EQUAL_PRESSED: goto T10
 gosub STAMP_EQUAL
-T10 if u$="@" then gosub STAMP_CONTACT_NEW_PRESSED: goto T11
+T10 if u0$="@" then gosub STAMP_CONTACT_NEW_PRESSED: goto T11
 gosub STAMP_CONTACT_NEW
-T11 if u$="<" or u$=">" then gosub STAMP_DUALSIM_PRESSED: goto T99
+T11 if u0$="<" or u$=">" then gosub STAMP_DUALSIM_PRESSED: goto T99
 gosub STAMP_DUALSIM
 T99 return
 

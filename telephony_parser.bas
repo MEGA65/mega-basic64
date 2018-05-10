@@ -22,6 +22,8 @@ if db=1 then for i=0 to(fc-1): print"[";mf$(i);"]",: next i
 f1$="": ml$="": fc=0: mf$=""
 mn=0
 gosub GET_MESSAGE_TYPE: gosub JUMP_TO_HANDLER
+# "a non-empty modem line has been handled"
+ml=1
 return
 
 

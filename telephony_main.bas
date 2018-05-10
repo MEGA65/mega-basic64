@@ -27,7 +27,9 @@ if db=1 then gosub SWITCH_TO_SCREEN_DEBUG: goto INIT_END
 # "by defaults, start the program on DIALLER screen"
 gosub SWITCH_TO_SCREEN_DIALLER
 
-INIT_END goto MAIN_LOOP
+INIT_END rem
+t0=time
+goto MAIN_LOOP
 
 
 MAIN_LOOP rem
@@ -37,18 +39,36 @@ cnt=cnt+1
 tt=time-t0
 
 t1=time
-# "--- get user input / update screen ---"
+# "--- call screen handler (get user input, update program state...) ---"
 gosub SCREEN_HANDLER
-# "screen updates debugging"
-# if us=1 then print "{home}+";: us=0: goto ML1: rem "print a char when screen is updated"
-# if us=0 then print "{home} ";: goto ML1: rem "remove the char when screen wasn't updated"
-ML1 rem
 ttmr(1)=ttmr(1)+(time-t1)
 
 t1=time
-# "--- get modem input ---"
+# "--- screen update ---"
+# "if the clock gain 0.1s over last timed update, we trigger an update"
+if time-tu>=6 then su=1
+# "we trigger a screen update every sr loops, and only if needed (su=1)"
+mdv=sr: if fn mod(cnt)=0 and su=1 then gosub SCREEN_DRAWER: tu=time: su=0: us=1
+# "screen updates debugging"
+# "print a char when screen is updated"
+if us=1 then print "{home}{down}+";
+# "remove the char when screen wasn't updated"
+if us=0 then print "{home}{down} ";
+
+t=time
+if us=1 then ttmr(5)=ttmr(5)+(t-t1): c5=c5+1
+if us=0 then ttmr(6)=ttmr(6)+(t-t1)
+us=0
+ttmr(2)=ttmr(2)+(t-t1)
+
+t1=time
+# "--- get modem input & handle received lines ---"
 gosub POLL_MODEM
-ttmr(2)=ttmr(2)+(time-t1)
+t=time
+if ml=1 then ttmr(7)=ttmr(7)+(t-t1): c7=c7+1
+if ml=0 then ttmr(8)=ttmr(8)+(t-t1)
+ml=0
+ttmr(3)=ttmr(3)+(t-t1)
 
 t1=time
 # "--- perform regular tasks ---"
@@ -62,12 +82,16 @@ mdv=500: if fn mod(cnt+250)=0 then s$="at+qnwinfo"+chr$(13): gosub WRITE_STRING_
 mdv=500: if fn mod(cnt+500)=0 then s$="at+qspn"+chr$(13): gosub WRITE_STRING_TO_MODEM
 # "fix charset bug"
 if (peek(53272)and 7)=0 then poke 53272,20
-ttmr(3)=ttmr(3)+(time-t1)
+ttmr(4)=ttmr(4)+(time-t1)
 
 # "--- timing related operation ---"
 ttmr(0)=ttmr(0)+(time-tl)
 # "update the average"
 for i=0 to 10: tavg(i)=ttmr(i)/cnt: next i
+if c5<>0 then tavg(5)=ttmr(5)/c5
+tavg(6)=ttmr(6)/(cnt-c5)
+if c7<>0 then tavg(7)=ttmr(7)/c7
+tavg(8)=ttmr(8)/(cnt-c8)
 
 goto MAIN_LOOP
 # "### main loop ###"
