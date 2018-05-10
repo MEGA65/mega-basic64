@@ -173,12 +173,17 @@ def scan(s, tokenize=True):
 
 
 def scan_line_number(s):
+    stemp = s
     s = s.lstrip()
     acc = []
     while s and s[0].isdigit():
         acc.append(s[0])
         s = s[1:]
-    return (int(''.join(acc)), s.lstrip())
+    try:
+        return (int(''.join(acc)), s.lstrip())
+    except ValueError as ve:
+        sys.stderr.write("Error in line: "+str(stemp)+"\n")
+        raise
 
 
 def tokenize(s):
