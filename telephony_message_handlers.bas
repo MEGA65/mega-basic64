@@ -1,6 +1,8 @@
-9999 rem "### MESSAGE HANDLERS ###"
-9999 rem "we actually have to force the line numbers for the jump-table mechanism to work"
-9999 rem "we could keep line numbers instead of labels, if we don't use those labels at all (outside of the jump-table)"
+# "### MESSAGE HANDLERS ###"
+# "we actually have to force the line numbers for the jump-table mechanism to work"
+# "we could keep line numbers instead of labels, if we don't use those labels at all (outside of the jump-table)"
+
+9999 rem
 
 MESSAGE_HANDLER_0 rem "Message handler: unknown/free-form"
 10099 return
@@ -131,7 +133,7 @@ MESSAGE_HANDLER_41 rem "Message handler: message type 41"
 
 MESSAGE_HANDLER_RING rem "Message handler: incoming call (ring)"
 gosub SEND_AT+CLCC
-if dactive=0 then dactive=1: gosub SWITCH_TO_SCREEN_CALL
+if dactive=0 then dactive=1: su=1: gosub SWITCH_TO_SCREEN_CALL
 # "else: already in-call"
 14299 return
 
@@ -145,6 +147,7 @@ goto MH_NC_END
 MH_NC_ACTIVE rem "active call"
 # "hang-up the active call"
 gosub CALL_HANGUP
+su=1
 gosub SWITCH_TO_SCREEN_DIALLER
 goto MH_NC_END
 
@@ -160,11 +163,11 @@ MESSAGE_HANDLER_45 rem "Message handler: message type 45"
 14599 return
 
 MESSAGE_HANDLER_NO_DIAL_TONE rem "Message handler: no dial tone"
-14610 if sc=4 then dr$="no dial tone"
+if dia=1 then dr$="no dial tone": su=1
 14699 return
 
 MESSAGE_HANDLER_BUSY rem "Message handler: busy"
-14710 if sc=4 then dr$="target is busy"
+if dia=1 then dr$="target is busy": su=1
 14799 return
 
 MESSAGE_HANDLER_NO_ANSWER rem "Message handler: no answer"
@@ -178,7 +181,8 @@ MESSAGE_HANDLER_50 rem "Message handler: message type 50"
 
 
 
-MESSAGE_HANDLER_+CLCC rem "Message handler: +clcc (list current calls)"
+MESSAGE_HANDLER_+CLCC rem
+# "Message handler: +clcc (list current calls)"
 # "update state and caller id only if voice call, and call active"
 if mf$(4)="0" and dactive=1 then goto MH_CLCC_VOICE
 return
@@ -186,6 +190,7 @@ return
 MH_CLCC_VOICE rem
 # "--- voice call ---"
 # "set caller id (cid$)"
+su=1
 cid$=right$(left$(mf$(6),len(mf$(6))-1),len(mf$(6))-2)
 # "update call state (dsta)"
 dsta=-1
@@ -214,7 +219,9 @@ gosub SEND_AT+CLCC
 
 
 
-MESSAGE_HANDLER_+CSQ rem "Message handler: +csq (signal quality report)"
+MESSAGE_HANDLER_+CSQ rem
+# "Message handler: +csq (signal quality report)"
+su=1
 rssi=val(mf$(1)): ber=val(mf$(2))
 if rssi=99 or rssi=199 then sl%=0
 if rssi>=0 and rssi<=31 then sl%=int((rssi/32*5)+1)
@@ -223,7 +230,9 @@ if ber>=0 and ber<=7 then ber$=str$(ber)
 if ber=99 then ber$="?"
 15299 return
 
-MESSAGE_HANDLER_+QNWINFO rem "Message handler: +qnwinfo (network information report)"
+MESSAGE_HANDLER_+QNWINFO rem
+# "Message handler: +qnwinfo (network information report)"
+su=1
 nact$=right$(left$(mf$(1),len(mf$(1))-1),len(mf$(1))-2): rem "get nwact, without quotes"
 nt$="?": rem "nwact is not in the following list (should not happen)"
 if nact$="none" then nt$=""
@@ -246,6 +255,7 @@ if nact$="fdd lte" then nt$="lte"
 
 MESSAGE_HANDLER_+QSPN rem
 # "Message handler: +QSPN (registered network name report)"
+su=1
 # "get SNN, without quotes"
 nname$=right$(left$(mf$(2),len(mf$(2))-1),len(mf$(2))-2)
 # "mf$(1) is FNN (Full Network Name), mf$(2) is SNN (Short Network Name)"

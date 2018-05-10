@@ -38,10 +38,7 @@ tt=time-t0
 
 t1=time
 # "--- get user input / update screen ---"
-if sc=0 then gosub DRAW_SCREEN_DEBUG
-if sc=1 then gosub HANDLER_SCREEN_DIALLER
-if sc=2 then gosub HANDLER_SCREEN_CONTACT
-if sc=3 then gosub HANDLER_SCREEN_CALL
+gosub SCREEN_HANDLER
 # "screen updates debugging"
 # if us=1 then print "{home}+";: us=0: goto ML1: rem "print a char when screen is updated"
 # if us=0 then print "{home} ";: goto ML1: rem "remove the char when screen wasn't updated"

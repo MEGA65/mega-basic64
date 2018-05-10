@@ -1,3 +1,13 @@
+SCREEN_DRAWER rem
+gosub DRAW_STATUS_BAR
+if sc=0 then gosub DRAW_SCREEN_DEBUG
+if sc=1 then gosub DRAW_SCREEN_DIALLER
+if sc=2 then gosub DRAW_SCREEN_CONTACT
+if sc=3 then gosub DRAW_SCREEN_CALL
+return
+
+
+
 # "### STATUS BAR DRAWER ###"
 DRAW_STATUS_BAR rem
 print "{wht}";
@@ -69,7 +79,6 @@ return
 
 # "### DIALLER screen update subroutine ###"
 DRAW_SCREEN_DIALLER rem
-gosub DRAW_STATUS_BAR
 # "call update subroutines"
 gosub DS_DIALLER_NUMBER: gosub DS_DIALLER_CONTACT: gosub DS_DIALLER_DIALPAD
 us=1
@@ -162,7 +171,6 @@ STAMP_DUALSIM canvas 47 stamp on canvas 0 at 16,5: return: rem "dual sim"
 
 # "### CONTACT screen update subroutine ###"
 DRAW_SCREEN_CONTACT rem
-gosub DRAW_STATUS_BAR
 # "buttons"
 canvas 60 stamp on canvas 0 at 0,2: rem "arrow back"
 canvas 18 stamp on canvas 0 at 0,6: rem "greephone"
@@ -187,7 +195,6 @@ return
 
 # "### CALL screen update subroutine ###"
 DRAW_SCREEN_CALL rem
-gosub DRAW_STATUS_BAR
 # "call status box"
 print "{wht}";
 x=0: y=2: w=40: h=3: gosub DRAW_BOX
