@@ -1,33 +1,49 @@
-DRAW_STATUS_BAR rem "### STATUS BAR DRAWER ###"
-print "{wht}";: rem "white text"
+# "### STATUS BAR DRAWER ###"
+DRAW_STATUS_BAR rem
+print "{wht}";
 gosub PRINT_NETWORK_NAME: gosub PRINT_CLOCK: gosub STAMP_SIGNAL_ICON: gosub STAMP_BATTERY_ICON
 return
 
-STAMP_SIGNAL_ICON rem "=== screen signal icon update ==="
+# "=== screen signal icon update ==="
+STAMP_SIGNAL_ICON rem
 shi=0
 if len(nt$)=3 then shi=0
 if len(nt$)=2 then shi=1
 if len(nt$)=1 then shi=2
 xx=30: yy=0: gosub MOVE_CURSOR_XX_YY
-for i=1 to shi: if shi<>0 then print " ";: next i: rem "print shi spaces"
-print nt$;: rem "print the network type (abbreviation)"
-canvas 40+1+sl% stamp on canvas 0 at 32,0: rem "print the signal level canvas in the status bar"
-rem "BER is always 99" xx=25: yy=3: gosub MOVE_CURSOR_XX_YY: print "ber";ber$;: rem "print the BER under signal strength"
+# "print shi spaces"
+for i=1 to shi: if shi<>0 then print " ";: next i
+# "print the network type (abbreviation)"
+print nt$;
+# "print the signal level canvas in the status bar"
+canvas 40+1+sl% stamp on canvas 0 at 32,0
+# "print the BER under signal strength"
+#xx=28: yy=1: gosub MOVE_CURSOR_XX_YY: print "ber";ber$;
 return
 
-STAMP_BATTERY_ICON rem "=== screen battery icon update ==="
+# "=== screen battery icon update ==="
+STAMP_BATTERY_ICON rem
 shi=0: bls$=""
-if len(str$(int(btp+0.5)))= 4 then shi=0: rem "btp=100"
-if len(str$(int(btp+0.5)))= 3 then shi=1: rem "10<=btp<=99"
-if len(str$(int(btp+0.5)))= 2 then shi=2: rem "0<=btp<=9" 
-for i=1 to shi: if shi<>0 then bls$=bls$+" ": next i: rem "we add shi spaces at the beginning of the printed string"
-bls$=bls$+right$(str$(int(btp+0.5)),3-shi)+"%": rem "e.g.: '100%', ' 75%', '  9%'"
-if len(str$(int(btp+0.5)))<2 or len(str$(int(btp+0.5)))>4 then bls$="   ?%": rem "unexpected length -> unexpected number"
+# "btp=100"
+if len(str$(int(btp+0.5)))= 4 then shi=0
+# "10<=btp<=99"
+if len(str$(int(btp+0.5)))= 3 then shi=1
+# "0<=btp<=9"
+if len(str$(int(btp+0.5)))= 2 then shi=2
+# "we add shi spaces at the beginning of the printed string"
+for i=1 to shi: if shi<>0 then bls$=bls$+" ": next i
+# "genereate battery level string (e.g.: '100%', ' 75%', '  9%')"
+bls$=bls$+right$(str$(int(btp+0.5)),3-shi)+"%"
+# "unexpected length -> unexpected number"
+if len(str$(int(btp+0.5)))<2 or len(str$(int(btp+0.5)))>4 then bls$="   ?%"
+# "print the battery level string"
 xx=35: yy=0: gosub MOVE_CURSOR_XX_YY: print bls$;
-canvas 49+bl% stamp on canvas 0 at 39,0: rem "print the battery level canvas in the status bar"
+# "print the battery level canvas in the status bar"
+canvas 49+bl% stamp on canvas 0 at 39,0
 return
 
-PRINT_CLOCK rem "=== print clock in status bar ==="
+# "=== print clock in status bar ==="
+PRINT_CLOCK rem
 t$=time$
 xx=16: yy=0: gosub MOVE_CURSOR_XX_YY
 print left$(t$,2);":";
@@ -35,22 +51,32 @@ print mid$(t$,3,2);":";
 print right$(t$,2);
 return
 
-PRINT_NETWORK_NAME rem "=== print network name in status bar ==="
+# "=== print network name in status bar ==="
+PRINT_NETWORK_NAME rem
 xx=0: yy=0: gosub MOVE_CURSOR_XX_YY
-print left$(nname$,10): rem "limit to 10 characters"
+# "limit to 10 characters"
+print left$(nname$,10)
 if len(nname$)>10 then print "..."
 return
 
 
-DRAW_SCREEN_1 rem "### SC 1 (DIALER) SCREEN UPDATE ###"
-rem "=== dialer screen update subroutine ==="
+# "### DEBUG screen update subroutine ###"
+DRAW_SCREEN_DEBUG rem
+# "we don't clr or print, and let debug messages be"
+return
+
+
+
+# "### DIALLER screen update subroutine ###"
+DRAW_SCREEN_DIALLER rem
 gosub DRAW_STATUS_BAR
-gosub DRAW_SCREEN_1_TEXT: gosub DRAW_SCREEN_1_TILES: rem "call update subroutines"
-gosub DRAW_CONTACTS_PANE
+# "call update subroutines"
+gosub DS_DIALLER_NUMBER: gosub DS_DIALLER_CONTACT: gosub DS_DIALLER_DIALPAD
 us=1
 return
 
-DRAW_SCREEN_1_TEXT rem "=== screen text update ==="
+# "=== print dialling field ==="
+DS_DIALLER_NUMBER rem
 # "draw dialling box"
 print "{yel}";
 x=0: y=2: w=21: h=3: gosub DRAW_BOX
@@ -59,7 +85,8 @@ if nb$<>"" then print nb$;
 for j=1 to 19-len(nb$): if len(nb$)<19 then print " ";: next j: rem "special case: for i=1 to 0 still goes into loop, so if len()=max we don't wanna print a space"
 return
 
-DRAW_CONTACTS_PANE rem "=== draw full-size contact pane ==="
+# "=== draw full-size contact pane ==="
+DS_DIALLER_CONTACT rem
 # "draw contact pane box"
 print "{lblu}";
 x=21: y=2: w=19: h=23: r(2)=1: r(19)=1: gosub DRAW_BOX
@@ -76,7 +103,8 @@ next i
 canvas 66 stamp on canvas 0 at 37,22: rem "search"
 return
 
-DRAW_SCREEN_1_TILES rem "=== screen dial tiles update ==="
+# "=== draw dialpad ==="
+DS_DIALLER_DIALPAD rem
 tmr=1000: rem "reinitialize timer"
 for x=1 to 3: for y=1 to 3
 if val(u$)=x+(y-1)*3 then gosub STAMP_1_TO_9_PRESSED: goto NEXTYX
@@ -132,14 +160,11 @@ STAMP_DUALSIM_PRESSED canvas 48 stamp on canvas 0 at 16,5: return: rem "dual sim
 STAMP_DUALSIM canvas 47 stamp on canvas 0 at 16,5: return: rem "dual sim"
 
 
-DRAW_SCREEN_0 rem "### SC 0 (DEBUG) SCREEN UPDATE ###"
-rem "we don't clr or print, and let debug messages be"
-return
-
+# "### CONTACT screen update subroutine ###"
 DRAW_SCREEN_CONTACT rem
 gosub DRAW_STATUS_BAR
 # "buttons"
-canvas 60 stamp on canvas 0 at 0,2
+canvas 60 stamp on canvas 0 at 0,2: rem "arrow back"
 canvas 18 stamp on canvas 0 at 0,6: rem "greephone"
 canvas 61 stamp on canvas 0 at 0,10: rem "cog"
 #canvas 62 stamp on canvas 0 at 0,14: rem "trash bin"
@@ -156,16 +181,30 @@ x=4: y=5: w=36: h=20: r(15)=1: gosub DRAW_BOX
 canvas 63 stamp on canvas 0 at 5,21: rem "globe"
 canvas 64 stamp on canvas 0 at 35,21: rem "message"
 return
+# "### end DRAW_SCREEN_CONTACT ###"
 
+
+
+# "### CALL screen update subroutine ###"
 DRAW_SCREEN_CALL rem
 gosub DRAW_STATUS_BAR
 # "call status box"
 print "{wht}";
 x=0: y=2: w=40: h=3: gosub DRAW_BOX
-gosub DS_CALL_TIMER
+
+# "common buttons"
+canvas 19 stamp on canvas 0 at 0,10: rem "redphone"
+canvas 61 stamp on canvas 0 at 0,14: rem "cog"
+canvas 61 stamp on canvas 0 at 0,18: rem "cog"
+
+# "SMS box"
+print "{wht}";
+x=4: y=5: w=36: h=20: r(15)=1: gosub DRAW_BOX
+canvas 63 stamp on canvas 0 at 5,21: rem "globe"
+canvas 64 stamp on canvas 0 at 35,21: rem "message"
 
 if db=1 then goto DS_CALL_DEBUG
-goto DS_CALL_ELSE
+goto DS_CALL_DSTA
 DS_CALL_DEBUG rem
 xx=1: yy=5: gosub MOVE_CURSOR_XX_YY
 print "call active=";dactive;"          ";
@@ -180,17 +219,22 @@ print "dnumber$=";dnumber$;"          ";
 xx=1: yy=10: gosub MOVE_CURSOR_XX_YY
 print "u$=";u$;"          ";
 
-DS_CALL_ELSE rem
+DS_CALL_DSTA rem
 if dsta=0 goto DS_CALL_ACTIVE
 if dsta=2 or dsta=3 goto DS_CALL_DIALING
 if dsta=4 or dsta=5 goto DS_CALL_RINGING
 ddisplay$="unknown status": gosub DS_CALL_DDISPLAY
+
 return
+# "### end DRAW_SCREEN_CALL ###"
+
 
 DS_CALL_ACTIVE rem
 # "=== Call state: active ==="
 ddisplay$="in-call with "+cid$
 gosub DS_CALL_DDISPLAY
+gosub DS_CALL_ERASE_GP
+gosub DS_CALL_TIMER
 return
 
 DS_CALL_DIALING rem
@@ -198,12 +242,16 @@ DS_CALL_DIALING rem
 ddsiplay$="dialling "+dnumber$
 if dr$<>"" then ddisplay$=ddisplay$+" ("+dr$+")"
 gosub DS_CALL_DDISPLAY
+gosub DS_CALL_ERASE_TMR
+gosub DS_CALL_ERASE_GP
 return
 
 DS_CALL_RINGING rem
 # "=== Call state: ringing ==="
 ddisplay$="incoming call from "+cid$
 gosub DS_CALL_DDISPLAY
+gosub DS_CALL_ERASE_TMR
+canvas 18 stamp on canvas 0 at 0,6: rem "greenphone"
 return
 
 DS_CALL_DDISPLAY rem
@@ -213,12 +261,25 @@ for j=1 to 38-len(ddisplay$): if len(ddisplay$)<38 then print " ";: next j
 return
 
 DS_CALL_TIMER rem "=== print call timer ==="
-xx=16: yy=16: gosub MOVE_CURSOR_XX_YY
-print left$(dtmr$,2);":";
-print mid$(dtmr$,3,2);":";
-print right$(dtmr$,2);
+xx=0: yy=6: gosub MOVE_CURSOR_XX_YY
+print left$(dtmr$,2);
+xx=0: yy=7: gosub MOVE_CURSOR_XX_YY
+print ":";mid$(dtmr$,3,2);
+xx=1: yy=8: gosub MOVE_CURSOR_XX_YY
+print ":";right$(dtmr$,2);
 return
 
+DS_CALL_ERASE_TMR rem
+# "erase timer text"
+xx=0: yy=6: gosub MOVE_CURSOR_XX_YY
+print "    ";
+xx=0: yy=7: gosub MOVE_CURSOR_XX_YY
+print "    ";
+xx=0: yy=8: gosub MOVE_CURSOR_XX_YY
+print "    ";
+return
 
-
-
+DS_CALL_ERASE_GP rem
+# "erase green phone (answer/pick-up)"
+canvas 0 clr from 0,6 to 4,9
+return

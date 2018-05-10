@@ -1,23 +1,30 @@
-GOTO_LN rem "=== goto X subroutine ==="
-rem "goes to line ln, if ln>0"
+GOTO_LN rem
+# "=== goto X subroutine ==="
+# "goes to line ln, if ln>0"
 ln$=str$(ln): if ln<=0 then return
-for i=0 to 5: poke ja+i,32:next: rem "first rub out with spaces in case line number is short"
+# "first rub out with spaces in case line number is short"
+for i=0 to 5: poke ja+i,32:next
 for i=0 to len(ln$)-1: poke ja+i,asc(right$(left$(ln$,i+1),1)):next
-if ln>0 then gosub,00000: rem "gosub to line ln"
-poke ja,44: rem "put the comma back in case we want to run again"
+# "gosub to line ln"
+if ln>0 then gosub,00000
+# "put the comma back in case we want to run again"
+poke ja,44: rem
 return
 
-WRITE_STRING_TO_MODEM rem "=== send to modem ==="
-rem "send string in s$ to modem"
+WRITE_STRING_TO_MODEM rem
+# "=== send to modem ==="
+# "send string in s$ to modem"
 for i=1 to len(s$): c$=right$(left$(s$,i),1): print#1,c$;: next i
 return
 
-WAIT_FOR_KEY_PRESS rem "=== read from keyboard ==="
-rem "receive one non-empty char from keyboard"
+WAIT_FOR_KEY_PRESS rem
+# "=== read from keyboard ==="
+# "receive one non-empty char from keyboard"
 WFKP_LOOP u$="": get u$: if u$="" goto WFKP_LOOP
 return
 
-MOVE_CURSOR_XX_YY rem "=== move the cursor to position xx,yy ==="
+MOVE_CURSOR_XX_YY rem
+# "=== move the cursor to position xx,yy ==="
 print "{home}";
 if xx>0 then for ii=1 to xx: print "{rght}";: next ii
 if yy>0 then for jj=1 to yy: print "{down}";: next jj
@@ -79,34 +86,37 @@ if btp>95 and btp <=100 then bl%=10
 return
 
 
-rem "### switch to SCREEN ###"
-rem "change the current screen"
-rem "it switches graphics/text mode only if necessary"
-rem "it triggers an initial update of the screen"
+# "### switch to screen ###"
+# "change the current screen"
+# "it switches graphics/text mode only if necessary"
+# "it triggers an initial update of the screen"
 
-SWITCH_TO_SCREEN_0 rem "=== switch to screen 0 (debug) ==="
+SWITCH_TO_SCREEN_DEBUG rem
+# "=== switch to screen DEBUG (0) ==="
 sc=0
 gosub SWITCH_SCREEN_CLEANUP
-gosub DRAW_SCREEN_0
+gosub DRAW_SCREEN_DEBUG
 return
 
-SWITCH_TO_SCREEN_1 rem "=== switch to screen 1 ==="
+SWITCH_TO_SCREEN_DIALLER rem
+# "=== switch to screen DIALLER (1) ==="
 sc=1
 gosub SWITCH_SCREEN_CLEANUP
-gosub DRAW_SCREEN_1: rem "trigger initial screen update"
+gosub DRAW_SCREEN_DIALLER
 return
 
-SWITCH_TO_SCREEN_CONTACT rem "=== switch to screen CONTACT ==="
-sc=5
+SWITCH_TO_SCREEN_CONTACT rem
+# "=== switch to screen CONTACT ==="
+sc=2
 gosub SWITCH_SCREEN_CLEANUP
-gosub DRAW_SCREEN_CONTACT: rem "trigger initial screen update"
+gosub DRAW_SCREEN_CONTACT
 return
 
 SWITCH_TO_SCREEN_CALL rem
 # "=== switch to screen CALL ==="
-sc=6
+sc=3
 gosub SWITCH_SCREEN_CLEANUP
-gosub DRAW_SCREEN_CALL: rem "trigger initial screen update"
+gosub DRAW_SCREEN_CALL
 return
 
 SWITCH_SCREEN_CLEANUP rem

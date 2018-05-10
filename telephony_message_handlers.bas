@@ -139,13 +139,13 @@ if dactive=0 then dactive=1: gosub SWITCH_TO_SCREEN_CALL
 MESSAGE_HANDLER_NO_CARRIER rem "Message handler: no carrier"
 # "TODO: depending on which screen we are, we can set different messages to be displayed to the user when the call is hung up"
 if dactive=1 then goto MH_NC_ACTIVE
-# "else: already in-call"
+# "else: not in call"
 goto MH_NC_END
 
 MH_NC_ACTIVE rem "active call"
 # "hang-up the active call"
 gosub CALL_HANGUP
-gosub SWITCH_TO_SCREEN_1
+gosub SWITCH_TO_SCREEN_DIALLER
 goto MH_NC_END
 
 MH_NC_END rem
@@ -186,7 +186,7 @@ return
 MH_CLCC_VOICE rem
 # "--- voice call ---"
 # "set caller id (cid$)"
-cid$=right$(left$(mf$(6),len(mf$(6))-1),len(mf$(6))-2): su=1
+cid$=right$(left$(mf$(6),len(mf$(6))-1),len(mf$(6))-2)
 # "update call state (dsta)"
 dsta=-1
 if mf$(3)="0" then dsta=0
@@ -221,7 +221,6 @@ if rssi>=0 and rssi<=31 then sl%=int((rssi/32*5)+1)
 if rssi>=100 and rssi<=191 then sl%=int(((rssi-100)/92*5)+1)
 if ber>=0 and ber<=7 then ber$=str$(ber)
 if ber=99 then ber$="?"
-su=1: rem "trigger screen update"
 15299 return
 
 MESSAGE_HANDLER_+QNWINFO rem "Message handler: +qnwinfo (network information report)"
@@ -243,13 +242,13 @@ if nact$="hspa+" then nt$="h+"
 if nact$="tdscdma" then nt$="3g"
 if nact$="tdd lte" then nt$="lte"
 if nact$="fdd lte" then nt$="lte"
-su=1: rem "trigger screen update"
 15399 return
 
-MESSAGE_HANDLER_+QSPN rem "Message handler: +QSPN (registered network name report)"
-nname$=right$(left$(mf$(2),len(mf$(2))-1),len(mf$(2))-2): rem "get SNN, without quotes"
-rem "mf$(1) is FNN (Full Network Name), mf$(2) is SNN (Short Network Name)"
-su=1: rem "trigger screen update"
+MESSAGE_HANDLER_+QSPN rem
+# "Message handler: +QSPN (registered network name report)"
+# "get SNN, without quotes"
+nname$=right$(left$(mf$(2),len(mf$(2))-1),len(mf$(2))-2)
+# "mf$(1) is FNN (Full Network Name), mf$(2) is SNN (Short Network Name)"
 15499 return
 
 MESSAGE_HANDLER_55 rem "Message handler: message type 55"
