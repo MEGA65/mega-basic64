@@ -32,8 +32,11 @@ INIT_END goto MAIN_LOOP
 
 MAIN_LOOP rem
 # "### main loop ###"
+tl=time
 cnt=cnt+1
+tt=time-t0
 
+t1=time
 # "--- get user input / update screen ---"
 if sc=0 then gosub DRAW_SCREEN_DEBUG
 if sc=1 then gosub HANDLER_SCREEN_DIALLER
@@ -43,21 +46,31 @@ if sc=3 then gosub HANDLER_SCREEN_CALL
 # if us=1 then print "{home}+";: us=0: goto ML1: rem "print a char when screen is updated"
 # if us=0 then print "{home} ";: goto ML1: rem "remove the char when screen wasn't updated"
 ML1 rem
+ttmr(1)=ttmr(1)+(time-t1)
 
+t1=time
 # "--- get modem input ---"
 gosub POLL_MODEM
+ttmr(2)=ttmr(2)+(time-t1)
 
+t1=time
 # "--- perform regular tasks ---"
 # "request signal quality report every 500 loops"
-mdv=500: if fn mod(cnt)=0 then s$="at+csq"+chr$(13): gosub WRITE_STRING_TO_MODEM
+mdv=100: if fn mod(cnt)=0 then s$="at+csq"+chr$(13): gosub WRITE_STRING_TO_MODEM
 # "[test] decrease battery level"
 mdv=1000: if fn mod(cnt)=0 then mdv=100: btp=fn mod(btp-1): gosub BATTERY_UPDATE
 # "request network info report every 1000 loops"
-mdv=1000: if fn mod(cnt+250)=0 then s$="at+qnwinfo"+chr$(13): gosub WRITE_STRING_TO_MODEM
+mdv=500: if fn mod(cnt+250)=0 then s$="at+qnwinfo"+chr$(13): gosub WRITE_STRING_TO_MODEM
 # "request network name every 1000 loops"
-mdv=1000: if fn mod(cnt+500)=0 then s$="at+qspn"+chr$(13): gosub WRITE_STRING_TO_MODEM
+mdv=500: if fn mod(cnt+500)=0 then s$="at+qspn"+chr$(13): gosub WRITE_STRING_TO_MODEM
 # "fix charset bug"
 if (peek(53272)and 7)=0 then poke 53272,20
+ttmr(3)=ttmr(3)+(time-t1)
 
-rem "--- end main loop ---"
+# "--- timing related operation ---"
+ttmr(0)=ttmr(0)+(time-tl)
+# "update the average"
+for i=0 to 10: tavg(i)=ttmr(i)/cnt: next i
+
 goto MAIN_LOOP
+# "### main loop ###"

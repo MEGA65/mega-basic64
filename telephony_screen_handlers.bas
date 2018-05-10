@@ -1,4 +1,4 @@
-"### DIALLER screen handler ###"
+# "### DIALLER screen handler ###"
 HANDLER_SCREEN_DIALLER rem
 # "read input chars and update string (phone number)"
 if su=1 then gosub DRAW_SCREEN_DIALLER: su=0
@@ -25,7 +25,7 @@ if u$=chr$(13) then gosub DRAW_SCREEN_DIALLER: dnumber$=nb$: gosub CALL_DIAL: go
 return
 
 
-"### CONTACT screen handler ###"
+# "### CONTACT screen handler ###"
 HANDLER_SCREEN_CONTACT rem
 mdv=sr: if fn mod(cnt)=0 then gosub DRAW_SCREEN_CONTACT
 # "handle user actions"
@@ -36,11 +36,11 @@ if u$=chr$(13) then gosub DRAW_SCREEN_CONTACT: dnumber$=pnumber$(cselected%): go
 return
 
 
-"### CALL screen handler ###"
+# "### CALL screen handler ###"
 HANDLER_SCREEN_CALL rem
 # "general operations"
 # "update the call timer and timer string"
-dtmr=time-t0
+dtmr=time-tc
 dtmr$=""
 thour=int(dtmr/216000)
 tmin=int((dtmr-thour)/3600)
@@ -104,7 +104,7 @@ return
 CALL_ANSWER rem
 # "Answer an incoming call"
 gosub SEND_ATA
-t0=time
+tc=time
 return
 
 CALL_HANGUP rem
@@ -126,5 +126,5 @@ dsta=-1
 cid$=""
 dr$="": dnumber$=""
 if dia=1 then dia=0
-t0=0: dtmr=0: dtmr$="000000"
+tc=0: dtmr=0: dtmr$="000000"
 return

@@ -38,12 +38,28 @@ dnumber$=""
 # "ddisplay"
 # "the text to be displayed at the top of the call screen"
 ddisplay$=""
-# "t0: initial time at beginning of call"
-t0=0
+# "tc: initial time at beginning of call"
+tc=0
 # "dtmr: call timer"
 dtmr=0
 # "dtmr$: call timer, in the format HHMMSS"
 dtmr$="000000"
+
+# "=== arrays to time different parts of the program ==="
+# "  0: loop time"
+# "  1: screen handlers"
+# "  2: modem polling and message handling"
+# "  3: regular tasks"
+# "======"
+# "t0: time at the beginning of the program"
+# "t1: time at the beginning of a subpart"
+# "tl: time at the beginning of a loop"
+# "tt: total time spent in program"
+t0=time: t1=0: tl=0: tt=0
+# "array containing the total time spent"
+dim ttmr(10)
+# "array containing the average time spent"
+dim tavg(10)
 return
 
 SETUP_PARSER rem "=== setup for modem parser ==="
