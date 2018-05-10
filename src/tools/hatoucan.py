@@ -11,6 +11,8 @@ import sys
 #   http://justsolve.archiveteam.org/wiki/Commodore_BASIC_tokenized_file
 #   http://www.c64-wiki.com/index.php/BASIC_token
 
+global_line=""    # global variable used to keep track of current line
+
 TOKENS = (
     ('restore', 140),
     ('input#', 132),
@@ -173,7 +175,7 @@ def scan(s, tokenize=True):
 
 
 def scan_line_number(s):
-    stemp = s
+    global global_line
     s = s.lstrip()
     acc = []
     while s and s[0].isdigit():
@@ -182,7 +184,6 @@ def scan_line_number(s):
     try:
         return (int(''.join(acc)), s.lstrip())
     except ValueError as ve:
-        sys.stderr.write("Error in line: "+str(stemp)+"\n")
         raise
 
 
@@ -244,6 +245,8 @@ class Sentinel(object):
 
 def main(argv):
     start_addr = 0x0801
+    
+    global global_line
 
     # parse command line
     while argv:
@@ -263,6 +266,7 @@ def main(argv):
     tokenized_lines = []
     addr = start_addr
     for line in sys.stdin:
+        global_line = line
         if not line.strip():
             continue
         tokenized_line = TokenizedLine(line.rstrip(), addr)
@@ -284,5 +288,9 @@ def main(argv):
 
 
 if __name__ == '__main__':
-    sys.exit(main(sys.argv[1:]))
+    try:
+        sys.exit(main(sys.argv[1:]))
+    except Exception as e:
+        sys.stderr.write("\nError in line: "+str(global_line)+"\n")
+        raise
 
