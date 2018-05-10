@@ -38,6 +38,12 @@ dnumber$=""
 # "ddisplay"
 # "the text to be displayed at the top of the call screen"
 ddisplay$=""
+# "t0: initial time at beginning of call"
+t0=0
+# "dtmr: call timer"
+dtmr=0
+# "dtmr$: call timer, in the format HHMMSS"
+dtmr$="000000"
 return
 
 SETUP_PARSER rem "=== setup for modem parser ==="

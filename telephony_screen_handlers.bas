@@ -30,12 +30,25 @@ return
 
 
 HANDLER_SCREEN_CALL rem
+# "general operations"
+# "update the call timer and timer string"
+dtmr=time-t0
+dtmr$=""
+thour=int(dtmr/216000)
+tmin=int((dtmr-thour)/3600)
+tsec=int((dtmr-thour-tmin)/60)
+if thour>=0 and thour<=9 then dtmr$=dtmr$+"0"
+dtmr$=dtmr$+right$(str$(thour), len(str$(thour))-1)
+if tmin>=0 and tmin<=9 then dtmr$=dtmr$+"0"
+dtmr$=dtmr$+right$(str$(tmin), len(str$(tmin))-1)
+if tsec>=0 and tsec<=9 then dtmr$=dtmr$+"0"
+dtmr$=dtmr$+right$(str$(tsec), len(str$(tsec))-1)
+
 # "screen update"
 mdv=sr: if fn mod(cnt)=0 then gosub DRAW_SCREEN_CALL
 # "handle user actions"
 u$="": get u$
 if u$="" then return
-gosub DRAW_SCREEN_CALL
 if dsta=0 goto HS_CALL_ACTIVE
 if dsta=2 or dsta=3 goto HS_CALL_DIALING
 if dsta=4 or dsta=5 goto HS_CALL_RINGING
@@ -81,6 +94,7 @@ return
 CALL_ANSWER rem
 # "Answer an incoming call"
 gosub SEND_ATA
+t0=time
 return
 
 CALL_HANGUP rem
@@ -102,6 +116,7 @@ dsta=-1
 cid$=""
 dr$="": dnumber$=""
 if dia=1 then dia=0
+t0=0: dtmr=0: dtmr$="000000"
 return
 
 # "=== subroutines: send messages to modem ==="

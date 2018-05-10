@@ -162,7 +162,11 @@ gosub DRAW_STATUS_BAR
 # "call status box"
 print "{wht}";
 x=0: y=2: w=40: h=3: gosub DRAW_BOX
+gosub DS_CALL_TIMER
 
+if db=1 then goto DS_CALL_DEBUG
+goto DS_CALL_ELSE
+DS_CALL_DEBUG rem
 xx=1: yy=5: gosub MOVE_CURSOR_XX_YY
 print "call active=";dactive;"          ";
 xx=1: yy=6: gosub MOVE_CURSOR_XX_YY
@@ -176,6 +180,7 @@ print "dnumber$=";dnumber$;"          ";
 xx=1: yy=10: gosub MOVE_CURSOR_XX_YY
 print "u$=";u$;"          ";
 
+DS_CALL_ELSE rem
 if dsta=0 goto DS_CALL_ACTIVE
 if dsta=2 or dsta=3 goto DS_CALL_DIALING
 if dsta=4 or dsta=5 goto DS_CALL_RINGING
@@ -205,6 +210,13 @@ DS_CALL_DDISPLAY rem
 xx=1: yy=3: gosub MOVE_CURSOR_XX_YY
 if ddisplay$<>"" then print ddisplay$;
 for j=1 to 38-len(ddisplay$): if len(ddisplay$)<38 then print " ";: next j
+return
+
+DS_CALL_TIMER rem "=== print call timer ==="
+xx=16: yy=16: gosub MOVE_CURSOR_XX_YY
+print left$(dtmr$,2);":";
+print mid$(dtmr$,3,2);":";
+print right$(dtmr$,2);
 return
 
 
