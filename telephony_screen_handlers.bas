@@ -22,7 +22,7 @@ if u$="{rght}" and hl%<>0 then cselected%=cindex%(hl%): su=1: gosub SWITCH_TO_SC
 # "dialler"
 # "limit length is 18, go to loop start if over it or not enter or backspace"
 if u$<>chr$(20) and u$<>chr$(13) and len(nb$)>=19 then return
-if u$="0" or u$="1" or u$="2" or u$="3" or u$="4" or u$="5" or u$="6" or u$="7" or u$="8" or u$="9" or u$="+" or u$="*" or u$="#" or u$="a" or u$="b" or u$="c" or u$="d" then nb$=nb$+u$: u0$=u$: su=1
+if (u$>="0" and u$<="9") or u$="+" or u$="*" or u$="#" or u$="a" or u$="b" or u$="c" or u$="d" then nb$=nb$+u$: u0$=u$: su=1
 # "these characters don't update the string (for now)"
 if u$="-" or u$="/" or u$="=" or u$="@" or u$="<" or u$=">" then  u0$=u$: su=1
 # "backspace: remove a character, but only if there's at least one"

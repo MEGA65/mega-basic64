@@ -51,7 +51,7 @@ t1=time
 # "if the clock gain 0.1s over last timed update, we trigger an update"
 if time-tu>=6 then su=1
 # "we trigger a screen update every sr loops, and only if needed (su=1)"
-mdv=sr: if fn mod(cnt)=0 and su=1 then gosub SCREEN_DRAWER: tu=time: su=0: us=1
+mdv=sr: if su=1 then gosub SCREEN_DRAWER: tu=time: su=0: us=1
 # "screen updates debugging"
 # "print a char when screen is updated"
 if us=1 then print "{home}{down}+";
@@ -92,9 +92,9 @@ ttmr(0)=ttmr(0)+(time-tl)
 # "update the average"
 for i=0 to 10: tavg(i)=ttmr(i)/cnt: next i
 if c5<>0 then tavg(5)=ttmr(5)/c5
-tavg(6)=ttmr(6)/(cnt-c5)
+if cnt<>c5 then tavg(6)=ttmr(6)/(cnt-c5)
 if c7<>0 then tavg(7)=ttmr(7)/c7
-tavg(8)=ttmr(8)/(cnt-c8)
+if cnt<>c8 then tavg(8)=ttmr(8)/(cnt-c8)
 
 goto MAIN_LOOP
 # "### main loop ###"
