@@ -17,8 +17,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <strings.h>
+#include <string.h>
+#include <malloc.h>
+#include <ctype.h>
+#include <unistd.h>
 
 #define MAX_LABELS 16384
 char *label_names[MAX_LABELS];
@@ -37,6 +40,55 @@ int resolve_symbol(char *s,char *o,int *olen)
 	return -1;
 }
 
+int notKeyword(char *s)
+{
+  if (!strcmp(s,"for")) return 0;
+  if (!strcmp(s,"let")) return 0;
+  if (!strcmp(s,"left")) return 0;
+  if (!strcmp(s,"len")) return 0;
+  if (!strcmp(s,"next")) return 0;
+  if (!strcmp(s,"right")) return 0;
+  if (!strcmp(s,"str")) return 0;
+  if (!strcmp(s,"to")) return 0;
+  if (!strcmp(s,"print")) return 0;
+  if (!strcmp(s,"poke")) return 0;
+  if (!strcmp(s,"peek")) return 0;
+  if (!strcmp(s,"canvas")) return 0;
+  if (!strcmp(s,"stamp")) return 0;
+  if (!strcmp(s,"on")) return 0;
+  if (!strcmp(s,"stop")) return 0;
+  if (!strcmp(s,"rem")) return 0;
+  if (!strcmp(s,"return")) return 0;
+  if (!strcmp(s,"goto")) return 0;
+  if (!strcmp(s,"gosub")) return 0;
+  if (!strcmp(s,"then")) return 0;
+  if (!strcmp(s,"clr")) return 0;
+  if (!strcmp(s,"int")) return 0;
+  if (!strcmp(s,"chr")) return 0;
+  if (!strcmp(s,"and")) return 0;
+  if (!strcmp(s,"or")) return 0;
+  if (!strcmp(s,"dim")) return 0;
+  if (!strcmp(s,"data")) return 0;
+  if (!strcmp(s,"restore")) return 0;
+  if (!strcmp(s,"def")) return 0;
+  if (!strcmp(s,"fn")) return 0;
+  if (!strcmp(s,"sin")) return 0;
+  if (!strcmp(s,"cos")) return 0;
+  if (!strcmp(s,"tan")) return 0;
+  if (!strcmp(s,"atn")) return 0;
+  if (!strcmp(s,"mid")) return 0;
+  if (!strcmp(s,"val")) return 0;
+  if (!strcmp(s,"get")) return 0;
+  if (!strcmp(s,"input")) return 0;
+  if (!strcmp(s,"open")) return 0;
+  if (!strcmp(s,"close")) return 0;
+  if (!strcmp(s,"cmd")) return 0;
+  if (!strcmp(s,"end")) return 0;
+  if (!strcmp(s,"new")) return 0;
+
+  return 1;
+}
+
 void compact_line(char *l)
 {
   char out[1024];
@@ -46,6 +98,35 @@ void compact_line(char *l)
 
   for(i=0;l[i];i++) {
     if (l[i]=='\"') quoteMode^=1;
+
+    // Shorten long variable names
+    if ((!quoteMode)&&((!i)||(!isalpha(l[i-1])))) {
+      if (isalpha(l[i])) {
+	// Look for end of current string
+	int j;
+	char s[1024];
+	s[0]=l[i];
+	for(j=i+1;isalnum(l[j]);j++) { s[j-i]=l[j]; continue; }
+	s[j-i]=0;
+	if (strlen(s)>2) {
+	  // Candidate for shortening
+
+	  // But don't shorten keywords, as that would be BAD!
+
+	  if (notKeyword(s)) {
+	    fprintf(stderr,"Trimming long variable name '%s'\n",s);
+	    fprintf(stderr,"  Source line: '%s'\n",l);
+	    // Output the two characters we need, and that's all.
+	    out[len++]=l[i];
+	    out[len++]=l[i+1];
+
+	    i=j;
+	  }	  
+	  
+	}
+      }
+    }
+    
     if (l[i]==' '&&(!quoteMode)) {
       // Remove spaces that aren't in strings
     } else {
