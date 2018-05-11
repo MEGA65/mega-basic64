@@ -37,6 +37,35 @@ int resolve_symbol(char *s,char *o,int *olen)
 	return -1;
 }
 
+void compact_line(char *l)
+{
+  char out[1024];
+  int len=0;
+  int i;
+  int quoteMode=0;
+
+  for(i=0;l[i];i++) {
+    if (l[i]=='\"') quoteMode^=1;
+    if (l[i]==' '&&(!quoteMode)) {
+      // Remove spaces that aren't in strings
+    } else {
+      out[len++]=l[i];
+    }
+    // Skip what follows a REM statement
+    if ((!quoteMode)&&(!strncmp("rem",&l[i],3))) {
+      out[len++]='e'; out[len++]='m';
+      break;
+    }
+    // And delete entirely any :rem...
+    if ((!quoteMode)&&(!strncmp(":rem",&l[i],4))) {
+      len--;
+    }
+  }
+  out[len]=0;
+  strcpy(l,out);
+  return;
+}
+
 int main(int argc,char **argv)
 {
 	int i;
@@ -111,7 +140,7 @@ skipline1:
 		int fl=1;
 		line[0]=0; fgets(line,1024,f);
 		while(line[0]) {
-			if (line[0]=='#') goto skipline2;
+		  if (line[0]=='#') goto skipline2;
 			int outlen=0;
 			char lineout[1024];
 			int quote_mode=0;
@@ -189,8 +218,11 @@ skipline1:
 					errors++;
 				}
 			}
-			
+
 			lineout[outlen]=0;
+			compact_line(lineout);
+			outlen=strlen(lineout);
+			
 			printf("%s",lineout);
 			if (outlen>0) if (lineout[outlen-1]>=' ') printf("\n");
 			
