@@ -85,6 +85,7 @@ int notKeyword(char *s)
   if (!strcmp(s,"cmd")) return 0;
   if (!strcmp(s,"end")) return 0;
   if (!strcmp(s,"new")) return 0;
+  if (!strcmp(s,"asc")) return 0;
 
   return 1;
 }
