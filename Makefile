@@ -95,7 +95,23 @@ VEHICLE_ASSETS=	\
 		$(ASSETS)/8.png \
 		$(ASSETS)/9.png \
 
+# Order is important, as some have line numbers.
+# Specifically, main must be first, and autopsy last
+DIALERSRCS=	\
+		telephony_main.bas \
+		telephony_phonebook.bas \
+		telephony_setup.bas \
+		telephony_helpers.bas \
+		telephony_message_senders.bas \
+		telephony_screen_drawers.bas \
+		telephony_parser.bas \
+		telephony_screen_handlers.bas \
+		telephony_message_handlers.bas \
+		telephony_autopsy.bas
+
+
 BINARIES=	$(BINDIR)/megabasic64.prg \
+		$(BINDIR)/dialer.prg \
 		$(BINDIR)/megabanner.tiles \
 		$(BINDIR)/vehicle_console.tiles \
 		$(BINDIR)/fonttest.tiles \
@@ -130,6 +146,9 @@ $(BINDIR)/megabasic64.prg:       $(MEGABASICOBJS) $(BINDIR)/megabanner.tiles
 	mkdir -p $(BINDIR)
 	$(LD65) $< --mapfile $*.map -o $(BINDIR)/megabasic64.prg
 
+$(BINDIR)/dialer.prg:	$(DIALERSRCS) $(TOOLDIR)/bpp
+	$(TOOLDIR)/bpp $(DIALERSRCS) | tee /tmp/bas |  $(TOOLDIR)/hatoucan.py > $(BINDIR)/dialer.prg
+
 $(BINDIR)/vehicle-console.prg:	src/vehicle-console.a65 $(BINDIR)/vehicle_console.tiles
 	$(OPHIS) src/vehicle-console.a65
 
@@ -150,7 +169,7 @@ $(BINDIR)/MEGABAS.D81:	$(BINARIES)
 	cbmconvert -D8 $(BINDIR)/MEGABAS.D81 $(BINARIES)
 
 clean:
-	rm -f $(TOOLDIR)/mktileset $(BINDIR)/* src/*.o src/tools/*.o
+	rm -f $(TOOLDIR)/mktileset $(BINDIR)/* $(SRCDIR)/*.o $(TOOLDIR)/*.o
 
 cleangen:
 
