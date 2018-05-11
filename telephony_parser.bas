@@ -1,7 +1,10 @@
 # "=== read from modem ==="
 POLL_MODEM rem
+# "reinitialize parser counter"
+cp=50
 # "read one char from cellular modem and parse received fields"
-get#1,c$: if c$="" then return
+PM_GET get#1,c$: if c$="" then return
+cp=cp-1
 if c$=chr$(13) or c$=chr$(10) then goto HANDLE_MODEM_LINE
 # "first field is separated with a column"
 if c$=":" and fc=0 then mf$(0)=mf$: fc=1: mf$=""
@@ -9,6 +12,9 @@ if c$=":" and fc=0 then mf$(0)=mf$: fc=1: mf$=""
 if c$="," and fc>0 and fc<20 then mf$(fc)=mf$: fc=fc+1: mf$=""
 if c$<>"," and c$<>":" then mf$=mf$+c$
 ml$=ml$+c$
+
+# "if we didn't handle a non-empty modem line, we poll the modem again (limit: cp times)"
+if ml=0 and cp>0 goto PM_GET
 return
 
 # "=== handle modem line ==="

@@ -98,6 +98,8 @@ dim ol$(20)
 # "jump table for message handling"
 dim jt%(100)
 for i=0 to 99: jt%(i)=10000+100*i: next i
+# "counter parser: number of times we poll a char from modem in a loop"
+cp=50
 open 1,2,1
 return
 
@@ -110,7 +112,7 @@ return
 # "=== GUI-related setup ==="
 SETUP_GUI rem
 # "GUI offset: the offset between a canvas and its 'pressed' equivalent, i.e. the number of loaded 'button' canvas"
-goffset=28
+gffst=28
 
 # "user-input char and number initialization"
 u$="": nb$=""
@@ -130,7 +132,7 @@ dim r(24)
 return
 
 # "=== phonebook setup ==="
-SETUP_PHONEBOOK
+SETUP_PHONEBOOK rem
 # "maximum number of contacts in the phonebook"
 plngth%=200
 # "index array"
