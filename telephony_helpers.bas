@@ -95,31 +95,31 @@ SWITCH_TO_SCREEN_DEBUG rem
 # "=== switch to screen DEBUG (0) ==="
 sc=0
 gosub SWITCH_SCREEN_CLEANUP
-gosub DRAW_SCREEN_DEBUG
+su=1
 return
 
 SWITCH_TO_SCREEN_DIALLER rem
 # "=== switch to screen DIALLER (1) ==="
 sc=1
 gosub SWITCH_SCREEN_CLEANUP
-gosub DRAW_SCREEN_DIALLER
+su=1
 return
 
 SWITCH_TO_SCREEN_CONTACT rem
 # "=== switch to screen CONTACT ==="
 sc=2
 gosub SWITCH_SCREEN_CLEANUP
-gosub DRAW_SCREEN_CONTACT
+su=1
 return
 
 SWITCH_TO_SCREEN_CALL rem
 # "=== switch to screen CALL ==="
 sc=3
 gosub SWITCH_SCREEN_CLEANUP
-gosub DRAW_SCREEN_CALL
+su=1
 return
 
 SWITCH_SCREEN_CLEANUP rem
-u$=""
-print "{clr}";: canvas 0 clr: rem "clear screen"
+u0$="": u$=""
+print "{clr}";: canvas 0 clr
 return

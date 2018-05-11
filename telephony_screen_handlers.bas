@@ -37,8 +37,8 @@ HANDLER_SCREEN_CONTACT rem
 # "handle user actions"
 u$="": get u$
 if u$="" then return
-if u$=chr$(20) then  u0$=u$: su=1: gosub SWITCH_TO_SCREEN_DIALLER
-if u$=chr$(13) then  u0$=u$: su=1: dnumber$=pnumber$(cselected%): gosub CALL_DIAL: gosub SWITCH_TO_SCREEN_CALL
+if u$=chr$(20) then u0$=u$: su=1: gosub SWITCH_TO_SCREEN_DIALLER
+if u$=chr$(13) then u0$=u$: su=1: dnumber$=pnumber$(cselected%): gosub CALL_DIAL: gosub SWITCH_TO_SCREEN_CALL
 return
 
 
