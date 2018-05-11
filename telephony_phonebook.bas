@@ -12,6 +12,8 @@ pnumber$(5)="": ptype%(5)=129 : ptxt$(5)=""
 return
 
 PHONEBOOK_TO_CONTACT_PANE rem
+# Schedule redraw after
+uc=1: su=1
 # "WARNING: probably bugs if O entries in phonebook"
 centry%=0: j=1
 # "contact pane not full"

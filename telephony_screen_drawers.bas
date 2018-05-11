@@ -110,7 +110,7 @@ xx=22: yy=3: gosub MOVE_CURSOR_XX_YY: print "    contacts     ";
 for i=1 to cmaxindex%
 xx=22: yy=4+i: gosub MOVE_CURSOR_XX_YY
 if hl%=i then print "{yel}";
-print cpane$;left$(ss$,clngth%-len(cpane$(i)));
+print cpane$(i);left$(ss$,clngth%-len(cpane$(i)));
 print "{lblu}"
 next i
 # "stamp search icon"
