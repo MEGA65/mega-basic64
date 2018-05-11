@@ -34,6 +34,10 @@ if db=1 then gosub SWITCH_TO_SCREEN_DEBUG: goto INIT_END
 gosub SWITCH_TO_SCREEN_DIALLER
 
 INIT_END t0=time
+
+# Ask for all elements to be drawn first time around
+up=1:uc=1:ud=1
+
 # goto MAIN_LOOP
 
 MAIN_LOOP rem "### main loop ###"

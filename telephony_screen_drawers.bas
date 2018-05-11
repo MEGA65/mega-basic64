@@ -82,11 +82,11 @@ return
 DRAW_SCREEN_DIALLER rem
 # "call update subroutines"
 # About 25ms?
-gosub DS_DIALLER_NUMBER
+if ud then gosub DS_DIALLER_NUMBER: ud=0
 # Contact list about 68ms (was 158ms+)
-gosub DS_DIALLER_CONTACT
+if uc then gosub DS_DIALLER_CONTACT: uc=0
 # Dial pad takes about 32ms (2 frames) to draw
-gosub DS_DIALLER_DIALPAD
+if up then gosub DS_DIALLER_DIALPAD: up=0
 return
 
 # "=== print dialling field ==="
