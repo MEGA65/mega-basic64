@@ -11,8 +11,9 @@ LD65=  ld65 --config ./c64asm.cfg
 ASSETS=		assets
 SRCDIR=		src
 BINDIR=		bin
+TELEPHONY=	$(SRCDIR)/telephony
 
-DIALER_ASSETS= \
+TELEPHONY_ASSETS= \
 		$(ASSETS)/dial0.png \
 		$(ASSETS)/dial1.png \
 		$(ASSETS)/dial2.png \
@@ -97,37 +98,40 @@ VEHICLE_ASSETS=	\
 
 # Order is important, as some have line numbers.
 # Specifically, main must be first, and autopsy last
-DIALERSRCS=	\
-		telephony_main.bas \
-		telephony_phonebook.bas \
-		telephony_setup.bas \
-		telephony_helpers.bas \
-		telephony_message_senders.bas \
-		telephony_screen_drawers.bas \
-		telephony_parser.bas \
-		telephony_screen_handlers.bas \
-		telephony_message_handlers.bas \
-		telephony_autopsy.bas
+TELEPHONY_SRCS=	\
+		$(TELEPHONY)/telephony_main.bas \
+		$(TELEPHONY)/telephony_phonebook.bas \
+		$(TELEPHONY)/phonebook_entries.bas \
+		$(TELEPHONY)/telephony_setup.bas \
+		$(TELEPHONY)/telephony_helpers.bas \
+		$(TELEPHONY)/telephony_message_senders.bas \
+		$(TELEPHONY)/telephony_screen_drawers.bas \
+		$(TELEPHONY)/telephony_parser.bas \
+		$(TELEPHONY)/telephony_screen_handlers.bas \
+		$(TELEPHONY)/telephony_message_handlers.bas \
+		$(TELEPHONY)/telephony_autopsy.bas
 
-
-BINARIES=	$(BINDIR)/megabasic64.prg \
-		$(BINDIR)/dialer.prg \
+BINARIES=	\
+		$(BINDIR)/megabasic64.prg \
+		$(BINDIR)/telephony.prg \
 		$(BINDIR)/megabanner.tiles \
 		$(BINDIR)/vehicle_console.tiles \
 		$(BINDIR)/fonttest.tiles \
-		$(BINDIR)/dialer.tiles
+		$(BINDIR)/telephony.tiles
 
 MEGABASICOBJS=	$(SRCDIR)/mega-basic64.o
 
 TOOLDIR=	$(SRCDIR)/tools
-TOOLS=	$(TOOLDIR)/pngtoscreens
+TOOLS=	\
+		$(TOOLDIR)/mktileset \
+		$(TOOLDIR)/bpp
 
 all:	$(TOOLS) $(BINDIR)/MEGABAS.D81
 
 # c-programs
 tools:	$(TOOLS)
 
-%.o:	%.s	$(BINDIR)/megabanner.tiles	$(BINDIR)/dialer.tiles
+%.o:	%.s	$(BINDIR)/megabanner.tiles	$(BINDIR)/telephony.tiles
 	$(CA65) $< -l $*.list
 
 $(BINDIR)/megabanner.tiles:	$(TOOLDIR)/mktileset $(ASSETS)/mega65_320x64.png
@@ -139,18 +143,18 @@ $(BINDIR)/vehicle_console.tiles:	$(TOOLDIR)/mktileset $(VEHICLE_ASSETS)
 $(BINDIR)/fonttest.tiles:	$(TOOLDIR)/mktileset
 	$(TOOLDIR)/mktileset $(BINDIR)/fonttest.tiles c64palette /usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf:0:16:41-5A,61-7A,20
 
-$(BINDIR)/dialer.tiles:	$(TOOLDIR)/mktileset	$(DIALER_ASSETS)
-	$(TOOLDIR)/mktileset $(BINDIR)/dialer.tiles c64palette $(DIALER_ASSETS)
+$(BINDIR)/telephony.tiles:	$(TOOLDIR)/mktileset	$(TELEPHONY_ASSETS)
+	$(TOOLDIR)/mktileset $(BINDIR)/telephony.tiles c64palette $(TELEPHONY_ASSETS)
 
-$(BINDIR)/megabasic64.prg:       $(MEGABASICOBJS) $(BINDIR)/megabanner.tiles
+$(BINDIR)/megabasic64.prg:	$(MEGABASICOBJS) $(BINDIR)/megabanner.tiles
 	mkdir -p $(BINDIR)
 	$(LD65) $< --mapfile $*.map -o $(BINDIR)/megabasic64.prg
 
-$(BINDIR)/dialer.bas:	$(DIALERSRCS) $(TOOLDIR)/bpp
-	$(TOOLDIR)/bpp $(DIALERSRCS) > $(BINDIR)/dialer.bas
+$(BINDIR)/telephony.bas:	$(TELEPHONY_SRCS) $(TOOLDIR)/bpp
+	$(TOOLDIR)/bpp $(TELEPHONY_SRCS) > $(BINDIR)/telephony.bas
 
-$(BINDIR)/dialer.prg:	$(BINDIR)/dialer.bas
-	$(TOOLDIR)/hatoucan.py > $(BINDIR)/dialer.prg < $(BINDIR)/dialer.bas
+$(BINDIR)/telephony.prg:	$(BINDIR)/telephony.bas
+	$(TOOLDIR)/hatoucan.py > $(BINDIR)/telephony.prg < $(BINDIR)/telephony.bas
 
 $(BINDIR)/vehicle-console.prg:	src/vehicle-console.a65 $(BINDIR)/vehicle_console.tiles
 	$(OPHIS) src/vehicle-console.a65
@@ -172,7 +176,4 @@ $(BINDIR)/MEGABAS.D81:	$(BINARIES)
 	cbmconvert -D8 $(BINDIR)/MEGABAS.D81 $(BINARIES)
 
 clean:
-	rm -f $(TOOLDIR)/mktileset $(BINDIR)/* $(SRCDIR)/*.o $(TOOLDIR)/*.o
-
-cleangen:
-
+	rm -f $(TOOLS) $(BINDIR)/* $(SRCDIR)/*.o $(SRCDIR)/*.list $(TOOLDIR)/*.o

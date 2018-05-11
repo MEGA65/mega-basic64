@@ -153,8 +153,8 @@ c000blockdmalist:
 
 
 preloaded_tiles:
-		;; 		.incbin "bin/megabanner.tiles" 
-		.incbin "bin/dialer.tiles" 
+		;;	.incbin "bin/megabanner.tiles"
+		.incbin "bin/telephony.tiles"
 preloaded_tiles_end:	
 		preloaded_tiles_length = preloaded_tiles_end - preloaded_tiles
 		
