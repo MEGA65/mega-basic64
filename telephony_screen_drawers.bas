@@ -81,7 +81,12 @@ return
 # "### DIALLER screen update subroutine ###"
 DRAW_SCREEN_DIALLER rem
 # "call update subroutines"
-gosub DS_DIALLER_NUMBER: gosub DS_DIALLER_CONTACT: gosub DS_DIALLER_DIALPAD
+# About 25ms?
+if ud then gosub DS_DIALLER_NUMBER: ud=0
+# Contact list about 68ms (was 158ms+)
+if uc then gosub DS_DIALLER_CONTACT: uc=0
+# Dial pad takes about 32ms (2 frames) to draw
+if up then gosub DS_DIALLER_DIALPAD: up=0
 return
 
 # "=== print dialling field ==="
@@ -105,8 +110,7 @@ xx=22: yy=3: gosub MOVE_CURSOR_XX_YY: print "    contacts     ";
 for i=1 to cmaxindex%
 xx=22: yy=4+i: gosub MOVE_CURSOR_XX_YY
 if hl%=i then print "{yel}";
-if cpane$(i)<>"" then print cpane$(i);
-for j=1 to clngth%-len(cpane$(i)): if len(cpane$(i))<clngth% then print " ";: next j
+print cpane$(i);left$(ss$,clngth%-len(cpane$(i)));
 print "{lblu}"
 next i
 # "stamp search icon"
@@ -114,9 +118,8 @@ canvas 66 stamp on canvas 0 at 37,22
 return
 
 # "=== draw dialpad ==="
-DS_DIALLER_DIALPAD rem
-# "reinitialize timer"
-tmr=1000
+DS_DIALLER_DIALPAD rem "reinitialize timer"
+tmr=20
 for x=1 to 3: for y=1 to 3
 if val(u0$)=x+(y-1)*3 then gosub STAMP_1_TO_9_PRESSED: goto NEXTYX
 gosub STAMP_1_TO_9

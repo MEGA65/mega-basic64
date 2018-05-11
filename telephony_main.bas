@@ -22,6 +22,7 @@ gosub SETUP_PROGRAM
 gosub SETUP_PARSER: gosub SETUP_MODEM
 # "GUI-related setup"
 gosub SETUP_GUI
+gosub SETUP_DRAWING
 # "phonebook setup"
 gosub SETUP_PHONEBOOK
 # "define functions (e.g. modulo)"
@@ -33,11 +34,13 @@ if db=1 then gosub SWITCH_TO_SCREEN_DEBUG: goto INIT_END
 gosub SWITCH_TO_SCREEN_DIALLER
 
 INIT_END t0=time
-goto MAIN_LOOP
 
+# Ask for all elements to be drawn first time around
+up=1:uc=1:ud=1
 
-MAIN_LOOP rem
-# "### main loop ###"
+# goto MAIN_LOOP
+
+MAIN_LOOP rem "### main loop ###"
 tl=time
 cnt=cnt+1
 tt=time-t0
@@ -52,12 +55,7 @@ t1=time
 # "if the clock gain 0.1s over last timed update, we trigger an update"
 if time-tu>=6 then su=1
 # "we trigger a screen update every sr loops, and only if needed (su=1)"
-mdv=sr: if fn mod(cnt)=0 and su=1 then gosub SCREEN_DRAWER: tu=time: su=0: us=1
-# "screen updates debugging"
-# "print a char when screen is updated"
-if us=1 then print "{home}{down}+";
-# "remove the char when screen wasn't updated"
-if us=0 then print "{home}{down} ";
+mdv=sr: if su=1 then gosub SCREEN_DRAWER: tu=time: su=0: us=1
 
 t=time
 if us=1 then ttmr(5)=ttmr(5)+(t-t1): c5=c5+1
@@ -93,9 +91,9 @@ ttmr(0)=ttmr(0)+(time-tl)
 # "update the average"
 for i=0 to 10: tavg(i)=ttmr(i)/cnt: next i
 if c5<>0 then tavg(5)=ttmr(5)/c5
-tavg(6)=ttmr(6)/(cnt-c5)
+if cnt<>c5 then tavg(6)=ttmr(6)/(cnt-c5)
 if c7<>0 then tavg(7)=ttmr(7)/c7
-tavg(8)=ttmr(8)/(cnt-c8)
+if cnt<>c8 then tavg(8)=ttmr(8)/(cnt-c8)
 
 goto MAIN_LOOP
 # "### main loop ###"
