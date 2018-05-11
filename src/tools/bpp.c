@@ -57,8 +57,11 @@ void compact_line(char *l)
       break;
     }
     // And delete entirely any :rem...
-    if ((!quoteMode)&&(!strncmp(":rem",&l[i],4))) {
-      len--;
+    if (i&&(!quoteMode)&&(!strncmp(":rem",&l[i-1],4))) {
+      len--; break;
+    }
+    if (i&&(!quoteMode)&&(!strncmp(": rem",&l[i-1],5))) {
+      len--; break;
     }
   }
   out[len]=0;
