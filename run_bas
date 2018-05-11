@@ -1,0 +1,52 @@
+#!/bin/csh -fx
+
+# run an untokenized basic program in C64 mode
+# usage: run_bas <untokenized basic program (in ASCII)> [-eb/-bb] [/dev/ttyUSBx]
+
+unset echo # disable command echoing
+
+if ( $#argv < 1 ) then
+  echo "Usage: run_bas <untokenized basic program (in ASCII)> [-eb/-bb] [/dev/ttyUSBx]"
+  echo "Please provide at least one argument!"
+  exit
+endif
+
+set coredir=~/dev/mega65-core
+
+set bitfile=${coredir}/bin/lcd4ddr.bit
+set kickupfile=${coredir}/bin/KICKUP.M65
+set romfile=${coredir}/bin/MEGA65.ROM
+set charromfile=${coredir}/bin/CHARROM.ROM
+
+set megabasic=bin/megabasic64.prg
+set prg=bin/test.prg
+
+set bpp=src/tools/bpp
+set hatoucan=src/tools/hatoucan.py
+
+set port=/dev/ttyUSB1
+if ( $#argv == 3 ) then
+  set port=$3
+endif
+
+if ( -e ${prg} ) then
+  rm ${prg}
+endif
+
+if ( $#argv >= 2 && "$2" == "-eb" ) then
+  echo "Running $1, with extended basic"
+  make ${megabasic} ${bpp} && \
+  ${bpp} $1 | ${hatoucan}  > ${prg} && \
+  m65 -l ${port} -b ${bitfile} -k ${kickupfile} -R ${romfile} -C ${charromfile} -4 -r ${megabasic} && \
+  m65 -l ${port} -4 -r ${prg}
+else if ( $#argv >= 2 && "$2" == "-bb" ) then
+  echo "Running $1, without extended basic"
+  make ${megabasic} ${bpp} && \
+  ${bpp} $1 | ${hatoucan}  > ${prg} && \
+  m65 -l ${port} -b ${bitfile} -k ${kickupfile} -R ${romfile} -C ${charromfile} -4 -r ${prg}
+else
+  echo "Running $1, without extended basic"
+  make ${megabasic} ${bpp} && \
+  ${bpp} $1 | ${hatoucan}  > ${prg} && \
+  m65 -l ${port} -b ${bitfile} -k ${kickupfile} -R ${romfile} -C ${charromfile} -4 -r ${prg}
+endif

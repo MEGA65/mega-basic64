@@ -1,0 +1,23 @@
+#!/bin/csh -fx
+
+# make and run the telephony software
+# usage: run_telephony [/dev/ttyUSBx]
+
+set coredir=~/dev/mega65-core
+
+set bitfile=${coredir}/bin/lcd4ddr.bit
+set kickupfile=${coredir}/bin/KICKUP.M65
+set romfile=${coredir}/bin/MEGA65.ROM
+set charromfile=${coredir}/bin/CHARROM.ROM
+
+set megabasic=bin/megabasic64.prg
+set telephony=bin/telephony.prg
+
+set port=/dev/ttyUSB1
+if ( x$1 != x ) then
+  set port=$1
+endif
+
+make ${megabasic} ${telephony} && \
+m65 -l ${port} -b ${bitfile} -k ${kickupfile} -R ${romfile} -C ${charromfile} -4 -r ${megabasic} && \
+m65 -l ${port} -4 -r ${telephony}
