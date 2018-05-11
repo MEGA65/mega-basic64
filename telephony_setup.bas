@@ -110,7 +110,7 @@ return
 # "=== GUI-related setup ==="
 SETUP_GUI rem
 # "GUI offset: the offset between a canvas and its 'pressed' equivalent, i.e. the number of loaded 'button' canvas"
-goffset=28
+gffset=28
 
 # "user-input char and number initialization"
 u$="": nb$=""
