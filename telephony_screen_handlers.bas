@@ -123,8 +123,7 @@ gosub SEND_AT+CHUP
 gosub CALL_HANGUP_CLEANUP
 return
 
-CALL_HANGUP_CLEANUP
-# "clean up"
+CALL_HANGUP_CLEANUP rem "clean up"
 dactive=0
 dsta=-1
 cid$=""

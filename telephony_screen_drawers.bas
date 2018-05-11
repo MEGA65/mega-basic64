@@ -114,9 +114,9 @@ canvas 66 stamp on canvas 0 at 37,22
 return
 
 # "=== draw dialpad ==="
-DS_DIALLER_DIALPAD rem
-# "reinitialize timer"
+DS_DIALLER_DIALPAD rem "reinitialize timer"
 tmr=1000
+return
 for x=1 to 3: for y=1 to 3
 if val(u0$)=x+(y-1)*3 then gosub STAMP_1_TO_9_PRESSED: goto NEXTYX
 gosub STAMP_1_TO_9

@@ -146,8 +146,11 @@ $(BINDIR)/megabasic64.prg:       $(MEGABASICOBJS) $(BINDIR)/megabanner.tiles
 	mkdir -p $(BINDIR)
 	$(LD65) $< --mapfile $*.map -o $(BINDIR)/megabasic64.prg
 
-$(BINDIR)/dialer.prg:	$(DIALERSRCS) $(TOOLDIR)/bpp
-	$(TOOLDIR)/bpp $(DIALERSRCS) | tee /tmp/bas |  $(TOOLDIR)/hatoucan.py > $(BINDIR)/dialer.prg
+$(BINDIR)/dialer.bas:	$(DIALERSRCS) $(TOOLDIR)/bpp
+	$(TOOLDIR)/bpp $(DIALERSRCS) > $(BINDIR)/dialer.bas
+
+$(BINDIR)/dialer.prg:	$(BINDIR)/dialer.bas
+	$(TOOLDIR)/hatoucan.py > $(BINDIR)/dialer.prg < $(BINDIR)/dialer.bas
 
 $(BINDIR)/vehicle-console.prg:	src/vehicle-console.a65 $(BINDIR)/vehicle_console.tiles
 	$(OPHIS) src/vehicle-console.a65

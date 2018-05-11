@@ -33,11 +33,9 @@ if db=1 then gosub SWITCH_TO_SCREEN_DEBUG: goto INIT_END
 gosub SWITCH_TO_SCREEN_DIALLER
 
 INIT_END t0=time
-goto MAIN_LOOP
+# goto MAIN_LOOP
 
-
-MAIN_LOOP rem
-# "### main loop ###"
+MAIN_LOOP rem "### main loop ###"
 tl=time
 cnt=cnt+1
 tt=time-t0

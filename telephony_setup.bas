@@ -129,8 +129,7 @@ dim r(24)
 
 return
 
-# "=== phonebook setup ==="
-SETUP_PHONEBOOK
+SETUP_PHONEBOOK rem "=== phonebook setup ==="
 # "maximum number of contacts in the phonebook"
 plngth%=200
 # "index array"

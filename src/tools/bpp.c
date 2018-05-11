@@ -115,8 +115,8 @@ void compact_line(char *l)
 	  // But don't shorten keywords, as that would be BAD!
 
 	  if (notKeyword(s)) {
-	    fprintf(stderr,"Trimming long variable name '%s'\n",s);
-	    fprintf(stderr,"  Source line: '%s'\n",l);
+	    // fprintf(stderr,"Trimming long variable name '%s'\n",s);
+	    // fprintf(stderr,"  Source line: '%s'\n",l);
 	    // Output the two characters we need, and that's all.
 	    out[len++]=l[i];
 	    out[len++]=l[i+1];
@@ -307,6 +307,15 @@ skipline1:
 			lineout[outlen]=0;
 			compact_line(lineout);
 			outlen=strlen(lineout);
+
+			if (strlen(lineout)&&(lineout[0]>=' ')) {
+			  int j;
+			  for(j=0;lineout[j];j++) if ((lineout[j]<'0'||lineout[j]>'9')&&(lineout[j]>=' ')) break;
+			  if (!lineout[j]) {
+			    fprintf(stderr,"%s:%d:ERROR Line consists only of label or line number\n",argv[i],fl);
+			    errors++;
+			  }
+			}
 			
 			printf("%s",lineout);
 			if (outlen>0) if (lineout[outlen-1]>=' ') printf("\n");
