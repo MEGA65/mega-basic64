@@ -37,8 +37,8 @@ HANDLER_SCREEN_CONTACT rem
 # "handle user actions"
 u$="": get u$
 if u$="" then return
-if u$=chr$(20) then u0$=u$: su=1: gosub SWITCH_TO_SCREEN_DIALLER
-if u$=chr$(13) then u0$=u$: su=1: dnumber$=pnumber$(cselected%): gosub CALL_DIAL: gosub SWITCH_TO_SCREEN_CALL
+if u$=chr$(20) then u0$=u$: gosub SWITCH_TO_SCREEN_DIALLER
+if u$=chr$(13) then u0$=u$: dnumber$=pnumber$(cselected%): gosub CALL_DIAL: gosub SWITCH_TO_SCREEN_CALL
 return
 
 
@@ -65,7 +65,7 @@ if dsta=0 goto HS_CALL_ACTIVE
 if dsta=2 or dsta=3 goto HS_CALL_DIALING
 if dsta=4 or dsta=5 goto HS_CALL_RINGING
 # "else, we want to always be able to hangup with H"
-if u$="h" or u$="H" then  u0$=u$: su=1: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER
+if u$="h" or u$="H" then  u0$=u$: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER
 return
 
 HS_CALL_ACTIVE rem
@@ -74,7 +74,7 @@ HS_CALL_ACTIVE rem
 # "   h: hang-up call"
 # "   TODO: more (mute, speaker, dialpad...)"
 # "--- Hang-up call (H) ---"
-if u$="h" or u$="H" then  u0$=u$: su=1: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER: return
+if u$="h" or u$="H" then  u0$=u$: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER: return
 return
 
 HS_CALL_DIALING rem
@@ -82,7 +82,7 @@ HS_CALL_DIALING rem
 # " Possible actions:"
 # "   h: hang-up call"
 # "   TODO: more (mute, speaker, dialpad...)"
-if u$="h" or u$="H" then  u0$=u$: su=1: gosub CALL_HANGUP: gosub SWITCH_TO_SCREEN_DIALLER: return
+if u$="h" or u$="H" then  u0$=u$: gosub CALL_HANGUP: gosub SWITCH_TO_SCREEN_DIALLER: return
 return
 
 HS_CALL_RINGING rem
@@ -92,7 +92,7 @@ HS_CALL_RINGING rem
 # "   r: reject call"
 # "   TODO: more (mute, speaker, dialpad...)"
 if u$="a" or u$="A" then  u0$=u$: su=1: gosub CALL_ANSWER: return
-if u$="r" or u$="R" or u$="h" or u$="H" then  u0$=u$: su=1: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER: return
+if u$="r" or u$="R" or u$="h" or u$="H" then  u0$=u$: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER: return
 return
 
 return

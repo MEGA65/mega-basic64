@@ -114,7 +114,8 @@ SWITCH_TO_SCREEN_DIALLER rem
 # "=== switch to screen DIALLER (1) ==="
 sc=1
 gosub SWITCH_SCREEN_CLEANUP
-su=1
+# Mark entire screen as requiring a re-draw
+su=1: up=1: uc=1: ud=1
 return
 
 SWITCH_TO_SCREEN_CONTACT rem
