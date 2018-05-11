@@ -56,11 +56,6 @@ t1=time
 if time-tu>=6 then su=1
 # "we trigger a screen update every sr loops, and only if needed (su=1)"
 mdv=sr: if su=1 then gosub SCREEN_DRAWER: tu=time: su=0: us=1
-# "screen updates debugging"
-# "print a char when screen is updated"
-if us=1 then print "{home}{down}+";
-# "remove the char when screen wasn't updated"
-if us=0 then print "{home}{down} ";
 
 t=time
 if us=1 then ttmr(5)=ttmr(5)+(t-t1): c5=c5+1
