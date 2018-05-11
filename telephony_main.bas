@@ -41,7 +41,7 @@ up=1:uc=1:ud=1
 # goto MAIN_LOOP
 
 MAIN_LOOP rem "### main loop ###"
-tl=time
+tl=time # set loop timer
 cnt=cnt+1
 tt=time-t0
 

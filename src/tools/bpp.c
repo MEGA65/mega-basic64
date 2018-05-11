@@ -42,113 +42,120 @@ int resolve_symbol(char *s,char *o,int *olen)
 
 int notKeyword(char *s)
 {
-  if (!strcmp(s,"for")) return 0;
-  if (!strcmp(s,"let")) return 0;
-  if (!strcmp(s,"left")) return 0;
-  if (!strcmp(s,"len")) return 0;
-  if (!strcmp(s,"next")) return 0;
-  if (!strcmp(s,"right")) return 0;
-  if (!strcmp(s,"str")) return 0;
-  if (!strcmp(s,"to")) return 0;
-  if (!strcmp(s,"print")) return 0;
-  if (!strcmp(s,"poke")) return 0;
-  if (!strcmp(s,"peek")) return 0;
-  if (!strcmp(s,"canvas")) return 0;
-  if (!strcmp(s,"stamp")) return 0;
-  if (!strcmp(s,"on")) return 0;
-  if (!strcmp(s,"stop")) return 0;
-  if (!strcmp(s,"rem")) return 0;
-  if (!strcmp(s,"return")) return 0;
-  if (!strcmp(s,"goto")) return 0;
-  if (!strcmp(s,"gosub")) return 0;
-  if (!strcmp(s,"then")) return 0;
-  if (!strcmp(s,"clr")) return 0;
-  if (!strcmp(s,"int")) return 0;
-  if (!strcmp(s,"chr")) return 0;
-  if (!strcmp(s,"and")) return 0;
-  if (!strcmp(s,"or")) return 0;
-  if (!strcmp(s,"dim")) return 0;
-  if (!strcmp(s,"data")) return 0;
-  if (!strcmp(s,"restore")) return 0;
-  if (!strcmp(s,"def")) return 0;
-  if (!strcmp(s,"fn")) return 0;
-  if (!strcmp(s,"sin")) return 0;
-  if (!strcmp(s,"cos")) return 0;
-  if (!strcmp(s,"tan")) return 0;
-  if (!strcmp(s,"atn")) return 0;
-  if (!strcmp(s,"mid")) return 0;
-  if (!strcmp(s,"val")) return 0;
-  if (!strcmp(s,"get")) return 0;
-  if (!strcmp(s,"input")) return 0;
-  if (!strcmp(s,"open")) return 0;
-  if (!strcmp(s,"close")) return 0;
-  if (!strcmp(s,"cmd")) return 0;
-  if (!strcmp(s,"end")) return 0;
-  if (!strcmp(s,"new")) return 0;
-  if (!strcmp(s,"asc")) return 0;
+	if (!strcmp(s,"for")) return 0;
+	if (!strcmp(s,"let")) return 0;
+	if (!strcmp(s,"left")) return 0;
+	if (!strcmp(s,"len")) return 0;
+	if (!strcmp(s,"next")) return 0;
+	if (!strcmp(s,"right")) return 0;
+	if (!strcmp(s,"str")) return 0;
+	if (!strcmp(s,"to")) return 0;
+	if (!strcmp(s,"print")) return 0;
+	if (!strcmp(s,"poke")) return 0;
+	if (!strcmp(s,"peek")) return 0;
+	if (!strcmp(s,"canvas")) return 0;
+	if (!strcmp(s,"stamp")) return 0;
+	if (!strcmp(s,"on")) return 0;
+	if (!strcmp(s,"stop")) return 0;
+	if (!strcmp(s,"rem")) return 0;
+	if (!strcmp(s,"return")) return 0;
+	if (!strcmp(s,"goto")) return 0;
+	if (!strcmp(s,"gosub")) return 0;
+	if (!strcmp(s,"then")) return 0;
+	if (!strcmp(s,"clr")) return 0;
+	if (!strcmp(s,"int")) return 0;
+	if (!strcmp(s,"chr")) return 0;
+	if (!strcmp(s,"and")) return 0;
+	if (!strcmp(s,"or")) return 0;
+	if (!strcmp(s,"dim")) return 0;
+	if (!strcmp(s,"data")) return 0;
+	if (!strcmp(s,"restore")) return 0;
+	if (!strcmp(s,"def")) return 0;
+	if (!strcmp(s,"fn")) return 0;
+	if (!strcmp(s,"sin")) return 0;
+	if (!strcmp(s,"cos")) return 0;
+	if (!strcmp(s,"tan")) return 0;
+	if (!strcmp(s,"atn")) return 0;
+	if (!strcmp(s,"mid")) return 0;
+	if (!strcmp(s,"val")) return 0;
+	if (!strcmp(s,"get")) return 0;
+	if (!strcmp(s,"input")) return 0;
+	if (!strcmp(s,"open")) return 0;
+	if (!strcmp(s,"close")) return 0;
+	if (!strcmp(s,"cmd")) return 0;
+	if (!strcmp(s,"end")) return 0;
+	if (!strcmp(s,"new")) return 0;
+	if (!strcmp(s,"asc")) return 0;
+	if (!strcmp(s,"from")) return 0;
 
-  return 1;
+	return 1;
 }
 
 void compact_line(char *l)
 {
-  char out[1024];
-  int len=0;
-  int i;
-  int quoteMode=0;
+	char out[1024];
+	int len=0;
+	int i;
+	int quoteMode=0;
 
-  for(i=0;l[i];i++) {
-    if (l[i]=='\"') quoteMode^=1;
+	for(i=0;l[i];i++) {
+		if (l[i]=='\"') quoteMode^=1;
 
-    // Shorten long variable names
-    if ((!quoteMode)&&((!i)||(!isalpha(l[i-1])))) {
-      if (isalpha(l[i])) {
-	// Look for end of current string
-	int j;
-	char s[1024];
-	s[0]=l[i];
-	for(j=i+1;isalnum(l[j]);j++) { s[j-i]=l[j]; continue; }
-	s[j-i]=0;
-	if (strlen(s)>2) {
-	  // Candidate for shortening
+		// Shorten long variable names
+		if ((!quoteMode)&&((!i)||(!isalpha(l[i-1])))) {
+			if (isalpha(l[i])) {
+			// Look for end of current string
+				int j;
+				char s[1024];
+				s[0]=l[i];
+				for(j=i+1;isalnum(l[j]);j++) { s[j-i]=l[j]; continue; }
+				s[j-i]=0;
+				if (strlen(s)>2) {
+					// Candidate for shortening
 
-	  // But don't shorten keywords, as that would be BAD!
+					// But don't shorten keywords, as that would be BAD!
 
-	  if (notKeyword(s)) {
-	    // fprintf(stderr,"Trimming long variable name '%s'\n",s);
-	    // fprintf(stderr,"  Source line: '%s'\n",l);
-	    // Output the two characters we need, and that's all.
-	    out[len++]=l[i];
-	    out[len++]=l[i+1];
+					if (notKeyword(s)) {
+						// fprintf(stderr,"Trimming long variable name '%s'\n",s);
+						// fprintf(stderr,"  Source line: '%s'\n",l);
+						// Output the two characters we need, and that's all.
+						out[len++]=l[i];
+						out[len++]=l[i+1];
 
-	    i=j;
-	  }	  
-	  
+						i=j;
+					}
+
+				}
+			}
+		}
+
+		if (l[i]==' '&&(!quoteMode)) {
+			// Remove spaces that aren't in strings
+		} else {
+			out[len++]=l[i];
+		}
+		// Skip what follows a REM statement
+		if ((!quoteMode)&&(!strncmp("rem",&l[i],3))) {
+			out[len++]='e'; out[len++]='m';
+			break;
+		}
+		// And delete entirely any :rem...
+		if (i&&(!quoteMode)&&(!strncmp(":rem",&l[i-1],4))) {
+			len--; break;
+		}
+		if (i&&(!quoteMode)&&(!strncmp(": rem",&l[i-1],5))) {
+			len--; break;
+		}
+
+		// Remove any # comment
+		if (i&&(!quoteMode)&&(!strncmp(" #",&l[i-1],2))) {
+			len--; break;
+		}
+
 	}
-      }
-    }
-    
-    if (l[i]==' '&&(!quoteMode)) {
-      // Remove spaces that aren't in strings
-    } else {
-      out[len++]=l[i];
-    }
-    // Skip what follows a REM statement
-    if ((!quoteMode)&&(!strncmp("rem",&l[i],3))) {
-      out[len++]='e'; out[len++]='m';
-      break;
-    }
-    // And delete entirely any :rem...
-    if (i&&(!quoteMode)&&(!strncmp(":rem",&l[i-1],4))) {
-      len--; break;
-    }
-    if (i&&(!quoteMode)&&(!strncmp(": rem",&l[i-1],5))) {
-      len--; break;
-    }
-  }
-  out[len]=0;
-  strcpy(l,out);
-  return;
+	out[len]=0;
+	strcpy(l,out);
+	return;
 }
 
 int main(int argc,char **argv)
@@ -199,7 +206,7 @@ int main(int argc,char **argv)
 				label_names[label_count]=strdup(label);
 				label_lines[label_count++]=line_number;
 			}
-skipline1:
+			skipline1:
 			line[0]=0; fgets(line,1024,f);
 			fl++;
 		}
@@ -309,18 +316,18 @@ skipline1:
 			outlen=strlen(lineout);
 
 			if (strlen(lineout)&&(lineout[0]>=' ')) {
-			  int j;
-			  for(j=0;lineout[j];j++) if ((lineout[j]<'0'||lineout[j]>'9')&&(lineout[j]>=' ')) break;
-			  if (!lineout[j]) {
-			    fprintf(stderr,"%s:%d:ERROR Line consists only of label or line number\n",argv[i],fl);
-			    errors++;
-			  }
+				int j;
+				for(j=0;lineout[j];j++) if ((lineout[j]<'0'||lineout[j]>'9')&&(lineout[j]>=' ')) break;
+				if (!lineout[j]) {
+					fprintf(stderr,"%s:%d:ERROR Line consists only of label or line number\n",argv[i],fl);
+					errors++;
+				}
 			}
 			
 			printf("%s",lineout);
 			if (outlen>0) if (lineout[outlen-1]>=' ') printf("\n");
 			
-	skipline2:
+			skipline2:
 			line[0]=0; fgets(line,1024,f);
 			fl++;
 		}
