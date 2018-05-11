@@ -22,6 +22,7 @@ gosub SETUP_PROGRAM
 gosub SETUP_PARSER: gosub SETUP_MODEM
 # "GUI-related setup"
 gosub SETUP_GUI
+gosub SETUP_DRAWING
 # "phonebook setup"
 gosub SETUP_PHONEBOOK
 # "define functions (e.g. modulo)"

@@ -11,6 +11,14 @@ if ln>0 then gosub,00000
 poke ja,44
 return
 
+SETUP_DRAWING rem "Prepare strings etc we use when drawing, to make drawing faster"
+bt$="UCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+bm$="B{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}"
+bb$="JCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+ll$="{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}"
+hd$="{home}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}"
+return
+
 WRITE_STRING_TO_MODEM rem
 # "=== send to modem ==="
 # "send string in s$ to modem"
@@ -26,8 +34,9 @@ return
 MOVE_CURSOR_XX_YY rem
 # "=== move the cursor to position xx,yy ==="
 print "{home}";
-if xx>0 then for ii=1 to xx: print "{rght}";: next ii
-if yy>0 then for jj=1 to yy: print "{down}";: next jj
+print left$(hd$,yy+1);
+print mid$(bm$,2,xx);
+#MCXY1 if xx>1 then print "{rght}";: xx = xx - 1: goto MCXY1
 return
 
 DRAW_BOX rem
@@ -43,14 +52,15 @@ DRAW_BOX rem
 # "   none"
 if w<3 or h<3 then return
 xx=x: yy=y: gosub MOVE_CURSOR_XX_YY
-print "U";: for i=1 to w-2: print "C";: next i: print "I";
+print left$(bt$,w-1);"I";
 for i=1 to h-2
-xx=x: yy=y+i: gosub MOVE_CURSOR_XX_YY
-if r(i)=0 then print "B";: for j=1 to w-2: print "{rght}";: next j: print "B";
-if r(i)=1 then print chr$(171);: for j=1 to w-2: print "C";: next j: print chr$(179);
-r(i)=0: next i
-xx=x: yy=y+h-1: gosub MOVE_CURSOR_XX_YY
-print "J";: for i=1 to w-2: print "C";: next i: c=peek(646): poke 55296+(y+h-1)*40+x+w-1,c: poke 1024+(y+h-1)*40+x+w-1,75
+print left$(ll$,w);"{down}";
+xx=x: yy=y+i: 
+print left$(bm$,w-1);"B";
+next i
+yy=y+h-1:xx=x:gosub MOVE_CURSOR_XX_YY
+print left$(bb$,w-1);
+c=peek(646): poke 55296+(y+h-1)*40+x+w-1,c: poke 1024+(y+h-1)*40+x+w-1,75
 # "we poke the last character to the screen RAM (1024) and the color to the color RAM (55296), in case it's in the lower-right-hand corner, to avoid a CR/LF"
 print "{home}"
 return
