@@ -8,7 +8,7 @@ for i=0 to len(ln$)-1: poke ja+i,asc(right$(left$(ln$,i+1),1)):next
 # "gosub to line ln"
 if ln>0 then gosub,00000
 # "put the comma back in case we want to run again"
-poke ja,44: rem
+poke ja,44
 return
 
 WRITE_STRING_TO_MODEM rem
@@ -71,7 +71,8 @@ print chr$(171);: for j=1 to w-2: print "C";: next j: print chr$(179);
 return
 
 
-BATTERY_UPDATE rem "=== update the battery level ==="
+BATTERY_UPDATE rem
+# "=== update the battery level ==="
 if btp>=0 and btp <=5 then bl%=0
 if btp>5 and btp <=15 then bl%=1
 if btp>15 and btp <=25 then bl%=2

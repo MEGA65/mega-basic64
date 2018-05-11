@@ -4,147 +4,192 @@
 
 9999 rem
 
-MESSAGE_HANDLER_0 rem "Message handler: unknown/free-form"
+# "Message handler: unknown/free-form"
+MESSAGE_HANDLER_0 rem
 10099 return
 
-MESSAGE_HANDLER_1 rem "Message handler: message type 1"
+# "Message handler: message type 1"
+MESSAGE_HANDLER_1 rem
 10199 return
 
-MESSAGE_HANDLER_2 rem "Message handler: message type 2"
+# "Message handler: message type 2"
+MESSAGE_HANDLER_2 rem
 10299 return
 
-MESSAGE_HANDLER_3 rem "Message handler: message type 3"
+# "Message handler: message type 3"
+MESSAGE_HANDLER_3 rem
 10399 return
 
-MESSAGE_HANDLER_4 rem "Message handler: message type 4"
+# "Message handler: message type 4"
+MESSAGE_HANDLER_4 rem
 10499 return
 
-MESSAGE_HANDLER_5 rem "Message handler: message type 5"
+# "Message handler: message type 5"
+MESSAGE_HANDLER_5 rem
 10599 return
 
-MESSAGE_HANDLER_6 rem "Message handler: message type 6"
+# "Message handler: message type 6"
+MESSAGE_HANDLER_6 rem
 10699 return
 
-MESSAGE_HANDLER_7 rem "Message handler: message type 7"
+# "Message handler: message type 7"
+MESSAGE_HANDLER_7 rem
 10799 return
 
-MESSAGE_HANDLER_8 rem "Message handler: message type 8"
+# "Message handler: message type 8"
+MESSAGE_HANDLER_8 rem
 10899 return
 
-MESSAGE_HANDLER_9 rem "Message handler: message type 9"
+# "Message handler: message type 9"
+MESSAGE_HANDLER_9 rem
 10999 return
 
-MESSAGE_HANDLER_10 rem "Message handler: message type 10"
+# "Message handler: message type 10"
+MESSAGE_HANDLER_10 rem
 11099 return
 
-MESSAGE_HANDLER_11 rem "Message handler: message type 11"
+# "Message handler: message type 11"
+MESSAGE_HANDLER_11 rem
 11199 return
 
-MESSAGE_HANDLER_12 rem "Message handler: message type 12"
+# "Message handler: message type 12"
+MESSAGE_HANDLER_12 rem
 11299 return
 
-MESSAGE_HANDLER_13 rem "Message handler: message type 13"
+# "Message handler: message type 13"
+MESSAGE_HANDLER_13 rem
 11399 return
 
-MESSAGE_HANDLER_14 rem "Message handler: message type 14"
+# "Message handler: message type 14"
+MESSAGE_HANDLER_14 rem
 11499 return
 
-MESSAGE_HANDLER_15 rem "Message handler: message type 15"
+# "Message handler: message type 15"
+MESSAGE_HANDLER_15 rem
 11599 return
 
-MESSAGE_HANDLER_16 rem "Message handler: message type 16"
+# "Message handler: message type 16"
+MESSAGE_HANDLER_16 rem
 11699 return
 
-MESSAGE_HANDLER_17 rem "Message handler: message type 17"
+# "Message handler: message type 17"
+MESSAGE_HANDLER_17 rem
 11799 return
 
-MESSAGE_HANDLER_18 rem "Message handler: message type 18"
+# "Message handler: message type 18"
+MESSAGE_HANDLER_18 rem
 11899 return
 
-MESSAGE_HANDLER_19 rem "Message handler: message type 19"
+# "Message handler: message type 19"
+MESSAGE_HANDLER_19 rem
 11999 return
 
-MESSAGE_HANDLER_20 rem "Message handler: message type 20"
+# "Message handler: message type 20"
+MESSAGE_HANDLER_20 rem
 12099 return
 
-MESSAGE_HANDLER_21 rem "Message handler: message type 21"
+# "Message handler: message type 21"
+MESSAGE_HANDLER_21 rem
 12199 return
 
-MESSAGE_HANDLER_22 rem "Message handler: message type 22"
+# "Message handler: message type 22"
+MESSAGE_HANDLER_22 rem
 12299 return
 
-MESSAGE_HANDLER_23 rem "Message handler: message type 23"
+# "Message handler: message type 23"
+MESSAGE_HANDLER_23 rem
 12399 return
 
-MESSAGE_HANDLER_24 rem "Message handler: message type 24"
+# "Message handler: message type 24"
+MESSAGE_HANDLER_24 rem
 12499 return
 
-MESSAGE_HANDLER_25 rem "Message handler: message type 25"
+# "Message handler: message type 25"
+MESSAGE_HANDLER_25 rem
 12599 return
 
-MESSAGE_HANDLER_26 rem "Message handler: message type 26"
+# "Message handler: message type 26"
+MESSAGE_HANDLER_26 rem
 12699 return
 
-MESSAGE_HANDLER_27 rem "Message handler: message type 27"
+# "Message handler: message type 27"
+MESSAGE_HANDLER_27 rem
 12799 return
 
-MESSAGE_HANDLER_28 rem "Message handler: message type 28"
+# "Message handler: message type 28"
+MESSAGE_HANDLER_28 rem
 12899 return
 
-MESSAGE_HANDLER_29 rem "Message handler: message type 29"
+# "Message handler: message type 29"
+MESSAGE_HANDLER_29 rem
 12999 return
 
-MESSAGE_HANDLER_30 rem "Message handler: message type 30"
+# "Message handler: message type 30"
+MESSAGE_HANDLER_30 rem
 13099 return
 
-MESSAGE_HANDLER_31 rem "Message handler: message type 31"
+# "Message handler: message type 31"
+MESSAGE_HANDLER_31 rem
 13199 return
 
-MESSAGE_HANDLER_32 rem "Message handler: message type 32"
+# "Message handler: message type 32"
+MESSAGE_HANDLER_32 rem
 13299 return
 
-MESSAGE_HANDLER_33 rem "Message handler: message type 33"
+# "Message handler: message type 33"
+MESSAGE_HANDLER_33 rem
 13399 return
 
-MESSAGE_HANDLER_34 rem "Message handler: message type 34"
+# "Message handler: message type 34"
+MESSAGE_HANDLER_34 rem
 13499 return
 
-MESSAGE_HANDLER_35 rem "Message handler: message type 35"
+# "Message handler: message type 35"
+MESSAGE_HANDLER_35 rem
 13599 return
 
-MESSAGE_HANDLER_36 rem "Message handler: message type 36"
+# "Message handler: message type 36"
+MESSAGE_HANDLER_36 rem
 13699 return
 
-MESSAGE_HANDLER_37 rem "Message handler: message type 37"
+# "Message handler: message type 37"
+MESSAGE_HANDLER_37 rem
 13799 return
 
-MESSAGE_HANDLER_38 rem "Message handler: message type 38"
+# "Message handler: message type 38"
+MESSAGE_HANDLER_38 rem
 13899 return
 
-MESSAGE_HANDLER_39 rem "Message handler: message type 39"
+# "Message handler: message type 39"
+MESSAGE_HANDLER_39 rem
 13999 return
 
-MESSAGE_HANDLER_OK rem "Message handler: OK"
-if dia=1 then gosub SEND_AT+CLCC: rem "ATD succeeded, dialling..."
+# "Message handler: OK"
+MESSAGE_HANDLER_OK rem
+# "ATD succeeded, dialling..."
+if dia=1 then gosub SEND_AT+CLCC
 14099 return
 
-MESSAGE_HANDLER_41 rem "Message handler: message type 41"
+# "Message handler: message type 41"
+MESSAGE_HANDLER_41 rem
 14199 return
 
-MESSAGE_HANDLER_RING rem "Message handler: incoming call (ring)"
+# "Message handler: incoming call (ring)"
+MESSAGE_HANDLER_RING rem
 gosub SEND_AT+CLCC
 if dactive=0 then dactive=1: su=1: gosub SWITCH_TO_SCREEN_CALL
 # "else: already in-call"
 14299 return
 
-
-MESSAGE_HANDLER_NO_CARRIER rem "Message handler: no carrier"
+# "Message handler: no carrier"
+MESSAGE_HANDLER_NO_CARRIER rem
 # "TODO: depending on which screen we are, we can set different messages to be displayed to the user when the call is hung up"
 if dactive=1 then goto MH_NC_ACTIVE
 # "else: not in call"
 goto MH_NC_END
 
-MH_NC_ACTIVE rem "active call"
+# "active call"
+MH_NC_ACTIVE rem
 # "hang-up the active call"
 gosub CALL_HANGUP
 su=1
@@ -155,28 +200,34 @@ MH_NC_END rem
 14399 return
 
 
-
-MESSAGE_HANDLER_44 rem "Message handler: message type 44"
+# "Message handler: message type 44"
+MESSAGE_HANDLER_44 rem
 14499 return
 
-MESSAGE_HANDLER_45 rem "Message handler: message type 45"
+# "Message handler: message type 45"
+MESSAGE_HANDLER_45 rem
 14599 return
 
-MESSAGE_HANDLER_NO_DIAL_TONE rem "Message handler: no dial tone"
+# "Message handler: no dial tone"
+MESSAGE_HANDLER_NO_DIAL_TONE rem
 if dia=1 then dr$="no dial tone": su=1
 14699 return
 
-MESSAGE_HANDLER_BUSY rem "Message handler: busy"
+# "Message handler: busy"
+MESSAGE_HANDLER_BUSY rem
 if dia=1 then dr$="target is busy": su=1
 14799 return
 
-MESSAGE_HANDLER_NO_ANSWER rem "Message handler: no answer"
+# "Message handler: no answer"
+MESSAGE_HANDLER_NO_ANSWER rem
 14899 return
 
-MESSAGE_HANDLER_49 rem "Message handler: message type 49"
+# "Message handler: message type 49"
+MESSAGE_HANDLER_49 rem
 14999 return
 
-MESSAGE_HANDLER_50 rem "Message handler: message type 50"
+# "Message handler: message type 50"
+MESSAGE_HANDLER_50 rem
 15099 return
 
 
@@ -233,14 +284,21 @@ if ber=99 then ber$="?"
 MESSAGE_HANDLER_+QNWINFO rem
 # "Message handler: +qnwinfo (network information report)"
 su=1
-nact$=right$(left$(mf$(1),len(mf$(1))-1),len(mf$(1))-2): rem "get nwact, without quotes"
-nt$="?": rem "nwact is not in the following list (should not happen)"
-if nact$="none" then nt$=""
-if nact$="cdma1x" then nt$="3g": rem "3g? abbreviation to check"
-if nact$="cdma1x and hdr" then nt$="3g": rem "3g? abbreviation to check"
-if nact$="cdma1x and ehrpd" then nt$="3g": rem "3g? abbreviation to check"
-if nact$="hdr" then nt$="2g": rem "2g? abbreviation to check"
-if nact$="hdr-ehrpd" then nt$="3g": rem "3g? abbreviation to check"
+# "get nwact, without quotes"
+nact$=right$(left$(mf$(1),len(mf$(1))-1),len(mf$(1))-2)
+# "initialize to unknown, in case nwact is not in the following list (should not happen)"
+nt$="?"
+if nact$="none" then nt$="x"
+# "3g? abbreviation to check"
+if nact$="cdma1x" then nt$="3g"
+# "3g? abbreviation to check"
+if nact$="cdma1x and hdr" then nt$="3g"
+# "3g? abbreviation to check"
+if nact$="cdma1x and ehrpd" then nt$="3g"
+# "2g? abbreviation to check"
+if nact$="hdr" then nt$="2g"
+# "3g? abbreviation to check"
+if nact$="hdr-ehrpd" then nt$="3g"
 if nact$="gsm" then nt$="2g"
 if nact$="gprs" then nt$="g"
 if nact$="edge" then nt$="e"
@@ -261,137 +319,182 @@ nname$=right$(left$(mf$(2),len(mf$(2))-1),len(mf$(2))-2)
 # "mf$(1) is FNN (Full Network Name), mf$(2) is SNN (Short Network Name)"
 15499 return
 
-MESSAGE_HANDLER_55 rem "Message handler: message type 55"
+# "Message handler: message type 55"
+MESSAGE_HANDLER_55 rem
 15599 return
 
-MESSAGE_HANDLER_56 rem "Message handler: message type 56"
+# "Message handler: message type 56"
+MESSAGE_HANDLER_56 rem
 15699 return
 
-MESSAGE_HANDLER_57 rem "Message handler: message type 57"
+# "Message handler: message type 57"
+MESSAGE_HANDLER_57 rem
 15799 return
 
-MESSAGE_HANDLER_58 rem "Message handler: message type 58"
+# "Message handler: message type 58"
+MESSAGE_HANDLER_58 rem
 15899 return
 
-MESSAGE_HANDLER_59 rem "Message handler: message type 59"
+# "Message handler: message type 59"
+MESSAGE_HANDLER_59 rem
 15999 return
 
-MESSAGE_HANDLER_60 rem "Message handler: message type 60"
+# "Message handler: message type 60"
+MESSAGE_HANDLER_60 rem
 16099 return
 
-MESSAGE_HANDLER_61 rem "Message handler: message type 61"
+# "Message handler: message type 61"
+MESSAGE_HANDLER_61 rem
 16199 return
 
-MESSAGE_HANDLER_62 rem "Message handler: message type 62"
+# "Message handler: message type 62"
+MESSAGE_HANDLER_62 rem
 16299 return
 
-MESSAGE_HANDLER_63 rem "Message handler: message type 63"
+# "Message handler: message type 63"
+MESSAGE_HANDLER_63 rem
 16399 return
 
-MESSAGE_HANDLER_64 rem "Message handler: message type 64"
+# "Message handler: message type 64"
+MESSAGE_HANDLER_64 rem
 16499 return
 
-MESSAGE_HANDLER_65 rem "Message handler: message type 65"
+# "Message handler: message type 65"
+MESSAGE_HANDLER_65 rem
 16599 return
 
-MESSAGE_HANDLER_66 rem "Message handler: message type 66"
+# "Message handler: message type 66"
+MESSAGE_HANDLER_66 rem
 16699 return
 
-MESSAGE_HANDLER_67 rem "Message handler: message type 67"
+# "Message handler: message type 67"
+MESSAGE_HANDLER_67 rem
 16799 return
 
-MESSAGE_HANDLER_68 rem "Message handler: message type 68"
+# "Message handler: message type 68"
+MESSAGE_HANDLER_68 rem
 16899 return
 
-MESSAGE_HANDLER_69 rem "Message handler: message type 69"
+# "Message handler: message type 69"
+MESSAGE_HANDLER_69 rem
 16999 return
 
-MESSAGE_HANDLER_70 rem "Message handler: message type 70"
+# "Message handler: message type 70"
+MESSAGE_HANDLER_70 rem
 17099 return
 
-MESSAGE_HANDLER_71 rem "Message handler: message type 71"
+# "Message handler: message type 71"
+MESSAGE_HANDLER_71 rem
 17199 return
 
-MESSAGE_HANDLER_72 rem "Message handler: message type 72"
+# "Message handler: message type 72"
+MESSAGE_HANDLER_72 rem
 17299 return
 
-MESSAGE_HANDLER_73 rem "Message handler: message type 73"
+# "Message handler: message type 73"
+MESSAGE_HANDLER_73 rem
 17399 return
 
-MESSAGE_HANDLER_74 rem "Message handler: message type 74"
+# "Message handler: message type 74"
+MESSAGE_HANDLER_74 rem
 17499 return
 
-MESSAGE_HANDLER_75 rem "Message handler: message type 75"
+# "Message handler: message type 75"
+MESSAGE_HANDLER_75 rem
 17599 return
 
-MESSAGE_HANDLER_76 rem "Message handler: message type 76"
+# "Message handler: message type 76"
+MESSAGE_HANDLER_76 rem
 17699 return
 
-MESSAGE_HANDLER_77 rem "Message handler: message type 77"
+# "Message handler: message type 77"
+MESSAGE_HANDLER_77 rem
 17799 return
 
-MESSAGE_HANDLER_78 rem "Message handler: message type 78"
+# "Message handler: message type 78"
+MESSAGE_HANDLER_78 rem
 17899 return
 
-MESSAGE_HANDLER_79 rem "Message handler: message type 79"
+# "Message handler: message type 79"
+MESSAGE_HANDLER_79 rem
 17999 return
 
-MESSAGE_HANDLER_80 rem "Message handler: message type 80"
+# "Message handler: message type 80"
+MESSAGE_HANDLER_80 rem
 18099 return
 
-MESSAGE_HANDLER_81 rem "Message handler: message type 81"
+# "Message handler: message type 81"
+MESSAGE_HANDLER_81 rem
 18199 return
 
-MESSAGE_HANDLER_82 rem "Message handler: message type 82"
+# "Message handler: message type 82"
+MESSAGE_HANDLER_82 rem
 18299 return
 
-MESSAGE_HANDLER_83 rem "Message handler: message type 83"
+# "Message handler: message type 83"
+MESSAGE_HANDLER_83 rem
 18399 return
 
-MESSAGE_HANDLER_84 rem "Message handler: message type 84"
+# "Message handler: message type 84"
+MESSAGE_HANDLER_84 rem
 18499 return
 
-MESSAGE_HANDLER_85 rem "Message handler: message type 85"
+# "Message handler: message type 85"
+MESSAGE_HANDLER_85 rem
 18599 return
 
-MESSAGE_HANDLER_86 rem "Message handler: message type 86"
+# "Message handler: message type 86"
+MESSAGE_HANDLER_86 rem
 18699 return
 
-MESSAGE_HANDLER_87 rem "Message handler: message type 87"
+# "Message handler: message type 87"
+MESSAGE_HANDLER_87 rem
 18799 return
 
-MESSAGE_HANDLER_88 rem "Message handler: message type 88"
+# "Message handler: message type 88"
+MESSAGE_HANDLER_88 rem
 18899 return
 
-MESSAGE_HANDLER_89 rem "Message handler: message type 89"
+# "Message handler: message type 89"
+MESSAGE_HANDLER_89 rem
 18999 return
 
-MESSAGE_HANDLER_90 rem "Message handler: message type 90"
+# "Message handler: message type 90"
+MESSAGE_HANDLER_90 rem
 19099 return
 
-MESSAGE_HANDLER_91 rem "Message handler: message type 91"
+# "Message handler: message type 91"
+MESSAGE_HANDLER_91 rem
 19199 return
 
-MESSAGE_HANDLER_92 rem "Message handler: message type 92"
+# "Message handler: message type 92"
+MESSAGE_HANDLER_92 rem
 19299 return
 
-MESSAGE_HANDLER_93 rem "Message handler: message type 93"
+# "Message handler: message type 93"
+MESSAGE_HANDLER_93 rem
 19399 return
 
-MESSAGE_HANDLER_94 rem "Message handler: message type 94"
+# "Message handler: message type 94"
+MESSAGE_HANDLER_94 rem
 19499 return
 
-MESSAGE_HANDLER_95 rem "Message handler: message type 95"
+# "Message handler: message type 95"
+MESSAGE_HANDLER_95 rem
 19599 return
 
-MESSAGE_HANDLER_96 rem "Message handler: message type 96"
+# "Message handler: message type 96"
+MESSAGE_HANDLER_96 rem
 19699 return
 
-MESSAGE_HANDLER_97 rem "Message handler: message type 97"
+# "Message handler: message type 97"
+MESSAGE_HANDLER_97 rem
 19799 return
 
-MESSAGE_HANDLER_98 rem "Message handler: message type 98"
+# "Message handler: message type 98"
+MESSAGE_HANDLER_98 rem
 19899 return
 
-MESSAGE_HANDLER_99 rem "Message handler: message type 99"
+# "Message handler: message type 99"
+MESSAGE_HANDLER_99 rem
 19999 return

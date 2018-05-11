@@ -1,8 +1,10 @@
-LOOKUP_GOTO_LN_PATCH_ADDRESS rem "=== goto,X lookup of patch address"
+# "=== goto,X lookup of patch address"
+LOOKUP_GOTO_LN_PATCH_ADDRESS rem
 for ja=2048 to 40959: if peek(ja-1)<>141 or peek(ja)<>44 then next
 return
 
-SETUP_PROGRAM rem "=== program flags and variables setup ==="
+# "=== program flags and variables setup ==="
+SETUP_PROGRAM rem
 # "flag db (debug): print debugging information"
 db=0
 # "current screen to be displayed and user input to be taken"
@@ -87,50 +89,83 @@ dim ttmr(10)
 dim tavg(10)
 return
 
-SETUP_PARSER rem "=== setup for modem parser ==="
-dim mf$(20): rem "fields from colon-comma formatted messages"
-dim ol$(20): rem "lines from modem that don't conform to any normal message format"
-dim jt%(100): rem "jump table for message handling"
+# "=== setup for modem parser ==="
+SETUP_PARSER rem
+# "fields from colon-comma formatted messages"
+dim mf$(20)
+# "lines from modem that don't conform to any normal message format"
+dim ol$(20)
+# "jump table for message handling"
+dim jt%(100)
 for i=0 to 99: jt%(i)=10000+100*i: next i
 open 1,2,1
 return
 
-SETUP_MODEM rem "=== modem setup ==="
-s$="ate0"+chr$(13): gosub WRITE_STRING_TO_MODEM: rem "no echo from modem"
+# "=== modem setup ==="
+SETUP_MODEM rem
+# "no echo from modem"
+s$="ate0"+chr$(13): gosub WRITE_STRING_TO_MODEM
 return
 
-SETUP_GUI rem "=== GUI-related setup ==="
-u$="": nb$="": rem "user-input char and number initialization"
-sl%=0: rem "Signal Level integer [0:5]"
-ber$="?": rem "Bit Error Rate string to be displayed"
-bl%=10: rem "Battery Level integer [0:10]"
-tmr=1000: rem "timer for keystrokes"
-hl%=0: rem "highlighted line (for example in contact pane)"
-dim r(24): rem "rows to be printed in a box"
+# "=== GUI-related setup ==="
+SETUP_GUI rem
+# "GUI offset: the offset between a canvas and its 'pressed' equivalent, i.e. the number of loaded 'button' canvas"
+goffset=28
+
+# "user-input char and number initialization"
+u$="": nb$=""
+# "Signal Level integer [0:5]"
+sl%=0
+# "Bit Error Rate string to be displayed"
+ber$="?"
+# "Battery Level integer [0:10]"
+bl%=10
+# "timer for keystrokes"
+tmr=1000
+# "highlighted line (for example in contact pane)"
+hl%=0
+# "rows to be printed in a box"
+dim r(24)
+
 return
 
-SETUP_PHONEBOOK rem "=== phonebook setup ==="
-plngth%=200: rem "maximum number of contacts in the phonebook"
-dim pindex%(plngth%): rem "index array"
-dim pnumber$(plngth%): rem "phone number array"
-dim ptype%(plngth%): rem "phone number type array [129, 145, 161]"
-dim ptxt$(plngth%): rem "text array"
-dim psim%(plngth%): rem "sim index array"
-cmaxindex%=16: rem "dim of contact array"
-clngth%=17: rem "max length that can be displayed in the contact pane"
-dim cpane$(cmaxindex%): rem "contact pane array: names to be displayed in the contact pane"
-dim cindex%(cmaxindex%): rem "contact pane <-> phonebook index mapping"
-centry%=0: rem "number of entries in contact pane (<= cmaxindex%)"
-cselected%=0: rem "selected contact index (in phonebook)"
-cdisplay$="": rem "the text to be displayed on the contact screen"
+# "=== phonebook setup ==="
+SETUP_PHONEBOOK
+# "maximum number of contacts in the phonebook"
+plngth%=200
+# "index array"
+dim pindex%(plngth%)
+# "phone number array"
+dim pnumber$(plngth%)
+# "phone number type array [129, 145, 161]"
+dim ptype%(plngth%)
+# "text array"
+dim ptxt$(plngth%)
+# "sim index array"
+dim psim%(plngth%)
+# "dim of contact array"
+cmaxindex%=16
+# "max length that can be displayed in the contact pane"
+clngth%=17
+# "contact pane array: names to be displayed in the contact pane"
+dim cpane$(cmaxindex%)
+# "contact pane <-> phonebook index mapping"
+dim cindex%(cmaxindex%)
+# "number of entries in contact pane (<= cmaxindex%)"
+centry%=0
+# "selected contact index (in phonebook)"
+cselected%=0
+# "the text to be displayed on the contact screen"
+cdisplay$=""
 gosub LOAD_PHONEBOOK
 gosub PHONEBOOK_TO_CONTACT_PANE
 gosub TRIM_CONTACT_PANE
 return
 
-DEFINE_FUNCTIONS rem "=== functions definition ==="
-def fn m6(x) = x-(int(x/6)*6): rem "x modulo 6; x % 6"
-def fn m1k(x) = x-(int(x/1000)*1000): rem "x modulo 1000; x % 1000"
-mdv=1 : rem "modulo divisor"
-def fn mod(x) = x-(int(x/mdv)*mdv): rem "x modulo mdv; x % mdv"
+# "=== functions definition ==="
+DEFINE_FUNCTIONS rem
+# "modulo divisor"
+mdv=1
+# "x modulo mdv; x % mdv"
+def fn mod(x) = x-(int(x/mdv)*mdv)
 return

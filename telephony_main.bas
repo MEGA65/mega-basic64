@@ -1,14 +1,19 @@
-poke 53280,0: poke 53281,0: rem "border and screen color (0: black)"
-poke 0,65: rem "fast mode (50mhz cpu clock)"
-poke 53248+111,128: rem "fix screen artifacts (60hz display)"
-poke 53272,20: rem "uppercase charset"
+# "border and screen color (0: black)"
+poke 53280,0: poke 53281,0
+# "fast mode (50mhz cpu clock)"
+poke 0,65
+# "fix screen artifacts (60hz display)"
+poke 53248+111,128
+# "uppercase charset"
+poke 53272,20
 
 # "clear screen"
 print "{clr}";: canvas 0 clr
 
 goto INIT
 
-INIT rem "### initialization ###"
+# "### initialization ###"
+INIT rem
 # "one-time only lookup patch address"
 gosub LOOKUP_GOTO_LN_PATCH_ADDRESS
 # "program state setup"
@@ -27,8 +32,7 @@ if db=1 then gosub SWITCH_TO_SCREEN_DEBUG: goto INIT_END
 # "by defaults, start the program on DIALLER screen"
 gosub SWITCH_TO_SCREEN_DIALLER
 
-INIT_END rem
-t0=time
+INIT_END t0=time
 goto MAIN_LOOP
 
 
