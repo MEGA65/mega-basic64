@@ -81,7 +81,12 @@ return
 # "### DIALLER screen update subroutine ###"
 DRAW_SCREEN_DIALLER rem
 # "call update subroutines"
-gosub DS_DIALLER_NUMBER: gosub DS_DIALLER_CONTACT: gosub DS_DIALLER_DIALPAD
+# About 25ms?
+gosub DS_DIALLER_NUMBER
+# Contact list about 68ms (was 158ms+)
+gosub DS_DIALLER_CONTACT
+# Dial pad takes about 32ms (2 frames) to draw
+gosub DS_DIALLER_DIALPAD
 return
 
 # "=== print dialling field ==="
@@ -105,8 +110,7 @@ xx=22: yy=3: gosub MOVE_CURSOR_XX_YY: print "    contacts     ";
 for i=1 to cmaxindex%
 xx=22: yy=4+i: gosub MOVE_CURSOR_XX_YY
 if hl%=i then print "{yel}";
-if cpane$(i)<>"" then print cpane$(i);
-for j=1 to clngth%-len(cpane$(i)): if len(cpane$(i))<clngth% then print " ";: next j
+print cpane$;left$(ss$,clngth%-len(cpane$(i)));
 print "{lblu}"
 next i
 # "stamp search icon"
