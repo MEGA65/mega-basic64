@@ -119,7 +119,7 @@ return
 
 # "=== draw dialpad ==="
 DS_DIALLER_DIALPAD rem "reinitialize timer"
-tmr=1000
+tmr=20
 for x=1 to 3: for y=1 to 3
 if val(u0$)=x+(y-1)*3 then gosub STAMP_1_TO_9_PRESSED: goto NEXTYX
 gosub STAMP_1_TO_9
