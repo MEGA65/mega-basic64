@@ -1,0 +1,14 @@
+# Compiled source #
+###################
+*.o
+*.list
+*.prg
+*.tiles
+src/tools/bpp
+src/tools/mktileset
+
+
+# Directories #
+###############
+bin/
+games/
