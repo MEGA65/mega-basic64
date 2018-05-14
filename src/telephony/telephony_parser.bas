@@ -1,29 +1,29 @@
-# "=== read from modem ==="
+'=== read from modem ===
 POLL_MODEM rem
-# "reinitialize parser counter"
+'reinitialize parser counter
 cp=50
-# "read one char from cellular modem and parse received fields"
+'read one char from cellular modem and parse received fields
 PM_GET get#1,c$: if c$="" then return
 cp=cp-1
 if c$=chr$(13) or c$=chr$(10) then goto HANDLE_MODEM_LINE
-# "first field is separated with a column"
+'first field is separated with a column
 if c$=":" and fc=0 then mf$(0)=mf$: fc=1: mf$=""
-# "other fields are separated with a comma; limit=20"
+'other fields are separated with a comma; limit=20
 if c$="," and fc>0 and fc<20 then mf$(fc)=mf$: fc=fc+1: mf$=""
 if c$<>"," and c$<>":" then mf$=mf$+c$
 ml$=ml$+c$
 
-# "if we didn't handle a non-empty modem line, we poll the modem again (limit: cp times)"
+'if we didn't handle a non-empty modem line, we poll the modem again (limit: cp times)
 if ml=0 and cp>0 goto PM_GET
 return
 
-# "=== handle modem line ==="
+'=== handle modem line ===
 HANDLE_MODEM_LINE rem
-# "received complete line from modem"
+'received complete line from modem
 if mf$<>"" and fc<20 then mf$(fc)=mf$: fc=fc+1
 if ml$="" then return
 for i=0 to(fc-1)
-# "trim one space at the beginning of each field, if there is a whitespace"
+'trim one space at the beginning of each field, if there is a whitespace
 if left$(mf$(i),1)=" " then mf$(i)=right$(mf$(i),len(mf$(i))-1)
 next i
 if db=1 then print "modem line: ";ml$
@@ -33,21 +33,21 @@ if db=1 then for i=0 to(fc-1): print"[";mf$(i);"]",: next i
 f1$="": ml$="": fc=0: mf$=""
 mn=0
 gosub GET_MESSAGE_TYPE: gosub JUMP_TO_HANDLER
-# "a non-empty modem line has been handled"
+'a non-empty modem line has been handled
 ml=1
 return
 
 
-# "=== Jump to handler ==="
+'=== Jump to handler ===
 JUMP_TO_HANDLER rem
 if db=1 then print "message is type";mn
-# "Check if jumptable is set for this message type, if so, call handler"
+'Check if jumptable is set for this message type, if so, call handler
 ln=jt%(mn): if ln>0 then gosub GOTO_LN
 return
 
-# "=== List of all messages ==="
+'=== List of all messages ===
 GET_MESSAGE_TYPE rem
-# "--- URC (Unsollicited Result Codes) ---"
+'--- URC (Unsollicited Result Codes) ---
 if mf$(0)="+creg" then mn=1
 if mf$(0)="+cgreg" then mn=3
 if mf$(0)="+ctzv" then mn=5
@@ -72,7 +72,7 @@ if mf$(0)="+cpin" then mn=26
 if mf$(0)="+qind" then mn=27
 if mf$(0)="powered down" then mn=29
 if mf$(0)="+cgev" then mn=30
-# "--- Result Codes ---"
+'--- Result Codes ---
 if mf$(0)="ok" then mn=40
 if mf$(0)="connect" then mn=41
 if mf$(0)="ring" then mn=42
@@ -81,7 +81,7 @@ if mf$(0)="error" then mn=44
 if mf$(0)="no dialtone" then mn=46
 if mf$(0)="busy" then mn=47
 if mf$(0)="no answer" then mn=48
-# "--- AT commands responses ---"
+'--- AT commands responses ---
 if mf$(0)="+clcc" then mn=51
 if mf$(0)="+csq" then mn=52
 if mf$(0)="+qnwinfo" then mn=53
