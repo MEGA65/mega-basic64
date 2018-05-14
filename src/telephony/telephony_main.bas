@@ -1,14 +1,9 @@
-# "border and screen color (0: black)"
-poke 53280,0: poke 53281,0
-# "fast mode (50mhz cpu clock)"
-poke 0,65
-# "fix screen artifacts (60hz display)"
-poke 53248+111,128
-# "uppercase charset"
-poke 53272,20
+poke 53280,0: poke 53281,0 'border and screen color (0: black)
+poke 0,65 'fast mode (50mhz cpu clock)
+poke 53248+111,128 'fix screen artifacts (60hz display)
+poke 53272,20 'uppercase charset
 
-# "clear screen"
-print "{clr}";: canvas 0 clr
+print "{clr}";: canvas 0 clr 'clear screen
 
 goto INIT
 

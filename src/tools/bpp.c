@@ -151,6 +151,10 @@ void compact_line(char *l)
 		if (i&&(!quoteMode)&&(!strncmp(" #",&l[i-1],2))) {
 			len--; break;
 		}
+		// Remove any ' comment
+		if (i&&(!quoteMode)&&(!strncmp(" \'",&l[i-1],2))) {
+			len--; break;
+		}
 
 	}
 	out[len]=0;
@@ -180,6 +184,7 @@ int main(int argc,char **argv)
 		line[0]=0; fgets(line,1024,f);
 		while(line[0]) {
 			if (line[0]=='#') goto skipline1;
+			if (line[0]=='\'') goto skipline1;
 			if (line[0]=='\t' || (line[0]>='a' && line[0]<='z')) {
 				// Line starts with TAB, so allocate line number
 				line_number++;
@@ -232,7 +237,8 @@ int main(int argc,char **argv)
 		int fl=1;
 		line[0]=0; fgets(line,1024,f);
 		while(line[0]) {
-		  if (line[0]=='#') goto skipline2;
+			if (line[0]=='#') goto skipline2;
+			if (line[0]=='\'') goto skipline2;
 			int outlen=0;
 			char lineout[1024];
 			int quote_mode=0;

@@ -131,6 +131,8 @@ all:	$(TOOLS) $(BINDIR)/MEGABAS.D81
 # c-programs
 tools:	$(TOOLS)
 
+telephony:	$(BINDIR)/telephony.prg
+
 %.o:	%.s	$(BINDIR)/megabanner.tiles	$(BINDIR)/telephony.tiles
 	$(CA65) $< -l $*.list
 
