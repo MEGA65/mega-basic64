@@ -18,31 +18,31 @@ r1=int((ty-80)/16)
 ' First row of buttons
 if r1>4 and r1<8 and c1>0 and c1<5 then u$="1"
 if r1>4 and r1<8 and c1>4 and c1<9 then u$="2"
-if r1>4 and r1<8 and c1>8 and c1<12  then u$="3"
-if r1>4 and r1<8 and c1>12 and c1<18  then u$=""   ' Switch active SIM
+if r1>4 and r1<8 and c1>8 and c1<13  then u$="3"
+if r1>4 and r1<8 and c1>12 and c1<18  then u$=""   ' switch active sim
 
 ' Second row of buttons
 if r1>8 and r1<12 and c1>0 and c1<5 then u$="4"
 if r1>8 and r1<12 and c1>4 and c1<9 then u$="5"
-if r1>8 and r1<12 and c1>8 and c1<12  then u$="6"
+if r1>8 and r1<12 and c1>8 and c1<13  then u$="6"
 if r1>8 and r1<12 and c1>12 and c1<18  then u$="-"
 
 ' Third row of buttons
 if r1>12 and r1<16 and c1>0 and c1<5 then u$="7"
 if r1>12 and r1<16 and c1>4 and c1<9 then u$="8"
-if r1>12 and r1<16 and c1>8 and c1<12  then u$="9"
+if r1>12 and r1<16 and c1>8 and c1<13  then u$="9"
 if r1>12 and r1<16 and c1>12 and c1<18  then u$="/"
 
 ' Fourth row of buttons
 if r1>16 and r1<20 and c1>0 and c1<5 then u$="#"
 if r1>16 and r1<20 and c1>4 and c1<9 then u$="0"
-if r1>16 and r1<20 and c1>8 and c1<12  then u$="*"
+if r1>16 and r1<20 and c1>8 and c1<13  then u$="*"
 if r1>16 and r1<20 and c1>12 and c1<18  then u$="="
 
 ' Fifth row of buttons
 if r1>20 and r1<25 and c1>0 and c1<5 then u$=chr$(13)
 if r1>20 and r1<25 and c1>4 and c1<9 then u$="+"
-if r1>20 and r1<25 and c1>8 and c1<12  then u$=chr$(20)
+if r1>20 and r1<25 and c1>8 and c1<13  then u$=chr$(20)
 if r1>20 and r1<25 and c1>12 and c1<18  then u$="@"
 
 ' Disable touch entry until released
