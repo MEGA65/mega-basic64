@@ -103,6 +103,7 @@ TELEPHONY_SRCS=	\
 		$(TELEPHONY)/telephony_phonebook.bas \
 		$(TELEPHONY)/phonebook_entries.bas \
 		$(TELEPHONY)/telephony_setup.bas \
+		$(TELEPHONY)/telephony_touch.bas \
 		$(TELEPHONY)/telephony_helpers.bas \
 		$(TELEPHONY)/telephony_message_senders.bas \
 		$(TELEPHONY)/telephony_screen_drawers.bas \

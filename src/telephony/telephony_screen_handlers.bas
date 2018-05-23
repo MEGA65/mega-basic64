@@ -11,6 +11,7 @@ return
 HANDLER_SCREEN_DIALLER rem
 'read input chars and update string (phone number)
 u$="": get u$
+gosub POLL_TOUCH_DIALER
 
 'we trigger a dial tiles update every 1000 loops since last
 tmr=tmr-1: if tmr=0 then up=1: su=1 'Request redrawing of dialpad (up), and mark screen as needing redrawing (su)
