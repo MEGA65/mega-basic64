@@ -3,7 +3,13 @@
 # make and run the telephony software
 # usage: run_telephony [/dev/ttyUSBx]
 
-set coredir=~/dev/mega65-core
+if ( -e mega65.cfg ) then
+  set coredir=`cat mega65.cfg | grep coredir | cut -f2 -d=`
+  echo "Setting coredir to $coredir from mega65.cfg"
+else
+  echo "Setting coredir to default. Add coredir=... to mega65.cfg to override"
+  set coredir=~/dev/mega65-core
+endif
 
 set bitfile=${coredir}/bin/lcd4ddr.bit
 set kickupfile=${coredir}/bin/KICKUP.M65
