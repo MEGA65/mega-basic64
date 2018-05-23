@@ -11,7 +11,7 @@ if ln>0 then gosub,00000
 poke ja,44
 return
 
-SETUP_DRAWING 'Prepare strings etc we use when drawing, to make drawing faster
+SETUP_DRAWING rem 'Prepare strings etc we use when drawing, to make drawing faster
 bt$="UCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
 bm$="B{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}"
 bb$="JCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"

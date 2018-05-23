@@ -8,7 +8,8 @@ pnumber$(2)="131444": ptype%(2)=129 : ptxt$(2)="sa police"
 pnumber$(3)="000": ptype%(3)=129 : ptxt$(3)="emergency"
 pnumber$(4)="": ptype%(4)=129 : ptxt$(4)=""
 pnumber$(5)="": ptype%(5)=129 : ptxt$(5)=""
-gosub PHONEBOOK_ENTRIES 'This subroutine is in another file, not uploaded to Git. It simply contains the same preceding lines, with actual data.
+gosub PHONEBOOK_ENTRIES
+'This subroutine is in another file, not uploaded to Git. It simply contains the same preceding lines, with actual data.
 return
 
 PHONEBOOK_TO_CONTACT_PANE rem

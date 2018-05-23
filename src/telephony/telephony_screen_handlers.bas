@@ -26,7 +26,8 @@ if (u$>="0" and u$<="9") or u$="+" or u$="*" or u$="#" or u$="a" or u$="b" or u$
 'these characters don't update the string (for now)
 if u$="-" or u$="/" or u$="=" or u$="@" or u$="<" or u$=">" then  u0$=u$: su=1
 'backspace: remove a character, but only if there's at least one
-if u$=chr$(20) and len(nb$)>=1 then nb$=left$(nb$,len(nb$)-1):  u0$=u$: su=1: up=1: ud=1 'delete char from dialed number. Update dial pad and number display
+if u$=chr$(20) and len(nb$)>=1 then nb$=left$(nb$,len(nb$)-1): u0$=u$: su=1: up=1: ud=1
+'delete char from dialed number. Update dial pad and number display
 'enter: call the dialled number
 if u$=chr$(13) then  u0$=u$: su=1: dnumber$=nb$: gosub CALL_DIAL: gosub SWITCH_TO_SCREEN_CALL
 return
@@ -123,7 +124,7 @@ gosub SEND_AT+CHUP
 gosub CALL_HANGUP_CLEANUP
 return
 
-CALL_HANGUP_CLEANUP 'clean up
+CALL_HANGUP_CLEANUP rem 'clean up
 dactive=0
 dsta=-1
 cid$=""
