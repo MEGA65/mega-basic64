@@ -116,10 +116,11 @@ s$="at+qdai=1,1,0,4,0"+chr$(13): gosub WRITE_STRING_TO_MODEM
 ' Disable audio muting
 s$="at+cmut=0"+chr$(13): gosub WRITE_STRING_TO_MODEM
 
-MLOOP rem
-get a$:if a$ <> "" then print#1, a$;
-get#1, a$:print a$;
-goto MLOOP
+'Simple terminal program for debugging
+'MLOOP rem
+'get a$:if a$ <> "" then print#1, a$;
+'get#1, a$:print a$;
+'goto MLOOP
 
 return
 
