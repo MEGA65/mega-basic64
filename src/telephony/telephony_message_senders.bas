@@ -22,6 +22,9 @@ SEND_ATA rem
 'answer call by sending ATA (answer)
 s$="ata"+chr$(13): gosub WRITE_STRING_TO_MODEM
 'we should wait for OK (or ERROR)
+' XXX If we send another command immediately, it can make the modem hang up.
+' so wait a little while.
+for i = 1 to 5000: next i
 return
 
 SEND_AT+CLCC rem
