@@ -116,13 +116,20 @@ s$="at+qdai=1,1,0,4,0"+chr$(13): gosub WRITE_STRING_TO_MODEM
 ' Disable audio muting
 s$="at+cmut=0"+chr$(13): gosub WRITE_STRING_TO_MODEM
 
-'Simple terminal program for debugging
-'MLOOP rem
-'get a$:if a$ <> "" then print#1, a$;
-'get#1, a$:print a$;
-'goto MLOOP
-
 return
+
+'=== Simple terminal program for debugging/talking to modem. ===
+'Press  HOME to exit.
+TERMINAL_PROGRAM rem
+canvas 0 clr: print "{clr}micro term. press home to exit."
+' Set modem to echo mode for convenience
+s$="ate1"+chr$(13): gosub WRITE_STRING_TO_MODEM
+'Simple terminal program for debugging
+MLOOP rem
+get a$:if a$="{home}" then s$="ate0"+chr$(13): gosub WRITE_STRING_TO_MODEM: print "{clr}";: return
+if a$ <> "" then print#1, a$;
+get#1, a$:print a$;
+goto MLOOP
 
 '=== GUI-related setup ===
 SETUP_GUI rem

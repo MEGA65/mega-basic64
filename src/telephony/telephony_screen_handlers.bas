@@ -16,6 +16,8 @@ gosub POLL_TOUCH_DIALER
 'we trigger a dial tiles update every 1000 loops since last
 tmr=tmr-1: if tmr=0 then up=1: su=1 'Request redrawing of dialpad (up), and mark screen as needing redrawing (su)
 if u$="" then return
+' Run terminal program for debugging modem communications
+if u$="t" then up=1: su=1: gosub TERMINAL_PROGRAM: gosub SWITCH_TO_SCREEN_DIALLER
 'navigation in contact pane
 if u$="{up}" then mdv=centry%: hl%=fn mod(hl%-2)+1: su=1: uc=1 'Redraw contact list
 if u$="{down}" then mdv=centry%: hl%=fn mod(hl%)+1: su=1: uc=1 'Redraw contact list
