@@ -234,7 +234,7 @@ DS_CALL_DSTA rem
 if dsta=0 goto DS_CALL_ACTIVE
 if dsta=2 or dsta=3 goto DS_CALL_DIALING
 if dsta=4 or dsta=5 goto DS_CALL_RINGING
-ddisplay$="unknown status": gosub DS_CALL_DDISPLAY
+ddisplay$="unknown status ("+str$(dsta)+")": gosub DS_CALL_DDISPLAY
 
 return
 '### end DRAW_SCREEN_CALL ###
