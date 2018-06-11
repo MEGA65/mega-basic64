@@ -110,9 +110,9 @@ s$="ate0"+chr$(13): gosub WRITE_STRING_TO_MODEM
 ' NOTE: Changing PCM master/slave mode requires the modem to be physically power cycled
 ' before it takes effect!
 ' Setup modem as PCM audio master, 2MHz, 8KHz 16-bit linear samples
-' s$="at+qdai=1,0,0,4,0"+chr$(13): gosub WRITE_STRING_TO_MODEM
+s$="at+qdai=1,0,0,4,0"+chr$(13): gosub WRITE_STRING_TO_MODEM
 ' Setup modem as PCM audio slave, 2MHz, 8KHz 16-bit linear samples
-s$="at+qdai=1,1,0,4,0"+chr$(13): gosub WRITE_STRING_TO_MODEM
+'s$="at+qdai=1,1,0,4,0"+chr$(13): gosub WRITE_STRING_TO_MODEM
 ' Disable audio muting
 s$="at+cmut=0"+chr$(13): gosub WRITE_STRING_TO_MODEM
 
