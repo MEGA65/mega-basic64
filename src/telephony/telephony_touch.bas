@@ -1,10 +1,5 @@
-' Scan the touch screen for the dialer
-POLL_TOUCH_DIALER rem
-' We trigger touches on release, so we need to watch
-' for a release following a touch
-te=(te*2+(peek(54960) and 1)) and 3
-if te<>2 then return
-
+' Convert raw touch position to row,column in c1,r1
+TOUCH_TO_ROW_COLUMN rem
 ' Get x,y coordinate of touch event
 tx=peek(54969) or ((peek(54971) and 3)*256)
 ty=peek(54970) or ((peek(54971) and 240)*16)
@@ -13,7 +8,43 @@ c1=int((tx-54)/16)
 r1=int((ty-80)/16)
 
 ' Debug display of touch info
-' print "{home}";c1;",";r1;"   "
+'print "{home}";c1;",";r1;"   "
+return
+
+' Check for a touch-release event
+TOUCH_CHECK_FOR_RELEASE rem
+' We trigger touches on release, so we need to watch
+' for a release following a touch
+te=(te*2+(peek(54960) and 1)) and 3
+return
+
+' Scan the touch screen for call dialing, answering and in-call
+POLL_TOUCH_CALL_ACTIVE rem
+POLL_TOUCH_CALL_INCOMING rem
+POLL_TOUCH_CALL_DIALING rem
+gosub TOUCH_CHECK_FOR_RELEASE
+if te<>2 then return
+gosub TOUCH_TO_ROW_COLUMN
+' So far the touch scans for these modes are all common, so
+' we save memory by having a single handler, until such time
+' as we need to split it up.
+if r1>6 and r1<10 and c1>-2 and c1<6 then u$="a"
+if r1>10 and r1<14 and c1>-2 and c1<6 then u$="h"
+return
+
+' Scan the touch screen when displaying a contact
+POLL_TOUCH_CONTACT rem
+gosub TOUCH_CHECK_FOR_RELEASE
+if te<>2 then return
+gosub TOUCH_TO_ROW_COLUMN
+return
+
+' Scan the touch screen for the dialer
+POLL_TOUCH_DIALER rem
+gosub TOUCH_CHECK_FOR_RELEASE
+if te<>2 then return
+
+gosub TOUCH_TO_ROW_COLUMN
 
 ' First row of buttons
 if r1>4 and r1<8 and c1>0 and c1<5 then u$="1"
