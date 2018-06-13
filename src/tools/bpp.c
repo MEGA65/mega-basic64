@@ -242,6 +242,7 @@ int main(int argc,char **argv)
 			int outlen=0;
 			char lineout[1024];
 			int quote_mode=0;
+			int comment_mode=0;
 			char symbol[1024];
 			int symbol_len=0;
 			
@@ -267,7 +268,7 @@ int main(int argc,char **argv)
 					snprintf(lineout,1024,"%d ",line_number);
 					outlen=strlen(lineout);
 					if (line[j]!='\t') lineout[outlen++]=line[j];
-				} else if (line[j]=='\"') {
+				} else if (line[j]=='\"' || line[j]=='\'') {
 					if (symbol_len) {
 						// Replace symbol with line number
 						if (resolve_symbol(symbol,lineout,&outlen)) {
@@ -277,13 +278,15 @@ int main(int argc,char **argv)
 						symbol_len=0;
 					}
 					lineout[outlen++]=line[j];
-					quote_mode^=1;
+					if(line[j]=='\"') quote_mode^=1;
+					if(line[j]=='\'') comment_mode^=1;
 				} else if ((
 						(!j)
 						|| (line[j-1]==' ')
 						|| symbol_len
 					)
 					&& (!quote_mode)
+					&& (!comment_mode)
 					&& (
 						(line[j]>='A' && line[j]<='Z')
 						|| (symbol_len && (line[j]>='0' && line[j]<='9'))
