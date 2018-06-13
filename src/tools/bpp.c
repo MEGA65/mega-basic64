@@ -278,8 +278,8 @@ int main(int argc,char **argv)
 						symbol_len=0;
 					}
 					lineout[outlen++]=line[j];
-					if(line[j]=='\"') quote_mode^=1;
-					if(line[j]=='\'') comment_mode^=1;
+					if(line[j]=='\"') quote_mode^=1;	// toggle quote mode
+					if(line[j]=='\'') comment_mode=1;	// still a comment after a second '
 				} else if ((
 						(!j)
 						|| (line[j-1]==' ')
