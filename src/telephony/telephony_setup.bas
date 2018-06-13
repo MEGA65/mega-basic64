@@ -5,8 +5,14 @@ return
 
 '=== program flags and variables setup ===
 SETUP_PROGRAM rem
-'flag db (debug): print debugging information
-db=0
+db=db 'flag db (debug): print debugging information
+'  0: no logging
+'  1: critical
+'  2: error
+'  3: warning
+'  4: info
+'  5: debug
+
 'current screen to be displayed and user input to be taken
 sc=1
 'screen refresh rate: number of loops between 2 screen updates
@@ -91,31 +97,27 @@ return
 
 '=== setup for modem parser ===
 SETUP_PARSER rem
-'fields from colon-comma formatted messages
-dim mf$(20)
-'lines from modem that don't conform to any normal message format
-dim ol$(20)
-'jump table for message handling
-dim jt%(100)
+dim mf$(20) 'fields from colon-comma formatted messages
+dim ol$(20) 'lines from modem that don't conform to any normal message format
+dim jt%(100) 'jump table for message handling
 for i=0 to 99: jt%(i)=10000+100*i: next i
-'counter parser: number of times we poll a char from modem in a loop
-cp=50
+cp=50 'counter parser: number of times we poll a char from modem in a loop
 open 1,2,1
 return
 
 '=== modem setup ===
 SETUP_MODEM rem
 'no echo from modem
-s$="ate0"+chr$(13): gosub WRITE_STRING_TO_MODEM
+jt%(99)= SETUP_MODEM_STEP2: s$="ate0"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
 ' NOTE: Changing PCM master/slave mode requires the modem to be physically power cycled
 ' before it takes effect!
 ' Setup modem as PCM audio master, 2MHz, 8KHz 16-bit linear samples
-s$="at+qdai=1,0,0,4,0"+chr$(13): gosub WRITE_STRING_TO_MODEM
+SETUP_MODEM_STEP2 jt%(99)= SETUP_MODEM_STEP3: s$="at+qdai=1,0,0,4,0"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
 ' Setup modem as PCM audio slave, 2MHz, 8KHz 16-bit linear samples
 's$="at+qdai=1,1,0,4,0"+chr$(13): gosub WRITE_STRING_TO_MODEM
 ' Disable audio muting
-s$="at+cmut=0"+chr$(13): gosub WRITE_STRING_TO_MODEM
-
+SETUP_MODEM_STEP3 jt%(99)= SETUP_MODEM_STEP4: s$="at+cmut=0"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
+SETUP_MODEM_STEP4 jt%(99)=0
 return
 
 '=== Simple terminal program for debugging/talking to modem. ===
@@ -155,10 +157,13 @@ return
 
 '=== phonebook setup ===
 SETUP_PHONEBOOK rem
+pused%=-1 'the number of contacts in the phonebook memory (i.e. SIM)
+ptotal%=0 'the maximum number of contacts that can be stored in the phonebook memory (i.e. SIM)
 'maximum number of contacts in the phonebook
-plngth%=200
+plngth%=100
 'index array
 dim pindex%(plngth%)
+pindex%=0 'the last phonebook index that was filled (i.e. the higher used phonebook index)'
 'phone number array
 dim pnumber$(plngth%)
 'phone number type array [129, 145, 161]

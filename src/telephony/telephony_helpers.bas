@@ -1,5 +1,5 @@
 GOTO_LN rem
-'=== goto X subroutine ===
+'=== gosub X subroutine ===
 'goes to line ln, if ln>0
 ln$=str$(ln): if ln<=0 then return
 'first rub out with spaces in case line number is short
@@ -20,10 +20,34 @@ hd$="{home}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{do
 ss$="                                         "
 return
 
+
 WRITE_STRING_TO_MODEM rem
 '=== send to modem ===
 'send string in s$ to modem
+if db>=4 then print "Sent to modem: "+left$(s$, len(s$)-1)
 for i=1 to len(s$): c$=right$(left$(s$,i),1): print#1,c$;: next i
+return
+
+WAIT_MODEM_READY rem
+if db>=4 then print "wait modem ready"
+WMR if db>=4 then print "  jt%(99)=",jt%(99)
+if jt%(99)<>0 then gosub POLL_MODEM: goto WMR
+if db>=4 then print "modem ready"
+return
+
+WRITE_STRING_TO_MODEM_READY rem
+gosub WAIT_MODEM_READY
+gosub WRITE_STRING_TO_MODEM
+return
+
+MODEM_READY jt%(99)=0: return
+
+
+REMOVE_QUOTES_STRING rem
+'=== remove quotes from string ===
+' remove the leading and trailing quotes (") from string s$
+'  (if it has quotes) 
+if left$(s$,1)=chr$(34) and right$(s$,1)=chr$(34) then s$=right$(left$(s$,len(s$)-1),len(s$)-2)
 return
 
 WAIT_FOR_KEY_PRESS rem
@@ -37,7 +61,7 @@ MOVE_CURSOR_XX_YY rem
 print "{home}";
 print left$(hd$,yy+1);
 print mid$(bm$,2,xx);
-#MCXY1 if xx>1 then print "{rght}";: xx = xx - 1: goto MCXY1
+'MCXY1 if xx>1 then print "{rght}";: xx = xx - 1: goto MCXY1
 return
 
 DRAW_BOX rem

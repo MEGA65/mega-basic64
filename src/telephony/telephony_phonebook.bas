@@ -1,19 +1,34 @@
 '=== load phonebook into memory (arrays)===
 LOAD_PHONEBOOK rem
-'This routine should load the phonebook entries from the storage (i.e. SD card) to the memory.
+'This routine should load the phonebook entries from the storage (i.e. Sim or SD card) to the memory.
+
+'We first need to get the number of contacts in storage
+s$="at+cpbs?"+chr$(13): gosub WRITE_STRING_TO_MODEM_READY: jt%(99)= MODEM_READY
+gosub WAIT_MODEM_READY
+if db>=4 then print "+CPBS received, pused%=",pused%
+'At this point, we know how many contacts there are in the SIM phonebook
+'We try and retrieve those contacts
+s$="at+cpbr=1,"+right$(str$(pused%),len(str$(pused%))-1)+chr$(13): gosub WRITE_STRING_TO_MODEM_READY: jt%(99)= MODEM_READY
+gosub WAIT_MODEM_READY
+if db>=4 then print "+CPBR received"
+'The memory phonebook should be filled with entries from the SIM phonebook
+print "+CPBR: phonebook entries received"
+if db>=4 and pindex%>0 then for i=1 to pindex%: print pnumber$(i)+" "+ptxt$(i)+" "+str$(psim%(i)): next i
+gosub WAIT_FOR_KEY_PRESS
+
 'For now, we load predefined entries from the program itself.
-for i=1 to 5: pindex%(i)=1: psim%(i)=0: next i
-pnumber$(1)="+61882013911": ptype%(1)=129 : ptxt$(1)="flinders uni"
-pnumber$(2)="131444": ptype%(2)=129 : ptxt$(2)="sa police"
-pnumber$(3)="000": ptype%(3)=129 : ptxt$(3)="emergency"
-pnumber$(4)="": ptype%(4)=129 : ptxt$(4)=""
-pnumber$(5)="": ptype%(5)=129 : ptxt$(5)=""
-gosub PHONEBOOK_ENTRIES
+'for i=1 to 5: pindex%(i)=1: psim%(i)=0: next i
+'pnumber$(1)="+61882013911": ptype%(1)=129 : ptxt$(1)="flinders uni"
+'pnumber$(2)="131444": ptype%(2)=129 : ptxt$(2)="sa police"
+'pnumber$(3)="000": ptype%(3)=129 : ptxt$(3)="emergency"
+'pnumber$(4)="": ptype%(4)=129 : ptxt$(4)=""
+'pnumber$(5)="": ptype%(5)=129 : ptxt$(5)=""
+'gosub PHONEBOOK_ENTRIES
 'This subroutine is in another file, not uploaded to Git. It simply contains the same preceding lines, with actual data.
 return
 
 PHONEBOOK_TO_CONTACT_PANE rem
-# Schedule redraw after
+'Schedule redraw after
 uc=1: su=1
 'WARNING: probably bugs if O entries in phonebook
 centry%=0: j=1

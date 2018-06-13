@@ -1,5 +1,6 @@
 '=== read from modem ===
 POLL_MODEM rem
+if db>=4 then print "polling modem"
 'reinitialize parser counter
 cp=50
 'read one char from cellular modem and parse received fields
@@ -26,21 +27,28 @@ for i=0 to(fc-1)
 'trim one space at the beginning of each field, if there is a whitespace
 if left$(mf$(i),1)=" " then mf$(i)=right$(mf$(i),len(mf$(i))-1)
 next i
-if db=1 then print "modem line: ";ml$
-if db=1 then print "modem field count: ";fc
-if db=1 then print "modem fields: ";
-if db=1 then for i=0 to(fc-1): print"[";mf$(i);"]",: next i
+if db>=4 then print "Received modem line: ";ml$
+if db>=5 then print "modem field count: ";fc
+if db>=5 then print "modem fields: ";
+if db>=5 then for i=0 to(fc-1): print"[";mf$(i);"]",: next i
 f1$="": ml$="": fc=0: mf$=""
 mn=0
 gosub GET_MESSAGE_TYPE: gosub JUMP_TO_HANDLER
 'a non-empty modem line has been handled
 ml=1
+'Check if we got an acceptable result code:
+'  ok, error, +cme error, +cms error'
+'  If so, then we will try and jump to a common callback
+rc=0
+if mn=40 or mn=44 or mn=49 or mn=50 then rc=1
+'Check if we have a common callback registered
+if rc=1 then mn=99: gosub JUMP_TO_HANDLER
 return
 
 
 '=== Jump to handler ===
 JUMP_TO_HANDLER rem
-if db=1 then print "message is type";mn
+if db>=5 then print "message is type";mn
 'Check if jumptable is set for this message type, if so, call handler
 ln=jt%(mn): if ln>0 then gosub GOTO_LN
 return
@@ -81,9 +89,13 @@ if mf$(0)="error" then mn=44
 if mf$(0)="no dialtone" then mn=46
 if mf$(0)="busy" then mn=47
 if mf$(0)="no answer" then mn=48
+if mf$(0)="+cme error" then mn=49
+if mf$(0)="+cms error" then mn=50
 '--- AT commands responses ---
 if mf$(0)="+clcc" then mn=51
 if mf$(0)="+csq" then mn=52
 if mf$(0)="+qnwinfo" then mn=53
 if mf$(0)="+qspn" then mn=54
+if mf$(0)="+cpbs" then mn=55
+if mf$(0)="+cpbr" then mn=56
 return

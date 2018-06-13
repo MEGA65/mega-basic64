@@ -166,8 +166,7 @@ MESSAGE_HANDLER_39 rem
 
 'Message handler: OK
 MESSAGE_HANDLER_OK rem
-'ATD succeeded, dialling...
-if dia=1 then gosub SEND_AT+CLCC
+if dia=1 then gosub SEND_AT+CLCC 'ATD succeeded, dialling...
 14099 return
 
 'Message handler: message type 41
@@ -200,8 +199,10 @@ MH_NC_END rem
 14399 return
 
 
-'Message handler: message type 44
-MESSAGE_HANDLER_44 rem
+MESSAGE_HANDLER_ERROR rem
+'Message handler: ERROR
+'This message is received if an AT command failed'
+'merror=1
 14499 return
 
 'Message handler: message type 45
@@ -222,18 +223,24 @@ if dia=1 then dr$="target is busy": su=1
 MESSAGE_HANDLER_NO_ANSWER rem
 14899 return
 
-'Message handler: message type 49
-MESSAGE_HANDLER_49 rem
+
+'Message handler: +CME ERROR
+MESSAGE_HANDLER_+CME_ERROR rem
+'This message is received after sending an AT command, if there is any error related to ME functionality'
+'merror=1
+'merror$=mf$(1)
 14999 return
 
-'Message handler: message type 50
-MESSAGE_HANDLER_50 rem
+'Message handler: +CMS ERROR
+MESSAGE_HANDLER_+CMS_ERROR rem
+'This message is received after sending an AT command, if there is any error related to MS functionality'
+'merror=1
+'merror$=mf$(1)
 15099 return
 
 
-
-MESSAGE_HANDLER_+CLCC rem
 'Message handler: +clcc (list current calls)
+MESSAGE_HANDLER_+CLCC rem
 'update state and caller id only if voice call, and call active
 if mf$(4)="0" and dactive=1 then goto MH_CLCC_VOICE
 return
@@ -269,9 +276,8 @@ gosub SEND_AT+CLCC
 15199 return
 
 
-
-MESSAGE_HANDLER_+CSQ rem
 'Message handler: +csq (signal quality report)
+MESSAGE_HANDLER_+CSQ rem
 su=1
 rssi=val(mf$(1)): ber=val(mf$(2))
 if rssi=99 or rssi=199 then sl%=0
@@ -281,8 +287,9 @@ if ber>=0 and ber<=7 then ber$=str$(ber)
 if ber=99 then ber$="?"
 15299 return
 
-MESSAGE_HANDLER_+QNWINFO rem
+
 'Message handler: +qnwinfo (network information report)
+MESSAGE_HANDLER_+QNWINFO rem
 su=1
 'get nwact, without quotes
 nact$=right$(left$(mf$(1),len(mf$(1))-1),len(mf$(1))-2)
@@ -306,20 +313,37 @@ if nact$="tdd lte" then nt$="lte"
 if nact$="fdd lte" then nt$="lte"
 15399 return
 
-MESSAGE_HANDLER_+QSPN rem
+
 'Message handler: +QSPN (registered network name report)
+MESSAGE_HANDLER_+QSPN rem
 su=1
 'get SNN, without quotes
 nname$=right$(left$(mf$(2),len(mf$(2))-1),len(mf$(2))-2)
 'mf$(1) is FNN (Full Network Name), mf$(2) is SNN (Short Network Name)
 15499 return
 
-'Message handler: message type 55
-MESSAGE_HANDLER_55 rem
+
+'Message handler: +CPBS (phonebook memory storage)
+MESSAGE_HANDLER_+CPBS rem
+'This can either be:
+' - a list of supported storages in response to AT+CPBS=?: +CPBS: ("sm","dc","mc","me","rc","en")
+' - a report on the current storage in response to AT+CPBS?: +CPBS: <storage>,<used>,<total>
+' For now, we only handle the second case
+pused%=val(mf$(2))
+ptotal%=val(mf$(3))
 15599 return
 
-'Message handler: message type 56
-MESSAGE_HANDLER_56 rem
+'Message handler: +CPBR (read phonebook entries)
+MESSAGE_HANDLER_+CPBR rem
+'Phonebook entry: +CPBR: <index>,<number>,<type>,<text>
+' Example: +CPBR: 1,"000",129,"emergency"
+pindex%=pindex%+1
+i=pindex%
+pindex%(i)=1 'entry i is now used
+psim%(i)=val(mf$(1)) 'SIM index of the entry
+s$=mf$(2): gosub REMOVE_QUOTES_STRING: pnumber$(i)=s$ 'phone number
+ptype%(i)=val(mf$(3)) 'type of phone number
+s$=mf$(4): gosub REMOVE_QUOTES_STRING: ptxt$(i)=s$ 'contact name
 15699 return
 
 'Message handler: message type 57

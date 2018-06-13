@@ -9,12 +9,16 @@ goto INIT
 
 '### initialization ###
 INIT rem
+db=4 'turn on debugging information
 'one-time only lookup patch address
 gosub LOOKUP_GOTO_LN_PATCH_ADDRESS
 'program state setup
 gosub SETUP_PROGRAM
 'modem parser and modem setup
 gosub SETUP_PARSER: gosub SETUP_MODEM
+if db>=4 then print "waiting for modem setup"
+gosub WAIT_MODEM_READY
+if db>=4 then print "modem setup is complete"
 'GUI-related setup
 gosub SETUP_GUI
 gosub SETUP_DRAWING
@@ -22,9 +26,10 @@ gosub SETUP_DRAWING
 gosub SETUP_PHONEBOOK
 'define functions (e.g. modulo)
 gosub DEFINE_FUNCTIONS
+db=0 'turn off debugging information
 '--- switch to correct screen ---
 'if db=1, sc=0 (debug screen)
-if db=1 then gosub SWITCH_TO_SCREEN_DEBUG: goto INIT_END
+if db>0 then gosub SWITCH_TO_SCREEN_DEBUG: goto INIT_END
 'by defaults, start the program on DIALLER screen
 gosub SWITCH_TO_SCREEN_DIALLER
 
@@ -81,6 +86,8 @@ mdv=500: if fn mod(cnt+500)=0 then s$="at+qspn"+chr$(13): gosub WRITE_STRING_TO_
 'fix charset bug
 if (peek(53272)and 7)=0 then poke 53272,20
 ttmr(4)=ttmr(4)+(time-t1)
+'update the contact pane
+mdv=1000: if fn mod(cnt+50)=0 then gosub PHONEBOOK_TO_CONTACT_PANE: gosub TRIM_CONTACT_PANE
 
 '--- timing related operation ---
 ttmr(0)=ttmr(0)+(time-tl)
