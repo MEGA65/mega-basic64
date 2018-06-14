@@ -118,7 +118,8 @@ BINARIES=	\
 		$(BINDIR)/megabanner.tiles \
 		$(BINDIR)/vehicle_console.tiles \
 		$(BINDIR)/fonttest.tiles \
-		$(BINDIR)/telephony.tiles
+		$(BINDIR)/telephony.tiles \
+		$(BINDIR)/asciifont.bin
 
 MEGABASICOBJS=	$(SRCDIR)/mega-basic64.o
 

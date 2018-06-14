@@ -16,7 +16,8 @@ set coredir=~/dev/mega65-core
 set bitfile=${coredir}/bin/lcd4ddr.bit
 set kickupfile=${coredir}/bin/KICKUP.M65
 set romfile=${coredir}/bin/MEGA65.ROM
-set charromfile=${coredir}/bin/CHARROM.ROM
+#set charromfile=${coredir}/bin/CHARROM.ROM
+set charromfile=bin/asciifont.bin
 
 set megabasic=bin/megabasic64.prg
 set prg=bin/test.prg
