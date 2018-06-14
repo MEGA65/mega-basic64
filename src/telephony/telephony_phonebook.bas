@@ -50,7 +50,7 @@ centry%=j-1: return
 TRIM_CONTACT_PANE rem
 'trim contact pane entries to clength chars, adding ... if necessary
 for i=1 to cmaxindex%
-if len(cpane$(i))>clngth% then cpane$(i)=left$(cpane$(i),clngth%-3)+"..."
+if len(cpane$(i))>clngth% then cpane$(i)=left$(cpane$(i),clngth%-1)+"{elipsis}"
 next i
 return
 

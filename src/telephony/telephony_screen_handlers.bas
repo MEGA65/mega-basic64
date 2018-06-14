@@ -19,16 +19,17 @@ tmr=tmr-1: if tmr=0 then up=1: su=1 'Request redrawing of dialpad (up), and mark
 if u$="" then return
 ' Run terminal program for debugging modem communications
 if u$="t" or u$="T" then up=1: su=1: gosub TERMINAL_PROGRAM: gosub SWITCH_TO_SCREEN_DIALLER
+' Open the new contact screen with dialled number pre-populated
+if u$="@" then ctrigger=2: cfields$(2)=nb$: gosub SWITCH_TO_SCREEN_CONTACT_EDIT
 'navigation in contact pane
 if u$="{up}" then mdv=centry%: hl%=fn mod(hl%-2)+1: su=1: uc=1 'Redraw contact list
 if u$="{down}" then mdv=centry%: hl%=fn mod(hl%)+1: su=1: uc=1 'Redraw contact list
-if u$="{rght}" and hl%<>0 then cselected%=cindex%(hl%): su=1: gosub SWITCH_TO_SCREEN_CONTACT
-'dialler
+if u$="{rght}" and hl%<>0 then cselected%=cindex%(hl%): su=1: gosub SWITCH_TO_SCREEN_CONTACT 'dialler
 'limit length is 18, go to loop start if over it or not enter or backspace
 if u$<>chr$(20) and u$<>chr$(13) and len(nb$)>=19 then return
 if (u$>="0" and u$<="9") or u$="+" or u$="*" or u$="#" or u$="a" or u$="b" or u$="c" or u$="d" or u$="A" or u$="B" or u$="C" or u$="D" then nb$=nb$+u$: u0$=u$: su=1: up=1: ud=1 'request dialpad and number update
 'these characters don't update the string (for now)
-if u$="-" or u$="/" or u$="=" or u$="@" or u$="<" or u$=">" then  u0$=u$: su=1
+if u$="-" or u$="/" or u$="=" or u$="<" or u$=">" then  u0$=u$: su=1
 'backspace: remove a character, but only if there's at least one
 if u$=chr$(20) and len(nb$)>=1 then nb$=left$(nb$,len(nb$)-1): u0$=u$: su=1: up=1: ud=1
 'delete char from dialed number. Update dial pad and number display
@@ -57,8 +58,8 @@ HANDLER_SCREEN_CONTACT_EDIT rem
 u$="": get u$
 gosub POLL_TOUCH_CONTACT_EDIT
 if u$="" then return
-if u$=chr$(19) then u0$=u$: gosub SWITCH_TO_LAST_SCREEN: return
-if u$=chr$(13) then u0$=u$: gosub HS_CE_SAVE_CONTACT: gosub SWITCH_TO_LAST_SCREEN: return
+if u$=chr$(19) then u0$=u$: gosub HS_CE_CLEANUP: gosub SWITCH_TO_LAST_SCREEN: return
+if u$=chr$(13) then u0$=u$: gosub HS_CE_SAVE_CONTACT: gosub HS_CE_CLEANUP: gosub SWITCH_TO_LAST_SCREEN: return
 if u$="{up}" then mdv=2: hl%=fn mod(hl%-2)+1: gosub HS_CE_ACTIVE_STRING: su=1 'Redraw field list
 if u$="{down}" then mdv=2: hl%=fn mod(hl%)+1: gosub HS_CE_ACTIVE_STRING: su=1 'Redraw field list
 if u$="{left}" then mdv=len(cfields$(hl%))+1: ul%=fn mod(ul%-2)+1
@@ -86,11 +87,14 @@ return
 HS_CE_NEW_CONTACT rem
 ' create a new contact at index pindex%
 pindex%=pindex%+1
+pindex%(pindex%)=1
 pnumber$(pindex%)=cfields$(2)
 ptxt$(pindex%)=cfields$(1)
 ptype%(pindex%)=129 'unknow number type; TODO: add the type field or auto-determine type
 cselected%=pindex%
 return
+
+HS_CE_CLEANUP ctrigger=0: return 'clean-up before leaving screen
 
 
 '### CALL screen handler ###
