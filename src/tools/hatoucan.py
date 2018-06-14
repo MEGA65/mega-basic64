@@ -12,6 +12,8 @@ import sys
 #   http://www.c64-wiki.com/index.php/BASIC_token
 
 global_line=""    # global variable used to keep track of current line
+reverse_in_quotes_case=True    # if True, chars in quotes are kept in ASCII
+                               # if False, chars in quotes are converted to PETSCII
 
 TOKENS = (
     ('restore', 140),
@@ -171,7 +173,7 @@ def ascii_to_petscii(o):  # int -> int
     raise NotImplementedError("Cannot PETSCII: %s" % hex(o))
 
 
-def scan(s, tokenize=True):
+def scan(s, tokenize=True, in_quotes=False):
     # so inefficient.  I don't care.
     if tokenize:
         for (token, value) in TOKENS:
@@ -182,7 +184,11 @@ def scan(s, tokenize=True):
            if s.startswith(token):
                return (value, s[len(token):])                
         raise NotImplementedError(s)
-    return (ascii_to_petscii(ord(s[0])), s[1:])
+    global reverse_in_quotes_case
+    if reverse_in_quotes_case and in_quotes:
+        return (ord(s[0]), s[1:])
+    else:
+        return (ascii_to_petscii(ord(s[0])), s[1:])
 
 
 def scan_line_number(s):
@@ -204,7 +210,7 @@ def tokenize(s):
     in_quotes = False
     in_remark = False
     while s:
-        (byte, s) = scan(s, tokenize=not (in_quotes or in_remark))
+        (byte, s) = scan(s, tokenize=not (in_quotes or in_remark), in_quotes=in_quotes)
         bytes.append(byte)
         if byte == ord('"'):
             in_quotes = not in_quotes

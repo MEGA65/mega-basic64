@@ -295,22 +295,22 @@ su=1
 nact$=right$(left$(mf$(1),len(mf$(1))-1),len(mf$(1))-2)
 'initialize to unknown, in case nwact is not in the following list (should not happen)
 nt$="?"
-if nact$="none" then nt$="x" '3g? abbreviation to check
-if nact$="cdma1x" then nt$="3g" '3g? abbreviation to check
-if nact$="cdma1x and hdr" then nt$="3g" '3g? abbreviation to check
-if nact$="cdma1x and ehrpd" then nt$="3g" '2g? abbreviation to check
-if nact$="hdr" then nt$="2g" '3g? abbreviation to check
-if nact$="hdr-ehrpd" then nt$="3g"
-if nact$="gsm" then nt$="2g"
-if nact$="gprs" then nt$="g"
-if nact$="edge" then nt$="e"
-if nact$="wcdma" then nt$="3g"
-if nact$="hsdpa" then nt$="h"
-if nact$="hsupa" then nt$="h"
-if nact$="hspa+" then nt$="h+"
-if nact$="tdscdma" then nt$="3g"
-if nact$="tdd lte" then nt$="lte"
-if nact$="fdd lte" then nt$="lte"
+if nact$="NONE" then nt$="x" '3g? abbreviation to check
+if nact$="CDMA1X" then nt$="3G" '3g? abbreviation to check
+if nact$="CDMA1X AND HDR" then nt$="3G" '3g? abbreviation to check
+if nact$="CDMA1X AND EHRPD" then nt$="3G" '2g? abbreviation to check
+if nact$="HDR" then nt$="2G" '3g? abbreviation to check
+if nact$="HDR-EHRPD" then nt$="3G"
+if nact$="GSM" then nt$="2G"
+if nact$="GPRS" then nt$="G"
+if nact$="EDGE" then nt$="E"
+if nact$="WCDMA" then nt$="3G"
+if nact$="HSDPA" then nt$="H"
+if nact$="HSUPA" then nt$="H"
+if nact$="HSPA+" then nt$="H+"
+if nact$="TDSCDMA" then nt$="3G"
+if nact$="TDD LTE" then nt$="LTE"
+if nact$="FDD LTE" then nt$="LTE"
 15399 return
 
 
