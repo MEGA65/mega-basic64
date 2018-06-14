@@ -214,12 +214,37 @@ void process_file(int mode, int do_reverse, char *outputfilename)
 
   fprintf(stderr,"Writing font (%d bytes read)...\n",bytes);
 
+  // Reorder the font layout so that PRINTing ASCII characters in
+  // C64 mode causes the correct thing to show on the screen
+  unsigned char fixed[1024];
+
+  for(int i=0;i<1024;i++) fixed[i]=first_half[i];
+
+  // Copy upper case chars from 0x40+ to 0x00+
+  int o;
+  o=0x00;
+  for(int c=0x40;c<0x5b;c++) {
+    for(int i=0;i<8;i++) {
+      fixed[o*8+i]=first_half[c*8+i];
+    }
+    o++;
+  }
+
+  // Lower case to upper case position
+  o=0x40;
+  for(int c=0x60;c<0x7b;c++) {
+    for(int i=0;i<8;i++) {
+      fixed[o*8+i]=first_half[c*8+i];
+    }
+    o++;
+  }
+
   // Write out the 128 characters normal and reverse, twice each
   // to make a complete 256 char ROM.
-  for(int i=0;i<1024;i++) fputc(first_half[i],outfile);
-  for(int i=0;i<1024;i++) fputc(first_half[i]^0xff,outfile);
-  for(int i=0;i<1024;i++) fputc(first_half[i],outfile);
-  for(int i=0;i<1024;i++) fputc(first_half[i]^0xff,outfile);
+  for(int i=0;i<1024;i++) fputc(fixed[i],outfile);
+  for(int i=0;i<1024;i++) fputc(fixed[i]^0xff,outfile);
+  for(int i=0;i<1024;i++) fputc(fixed[i],outfile);
+  for(int i=0;i<1024;i++) fputc(fixed[i]^0xff,outfile);
 }
 
 /* ============================================================= */
