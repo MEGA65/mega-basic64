@@ -161,8 +161,15 @@ ctrigger=0 'the trigger for opening the contact_edit screen
 '  0: no contact_edit
 '  1: edit existing contact
 '  2: new contact
-cnumber$="" 'number of the contact being created/edited
-ctxt$="" 'name of the contact being created/edited
+'cnumber$="" 'number of the contact being created/edited
+'ctxt$="" 'name of the contact being created/edited
+cfields%=2 'number of editable fields
+dim cfields$(cfields%) 'array containing the fields of the contact being created/edited
+'  1: name
+'  2: number
+dim clabels$(cfields%) 'array containing the labels of the previous fields
+clabels$(1)="name"
+clabels$(2)="number"
 gosub LOAD_PHONEBOOK
 gosub PHONEBOOK_TO_CONTACT_PANE
 gosub TRIM_CONTACT_PANE

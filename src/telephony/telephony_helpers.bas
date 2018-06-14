@@ -113,6 +113,20 @@ if len(s$)<=l then return
 if len(s$)>l then s$=left$(s$,len(s$)-3)+"...": return
 
 
+SPACES rem
+'SPACES
+'   Returns a string with s spaces'
+s$=""
+if s>0 then for ii=1 to s: s$=s$+" ": next ii
+return
+
+POKE_SPACES rem
+'POKE_SPACES
+'   Pokes s space chars at row x, column y
+a=1024+40*y+x
+if s>0 then for ii=0 to s-1: poke a+ii,32: next ii
+return
+
 BATTERY_UPDATE rem
 '=== update the battery level ===
 if btp>=0 and btp <=5 then bl%=0
@@ -180,6 +194,7 @@ SWITCH_TO_SCREEN_CONTACT_EDIT rem
 ls=sc: sc=4
 gosub SWITCH_SCREEN_CLEANUP
 su=1
+hl%=0: ul%=0
 if ctrigger=1 and cselected%<=0 then stop 'we should have cselected% pointing to the contact to edit
 if ctrigger=1 and cselected%>0 then gosub PREP_EDIT_CONTACT: return
 if ctrigger=2 then cselected%=0
@@ -187,8 +202,8 @@ if ctrigger>2 then stop 'that shouldn't happen
 return
 
 PREP_EDIT_CONTACT rem
-cnumber$=pnumber$(cselected%)
-ctxt$=ptxt$(cselected%)
+cfields$(1)=ptxt$(cselected%)
+cfields$(2)=pnumber$(cselected%)
 return
 
 SWITCH_SCREEN_CLEANUP rem

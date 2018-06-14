@@ -57,12 +57,17 @@ HANDLER_SCREEN_CONTACT_EDIT rem
 u$="": get u$
 gosub POLL_TOUCH_CONTACT_EDIT
 if u$="" then return
-if u$=chr$(20) then u0$=u$: gosub SWITCH_TO_LAST_SCREEN
-'if u$=chr$(13) then u0$=u$: dnumber$=pnumber$(cselected%): gosub CALL_DIAL: gosub SWITCH_TO_SCREEN_CALL
-if u$="{up}" then mdv=2: hl%=fn mod(hl%-2)+1: su=1 'Redraw field list
-if u$="{down}" then mdv=2: hl%=fn mod(hl%)+1: su=1 'Redraw field list
+if u$=chr$(19) then u0$=u$: gosub SWITCH_TO_LAST_SCREEN
+if u$=chr$(13) then u0$=u$: gosub SWITCH_TO_LAST_SCREEN
+if u$="{up}" then mdv=2: hl%=fn mod(hl%-2)+1: gosub HS_CONTACT_EDIT_ACTIVE_STRING: su=1 'Redraw field list
+if u$="{down}" then mdv=2: hl%=fn mod(hl%)+1: gosub HS_CONTACT_EDIT_ACTIVE_STRING: su=1 'Redraw field list
+if u$="{left}" then mdv=len(cfields$(hl%))+1: ul%=fn mod(ul%-2)+1
+if u$="{rght}" then mdv=len(cfields$(hl%))+1: ul%=fn mod(ul%)+1
+'Modify the selected field
+if u$=chr$(20) and ul%>1 then s$=cfields$(hl%): s$=left$(s$, ul%-2)+right$(s$, len(s$)+1-ul%): cfields$(hl%)=s$: ul%=ul%-1
 return
 
+HS_CONTACT_EDIT_ACTIVE_STRING ul%=len(cfields$(hl%))+1: return
 
 '### CALL screen handler ###
 HANDLER_SCREEN_CALL rem

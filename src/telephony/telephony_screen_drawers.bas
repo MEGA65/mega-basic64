@@ -212,12 +212,24 @@ if ctrigger=2 then print "new contact"
 'contact fields box
 print "{wht}";
 x=4: y=5: w=36: h=20: r(15)=1: gosub DRAW_BOX
-xx=6: yy=7: gosub MOVE_CURSOR_XX_YY
-if hl%=1 then print "{yel}";
-print "name: ";: s$=ctxt$: l=28: gosub TRIM_STRING: print s$;: print "{wht}";
-xx=6: yy=9: gosub MOVE_CURSOR_XX_YY
-if hl%=2 then print "{yel}";
-print "number: ";: s$=cnumber$: l=25: gosub TRIM_STRING: print s$;: print "{wht}";
+
+'xx=6: yy=7: gosub MOVE_CURSOR_XX_YY
+'print "name: ";: if hl%=1 then print "{yel}";
+'s$=cfields$(0): l=28: gosub TRIM_STRING: print s$;: print "{wht}";
+'xx=6: yy=9: gosub MOVE_CURSOR_XX_YY
+'print "number: ";: if hl%=2 then print "{yel}";
+'s$=cfields$(1): l=25: gosub TRIM_STRING: print s$;: print "{wht}";
+
+for i=1 to cfields%
+print "{wht}";
+xx=6: yy=5+2*i: gosub MOVE_CURSOR_XX_YY
+print clabels$(i)+": ";
+if hl%=i then print "{yel}";
+s$=cfields$(i): l=34-3-len(clabels$(i)): gosub TRIM_STRING: print s$;: print "{wht}";: s=l-len(cfields$(i)): gosub SPACES: print s$
+x=6+2+len(clabels$(i)): y=6+2*i: s=l: gosub POKE_SPACES
+if hl%=i then xx=6+2+len(clabels$(i))+ul%-1: yy=6+2*i: gosub MOVE_CURSOR_XX_YY: print chr$(163);
+
+next i
 
 return
 '### end DRAW_SCREEN_CONTACT_EDIT ###
