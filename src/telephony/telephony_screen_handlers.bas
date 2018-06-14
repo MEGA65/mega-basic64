@@ -54,12 +54,13 @@ return
 
 '### CONTACT_EDIT screen handler ###
 HANDLER_SCREEN_CONTACT_EDIT rem
+if ni=1 then return
 'handle user actions
 u$="": get u$
 gosub POLL_TOUCH_CONTACT_EDIT
 if u$="" then return
 if u$=chr$(19) then u0$=u$: gosub HS_CE_CLEANUP: gosub SWITCH_TO_LAST_SCREEN: return
-if u$=chr$(13) then u0$=u$: gosub HS_CE_SAVE_CONTACT: gosub HS_CE_CLEANUP: gosub SWITCH_TO_LAST_SCREEN: return
+if u$=chr$(13) then u0$=u$: gosub HS_CE_SAVE_CONTACT: return
 if u$="{up}" then mdv=2: hl%=fn mod(hl%-2)+1: gosub HS_CE_ACTIVE_STRING: su=1 'Redraw field list
 if u$="{down}" then mdv=2: hl%=fn mod(hl%)+1: gosub HS_CE_ACTIVE_STRING: su=1 'Redraw field list
 if u$="{left}" then mdv=len(cfields$(hl%))+1: ul%=fn mod(ul%-2)+1
@@ -71,17 +72,25 @@ return
 
 HS_CE_INSERT_CHAR rem
 c$=u$: gosub PETSCII_TO_ASCII: u$=c$ 'convert the PETSCII keyboard input to ASCII
+if ul%>=len(s$)+1 then s$=s$+u$ 'if the cursor is at len+1, just add the char
+if ul%<len(s$)+1 then s$=left$(s$, ul%-1)+u$+right$(s$, len(s$)-ul%) 'if not (<=len), replace char at ul%
 ul%=ul%+1 'move the cursor one char to right
-if ul%>=len(s$)+1 then s$=s$+u$: return 'if the cursor is at len+1, just add the char
-s$=left$(s$, ul%-1)+u$+right$(s$, len(s$)-ul%): return 'if not (<=len), replace char at ul%
+return
 
 HS_CE_ACTIVE_STRING ul%=len(cfields$(hl%))+1: return
 
 HS_CE_SAVE_CONTACT rem
-'save the edited/created contact
+'change status message and disable user interaction
+cstatus$="saving{elipsis}"
+ni=1
+'save the edited/created contact to phonebook in RAM
 if cselected%>0 then pnumber$(cselected%)=cfields$(2): ptxt$(cselected%)=cfields$(1)
 if cselected%=0 then gosub HS_CE_NEW_CONTACT 'new contact
 gosub PHONEBOOK_TO_CONTACT_PANE: gosub TRIM_CONTACT_PANE 'update contact pane
+'ask modem to write the edited/created contact to SIM phonebook
+jt%(99)= HS_CE_CONTACT_SAVED
+s$="AT+CPBW="+right$(str$(cselected%), len(str$(cselected%))-1)+","+chr$(34)+pnumber$(cselected%)+chr$(34)+","+right$(str$(ptype%(cselected%)), len(str$(ptype%(cselected%)))-1)+","+chr$(34)+ptxt$(cselected%)+chr$(34)
+gosub WRITE_STRING_TO_MODEM
 return
 
 HS_CE_NEW_CONTACT rem
@@ -94,7 +103,15 @@ ptype%(pindex%)=129 'unknow number type; TODO: add the type field or auto-determ
 cselected%=pindex%
 return
 
-HS_CE_CLEANUP ctrigger=0: return 'clean-up before leaving screen
+HS_CE_CONTACT_SAVED rem
+' modem sent a response to at+cpbw
+jt%(99)=0
+ni=0 're-enable user interaction
+if merror=1 then merror=0: cstatus$="error while saving!": return 'modem error, stay on screen
+if merror=0 then gosub HS_CE_CLEANUP: gosub SWITCH_TO_LAST_SCREEN: return 'modem OK, contact saved, switch to last screen
+return
+
+HS_CE_CLEANUP ctrigger=0: cstatus$="": return 'clean-up before leaving screen
 
 
 '### CALL screen handler ###

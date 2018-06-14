@@ -12,6 +12,9 @@ db=db 'flag db (debug): print debugging information
 '  3: warning
 '  4: info
 '  5: debug
+ni=0 'no interaction flag
+'  0: normal user interaction
+'  1: disables user input
 sc=1 'current screen to be displayed and user input to be taken
 ls=1 'last screen used before the current one
 sr=10 'screen refresh rate: number of loops between 2 screen updates
@@ -130,6 +133,10 @@ return
 
 '=== phonebook setup ===
 SETUP_PHONEBOOK rem
+psource$="sim" 'source of the contacts to load
+'   "sim"
+'   "code"
+'   "sd"
 pused%=-1 'the number of contacts in the phonebook memory (i.e. SIM)
 ptotal%=0 'the maximum number of contacts that can be stored in the phonebook memory (i.e. SIM)
 plngth%=100 'maximum number of contacts in the MEGA65 memory
@@ -159,6 +166,7 @@ dim cfields$(cfields%) 'array containing the fields of the contact being created
 dim clabels$(cfields%) 'array containing the labels of the previous fields
 clabels$(1)="Name"
 clabels$(2)="Number"
+cstatus$="" 'status message on the contact edit screen
 gosub LOAD_PHONEBOOK
 gosub PHONEBOOK_TO_CONTACT_PANE
 gosub TRIM_CONTACT_PANE

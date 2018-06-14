@@ -117,24 +117,34 @@ return
 
 TRIM_STRING rem
 'TRIM_STRING
-'   Trims a string s$ to length l, adding ... if necessary
+'   Trims a string s$ to length l, adding ... if too long
 if len(s$)<=l then return
-if len(s$)>l then s$=left$(s$,len(s$)-3)+"...": return
+if len(s$)>l then s$=left$(s$,l-1)+"{elipsis}": return
 
+TRIM_STRING_SPACES rem
+'TRIM_STRING_SPACES
+'   Trims a string s$ to length l,
+'      adding ... if too long
+'      and adding spaces if too short
+gosub TRIM_STRING
+if len(s$)<l then s$=s$+left$(ss$,l-len(s$)) 'add l-len spaces, so that len(s$)=l
+return
 
 SPACES rem
 'SPACES
-'   Returns a string with s spaces'
+'   Returns a string with l spaces'
 s$=""
-if s>0 then for ii=1 to s: s$=s$+" ": next ii
+if l>0 then s$=left$(ss$,l)
 return
 
 POKE_SPACES rem
 'POKE_SPACES
 '   Pokes s space chars at row x, column y
+'   NOTE: Probably not efficient for many characters?
 a=1024+40*y+x
 if s>0 then for ii=0 to s-1: poke a+ii,32: next ii
 return
+
 
 BATTERY_UPDATE rem
 '=== update the battery level ===

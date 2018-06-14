@@ -111,7 +111,7 @@ xx=22: yy=3: gosub MOVE_CURSOR_XX_YY: print "    Contacts     ";
 for i=1 to cmaxindex%
 xx=22: yy=4+i: gosub MOVE_CURSOR_XX_YY
 if hl%=i then print "{yel}";
-print cpane$(i);left$(ss$,clngth%-len(cpane$(i)));
+s$=cpane$(i): l=clngth%: gosub TRIM_STRING_SPACES: print s$;
 print "{lblu}";
 next i
 canvas 66 stamp on canvas 0 at 37,22 'stamp search icon
@@ -187,7 +187,7 @@ print "{wht}";
 x=4: y=2: w=36: h=3: gosub DRAW_BOX
 xx=5: yy=3: gosub MOVE_CURSOR_XX_YY
 if cdisplay$<>"" then print cdisplay$;
-for j=1 to 34-len(cdisplay$): if len(cdisplay$)<35 then print " ";: next j
+if len(cdisplay$)<34 then for j=1 to 34-len(cdisplay$): print " ";: next j
 'SMS box
 print "{wht}";
 x=4: y=5: w=36: h=20: r(15)=1: gosub DRAW_BOX
@@ -201,14 +201,18 @@ return
 DRAW_SCREEN_CONTACT_EDIT rem
 'buttons
 canvas 60 stamp on canvas 0 at 0,2 'arrow back
-'contact name/number box
-'gosub TRIM_CONTACT_DISPLAY_TEXT
+'heading box
 print "{wht}";
 x=4: y=2: w=36: h=3: gosub DRAW_BOX
 xx=5: yy=3: gosub MOVE_CURSOR_XX_YY
-if ctrigger=0 then print "?"
-if ctrigger=1 then print "Edit contact"
-if ctrigger=2 then print "New contact"
+s$=""
+if ctrigger=0 then s$="?" 'should not happen
+if ctrigger=1 then s$="Edit contact"
+if ctrigger=2 then s$="New contact"
+'contact saving status
+if cstatus$<>"" then s$=s$+" {red}"+cstatus$
+'trim and display heading
+l=34: gosub TRIM_STRING_SPACES: print s$;
 'contact fields box
 print "{wht}";
 x=4: y=5: w=36: h=20: r(15)=1: gosub DRAW_BOX
@@ -220,15 +224,15 @@ x=4: y=5: w=36: h=20: r(15)=1: gosub DRAW_BOX
 'print "number: ";: if hl%=2 then print "{yel}";
 's$=cfields$(1): l=25: gosub TRIM_STRING: print s$;: print "{wht}";
 
+'TODO: TO OPTIMIZE (do not use MOVE_CURSOR)
 for i=1 to cfields%
 print "{wht}";
 xx=6: yy=5+2*i: gosub MOVE_CURSOR_XX_YY
 print clabels$(i)+": ";
 if hl%=i then print "{yel}";
-s$=cfields$(i): l=34-3-len(clabels$(i)): gosub TRIM_STRING: print s$;: print "{wht}";: s=l-len(cfields$(i)): gosub SPACES: print s$
-x=6+2+len(clabels$(i)): y=6+2*i: s=l: gosub POKE_SPACES
-if hl%=i then xx=6+2+len(clabels$(i))+ul%-1: yy=6+2*i: gosub MOVE_CURSOR_XX_YY: print chr$(163);
-
+s$=cfields$(i): l=34-3-len(clabels$(i)): gosub TRIM_STRING_SPACES: print s$;
+xx=6+2+len(clabels$(i)): yy=6+2*i: gosub MOVE_CURSOR_XX_YY: l=34-3-len(clabels$(i)): gosub SPACES: print s$; 'print spaces on the underline line
+if hl%=i then xx=6+2+len(clabels$(i))+ul%-1: yy=6+2*i: gosub MOVE_CURSOR_XX_YY: print chr$(182); 'print underline char if the line is hilighted
 next i
 
 return
