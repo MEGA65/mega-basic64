@@ -12,43 +12,26 @@ db=db 'flag db (debug): print debugging information
 '  3: warning
 '  4: info
 '  5: debug
-
-'current screen to be displayed and user input to be taken
-sc=1
-'screen refresh rate: number of loops between 2 screen updates
-sr=10
-'flag su (screen update): a change in the program requires a screen update
-su=0
-'flag us (updated screen): is set to 1 when the screen if actually updated
-us=0
-'last call to POLL_MODEM resulted in a call to HANDLE_MODEM_LINE
-ml=0
-'caller id (number)
-cid$=""
-'dr (dialling result): user friendly information about dialling state
-dr$=""
-'flag dia (dialling): the modem is currently dialling
-dia=0
-'rssi: received signal strength indicator
-rssi=99
-'ber: channel bit error rate
-ber=99
-'remaining battery percentage [0:100]
-btp=100.0
-'loop counter
-cnt=0
-'network access technology (GSM, EDGE, HSPA, LTE...)
-nact$=""
-'network type, to be displayed (2G, 3G, 4G...)
-ntype$=""
-'network name to be displayed
-nname$=""
-'dactive
+sc=1 'current screen to be displayed and user input to be taken
+ls=1 'last screen used before the current one
+sr=10 'screen refresh rate: number of loops between 2 screen updates
+su=0 'flag su (screen update): a change in the program requires a screen update
+us=0 'flag us (updated screen): is set to 1 when the screen if actually updated
+ml=0 'last call to POLL_MODEM resulted in a call to HANDLE_MODEM_LINE
+cid$="" 'caller id (number)
+dr$="" 'dr (dialling result): user friendly information about dialling state
+dia=0 'flag dia (dialling): the modem is currently dialling
+rssi=99 'rssi: received signal strength indicator
+ber=99 'ber: channel bit error rate
+btp=100.0 'remaining battery percentage [0:100]
+cnt=0 'loop counter
+nact$="" 'network access technology (GSM, EDGE, HSPA, LTE...)
+ntype$="" 'network type, to be displayed (2G, 3G, 4G...)
+nname$="" 'network name to be displayed
+dactive=0 'dactive
 '   0: no call active
 '   1: call in progress
-dactive=0
-'dsta
-'call/dialing state
+dsta=-1 'call/dialing state
 '  -1: unknown/error/no call
 '   0: active
 '   1: held
@@ -56,19 +39,11 @@ dactive=0
 '   3: alerting (outbound call)
 '   4: incoming (inbound call)
 '   5: waiting (inbound call)
-dsta=-1
-'dnumber
-'number to be dialed
-dnumber$=""
-'ddisplay
-'the text to be displayed at the top of the call screen
-ddisplay$=""
-'tc: initial time at beginning of call
-tc=0
-'dtmr: call timer
-dtmr=0
-'dtmr$: call timer, in the format HHMMSS
-dtmr$="000000"
+dnumber$="" 'number to be dialed
+ddisplay$="" 'the text to be displayed at the top of the call screen
+tc=0 'tc: initial time at beginning of call
+dtmr=0 'dtmr: call timer
+dtmr$="000000" 'dtmr$: call timer, in the format HHMMSS
 
 '=== arrays to time different parts of the program ===
 '  0: loop time
@@ -89,10 +64,8 @@ dtmr$="000000"
 t0=0: t1=0: tl=0: tt=0: tu=0
 'diverse counters
 c5=0: c7=0
-'array containing the total time spent
-dim ttmr(10)
-'array containing the average time spent
-dim tavg(10)
+dim ttmr(10) 'array containing the total time spent
+dim tavg(10) 'array containing the average time spent
 return
 
 '=== setup for modem parser ===
@@ -182,10 +155,14 @@ dim cpane$(cmaxindex%)
 dim cindex%(cmaxindex%)
 'number of entries in contact pane (<= cmaxindex%)
 centry%=0
-'selected contact index (in phonebook)
-cselected%=0
-'the text to be displayed on the contact screen
-cdisplay$=""
+cselected%=0 'selected contact index (in phonebook)
+cdisplay$="" 'the text to be displayed on the contact screen
+ctrigger=0 'the trigger for opening the contact_edit screen
+'  0: no contact_edit
+'  1: edit existing contact
+'  2: new contact
+cnumber$="" 'number of the contact being created/edited
+ctxt$="" 'name of the contact being created/edited
 gosub LOAD_PHONEBOOK
 gosub PHONEBOOK_TO_CONTACT_PANE
 gosub TRIM_CONTACT_PANE

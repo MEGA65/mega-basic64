@@ -3,6 +3,7 @@ if sc=0 then gosub DRAW_SCREEN_DEBUG
 if sc=1 then gosub HANDLER_SCREEN_DIALLER
 if sc=2 then gosub HANDLER_SCREEN_CONTACT
 if sc=3 then gosub HANDLER_SCREEN_CALL
+if sc=4 then gosub HANDLER_SCREEN_CONTACT_EDIT
 return
 
 
@@ -46,6 +47,20 @@ gosub POLL_TOUCH_CONTACT
 if u$="" then return
 if u$=chr$(20) then u0$=u$: gosub SWITCH_TO_SCREEN_DIALLER
 if u$=chr$(13) then u0$=u$: dnumber$=pnumber$(cselected%): gosub CALL_DIAL: gosub SWITCH_TO_SCREEN_CALL
+if u$="e" then u0$=u$: ctrigger=1: gosub SWITCH_TO_SCREEN_CONTACT_EDIT
+return
+
+
+'### CONTACT_EDIT screen handler ###
+HANDLER_SCREEN_CONTACT_EDIT rem
+'handle user actions
+u$="": get u$
+gosub POLL_TOUCH_CONTACT_EDIT
+if u$="" then return
+if u$=chr$(20) then u0$=u$: gosub SWITCH_TO_LAST_SCREEN
+'if u$=chr$(13) then u0$=u$: dnumber$=pnumber$(cselected%): gosub CALL_DIAL: gosub SWITCH_TO_SCREEN_CALL
+if u$="{up}" then mdv=2: hl%=fn mod(hl%-2)+1: su=1 'Redraw field list
+if u$="{down}" then mdv=2: hl%=fn mod(hl%)+1: su=1 'Redraw field list
 return
 
 

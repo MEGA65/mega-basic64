@@ -4,6 +4,7 @@ if sc=0 then gosub DRAW_SCREEN_DEBUG
 if sc=1 then gosub DRAW_SCREEN_DIALLER
 if sc=2 then gosub DRAW_SCREEN_CONTACT
 if sc=3 then gosub DRAW_SCREEN_CALL
+if sc=4 then gosub DRAW_SCREEN_CONTACT_EDIT
 u0$="": us=1
 return
 
@@ -195,6 +196,31 @@ canvas 64 stamp on canvas 0 at 35,21 'message
 return
 '### end DRAW_SCREEN_CONTACT ###
 
+
+'### CONTACT_EDIT screen update subroutine ###
+DRAW_SCREEN_CONTACT_EDIT rem
+'buttons
+canvas 60 stamp on canvas 0 at 0,2 'arrow back
+'contact name/number box
+'gosub TRIM_CONTACT_DISPLAY_TEXT
+print "{wht}";
+x=4: y=2: w=36: h=3: gosub DRAW_BOX
+xx=5: yy=3: gosub MOVE_CURSOR_XX_YY
+if ctrigger=0 then print "?"
+if ctrigger=1 then print "edit contact"
+if ctrigger=2 then print "new contact"
+'contact fields box
+print "{wht}";
+x=4: y=5: w=36: h=20: r(15)=1: gosub DRAW_BOX
+xx=6: yy=7: gosub MOVE_CURSOR_XX_YY
+if hl%=1 then print "{yel}";
+print "name: ";: s$=ctxt$: l=28: gosub TRIM_STRING: print s$;: print "{wht}";
+xx=6: yy=9: gosub MOVE_CURSOR_XX_YY
+if hl%=2 then print "{yel}";
+print "number: ";: s$=cnumber$: l=25: gosub TRIM_STRING: print s$;: print "{wht}";
+
+return
+'### end DRAW_SCREEN_CONTACT_EDIT ###
 
 
 '### CALL screen update subroutine ###

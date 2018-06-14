@@ -29,10 +29,10 @@ for i=1 to len(s$): c$=right$(left$(s$,i),1): print#1,c$;: next i
 return
 
 WAIT_MODEM_READY rem
-if db>=4 then print "wait modem ready"
-WMR if db>=4 then print "  jt%(99)=",jt%(99)
+if db>=5 then print "wait modem ready"
+WMR if db>=5 then print "  jt%(99)=",jt%(99)
 if jt%(99)<>0 then gosub POLL_MODEM: goto WMR
-if db>=4 then print "modem ready"
+if db>=5 then print "modem ready"
 return
 
 WRITE_STRING_TO_MODEM_READY rem
@@ -106,6 +106,13 @@ print chr$(171);: for j=1 to w-2: print "C";: next j: print chr$(179);
 return
 
 
+TRIM_STRING rem
+'TRIM_STRING
+'   Trims a string s$ to length l, adding ... if necessary
+if len(s$)<=l then return
+if len(s$)>l then s$=left$(s$,len(s$)-3)+"...": return
+
+
 BATTERY_UPDATE rem
 '=== update the battery level ===
 if btp>=0 and btp <=5 then bl%=0
@@ -127,16 +134,28 @@ return
 'it switches graphics/text mode only if necessary
 'it triggers an initial update of the screen
 
+SWITCH_TO_LAST_SCREEN rem
+'=== switch to the previous screen ===
+kk=sc 'tmp storage of sc
+ll=ls 'tmp storage of ls
+if ll=0 then gosub SWITCH_TO_SCREEN_DEBUG
+if ll=1 then gosub SWITCH_TO_SCREEN_DIALLER
+if ll=2 then gosub SWITCH_TO_SCREEN_CONTACT
+if ll=3 then gosub SWITCH_TO_SCREEN_CALL
+if ll=4 then gosub SWITCH_TO_SCREEN_CONTACT_EDIT
+ls=kk
+return
+
 SWITCH_TO_SCREEN_DEBUG rem
 '=== switch to screen DEBUG (0) ===
-sc=0
+ls=sc: sc=0
 gosub SWITCH_SCREEN_CLEANUP
 su=1
 return
 
 SWITCH_TO_SCREEN_DIALLER rem
 '=== switch to screen DIALLER (1) ===
-sc=1
+ls=sc: sc=1
 gosub SWITCH_SCREEN_CLEANUP
 'Mark entire screen as requiring a re-draw
 su=1: up=1: uc=1: ud=1
@@ -144,16 +163,32 @@ return
 
 SWITCH_TO_SCREEN_CONTACT rem
 '=== switch to screen CONTACT (2) ===
-sc=2
+ls=sc: sc=2
 gosub SWITCH_SCREEN_CLEANUP
 su=1
 return
 
 SWITCH_TO_SCREEN_CALL rem
 '=== switch to screen CALL (3) ===
-sc=3
+ls=sc: sc=3
 gosub SWITCH_SCREEN_CLEANUP
 su=1
+return
+
+SWITCH_TO_SCREEN_CONTACT_EDIT rem
+'=== switch to screen CONTACT_EDIT (4) ===
+ls=sc: sc=4
+gosub SWITCH_SCREEN_CLEANUP
+su=1
+if ctrigger=1 and cselected%<=0 then stop 'we should have cselected% pointing to the contact to edit
+if ctrigger=1 and cselected%>0 then gosub PREP_EDIT_CONTACT: return
+if ctrigger=2 then cselected%=0
+if ctrigger>2 then stop 'that shouldn't happen
+return
+
+PREP_EDIT_CONTACT rem
+cnumber$=pnumber$(cselected%)
+ctxt$=ptxt$(cselected%)
 return
 
 SWITCH_SCREEN_CLEANUP rem

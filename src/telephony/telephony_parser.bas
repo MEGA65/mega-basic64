@@ -1,6 +1,6 @@
 '=== read from modem ===
 POLL_MODEM rem
-if db>=4 then print "polling modem"
+if db>=5 then print "polling modem"
 'reinitialize parser counter
 cp=50
 'read one char from cellular modem and parse received fields

@@ -39,6 +39,13 @@ if te<>2 then return
 gosub TOUCH_TO_ROW_COLUMN
 return
 
+' Scan the touch screen when displaying the contact edit screen
+POLL_TOUCH_CONTACT_EDIT rem
+gosub TOUCH_CHECK_FOR_RELEASE
+'if te<>2 then return
+'gosub TOUCH_TO_ROW_COLUMN
+return
+
 ' Scan the touch screen for the dialer
 POLL_TOUCH_DIALER rem
 gosub TOUCH_CHECK_FOR_RELEASE
