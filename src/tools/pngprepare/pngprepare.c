@@ -154,6 +154,18 @@ unsigned char nyblswap(unsigned char in)
   return ((in&0xf)<<4)+((in&0xf0)>>4);
 }
 
+int char_move(int from, int max,int dest,unsigned char *first_half,unsigned char *fixed)
+{
+  int o;
+  o=dest;
+  for(int c=from;c<=max;c++) {
+    for(int i=0;i<8;i++) {
+      fixed[o*8+i]=first_half[c*8+i];
+    }
+    o++;
+  }
+}
+
 void process_file(int mode, int do_reverse, char *outputfilename)
 {
   int multiplier=-1;
@@ -221,23 +233,12 @@ void process_file(int mode, int do_reverse, char *outputfilename)
   for(int i=0;i<1024;i++) fixed[i]=first_half[i];
 
   // Copy upper case chars from 0x40+ to 0x00+
-  int o;
-  o=0x00;
-  for(int c=0x40;c<0x5b;c++) {
-    for(int i=0;i<8;i++) {
-      fixed[o*8+i]=first_half[c*8+i];
-    }
-    o++;
-  }
+  fprintf(stderr,"Updating upper case characters\n");
+  char_move(0x61,0x7a,0x01,first_half,fixed);
 
   // Lower case to upper case position
-  o=0x40;
-  for(int c=0x60;c<0x7b;c++) {
-    for(int i=0;i<8;i++) {
-      fixed[o*8+i]=first_half[c*8+i];
-    }
-    o++;
-  }
+  fprintf(stderr,"Updating lower case characters\n");
+  char_move(0x41,0x4a,0x61,first_half,fixed);
 
   // Write out the 128 characters normal and reverse, twice each
   // to make a complete 256 char ROM.
