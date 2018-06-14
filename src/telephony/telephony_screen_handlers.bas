@@ -18,7 +18,7 @@ gosub POLL_TOUCH_DIALER
 tmr=tmr-1: if tmr=0 then up=1: su=1 'Request redrawing of dialpad (up), and mark screen as needing redrawing (su)
 if u$="" then return
 ' Run terminal program for debugging modem communications
-if u$="t" then up=1: su=1: gosub TERMINAL_PROGRAM: gosub SWITCH_TO_SCREEN_DIALLER
+if u$="t" or u$="T" then up=1: su=1: gosub TERMINAL_PROGRAM: gosub SWITCH_TO_SCREEN_DIALLER
 'navigation in contact pane
 if u$="{up}" then mdv=centry%: hl%=fn mod(hl%-2)+1: su=1: uc=1 'Redraw contact list
 if u$="{down}" then mdv=centry%: hl%=fn mod(hl%)+1: su=1: uc=1 'Redraw contact list
@@ -26,7 +26,7 @@ if u$="{rght}" and hl%<>0 then cselected%=cindex%(hl%): su=1: gosub SWITCH_TO_SC
 'dialler
 'limit length is 18, go to loop start if over it or not enter or backspace
 if u$<>chr$(20) and u$<>chr$(13) and len(nb$)>=19 then return
-if (u$>="0" and u$<="9") or u$="+" or u$="*" or u$="#" or u$="a" or u$="b" or u$="c" or u$="d" then nb$=nb$+u$: u0$=u$: su=1: up=1: ud=1 'request dialpad and number update
+if (u$>="0" and u$<="9") or u$="+" or u$="*" or u$="#" or u$="a" or u$="b" or u$="c" or u$="d" or u$="A" or u$="B" or u$="C" or u$="D" then nb$=nb$+u$: u0$=u$: su=1: up=1: ud=1 'request dialpad and number update
 'these characters don't update the string (for now)
 if u$="-" or u$="/" or u$="=" or u$="@" or u$="<" or u$=">" then  u0$=u$: su=1
 'backspace: remove a character, but only if there's at least one
@@ -35,7 +35,7 @@ if u$=chr$(20) and len(nb$)>=1 then nb$=left$(nb$,len(nb$)-1): u0$=u$: su=1: up=
 'enter: call the dialled number
 if u$=chr$(13) then  u0$=u$: su=1: dnumber$=nb$: gosub CALL_DIAL: gosub SWITCH_TO_SCREEN_CALL
 ' XXX - Debug display dialer interface
-if u$="z" then su=1: dsata=val(nb$): gosub SWITCH_TO_SCREEN_CALL
+if u$="z" or u$="Z" then su=1: dsata=val(nb$): gosub SWITCH_TO_SCREEN_CALL
 return
 
 
@@ -47,7 +47,7 @@ gosub POLL_TOUCH_CONTACT
 if u$="" then return
 if u$=chr$(20) then u0$=u$: gosub SWITCH_TO_SCREEN_DIALLER
 if u$=chr$(13) then u0$=u$: dnumber$=pnumber$(cselected%): gosub CALL_DIAL: gosub SWITCH_TO_SCREEN_CALL
-if u$="e" then u0$=u$: ctrigger=1: gosub SWITCH_TO_SCREEN_CONTACT_EDIT
+if u$="e" or u$="E" then u0$=u$: ctrigger=1: gosub SWITCH_TO_SCREEN_CONTACT_EDIT
 return
 
 

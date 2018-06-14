@@ -106,7 +106,7 @@ DS_DIALLER_CONTACT rem
 'draw contact pane box
 print "{lblu}";
 x=21: y=2: w=19: h=23: r(2)=1: r(19)=1: gosub DRAW_BOX
-xx=22: yy=3: gosub MOVE_CURSOR_XX_YY: print "    contacts     ";
+xx=22: yy=3: gosub MOVE_CURSOR_XX_YY: print "    Contacts     ";
 'print contact names
 for i=1 to cmaxindex%
 xx=22: yy=4+i: gosub MOVE_CURSOR_XX_YY
@@ -207,8 +207,8 @@ print "{wht}";
 x=4: y=2: w=36: h=3: gosub DRAW_BOX
 xx=5: yy=3: gosub MOVE_CURSOR_XX_YY
 if ctrigger=0 then print "?"
-if ctrigger=1 then print "edit contact"
-if ctrigger=2 then print "new contact"
+if ctrigger=1 then print "Edit contact"
+if ctrigger=2 then print "New contact"
 'contact fields box
 print "{wht}";
 x=4: y=5: w=36: h=20: r(15)=1: gosub DRAW_BOX
@@ -252,15 +252,16 @@ x=4: y=5: w=36: h=20: r(15)=1: gosub DRAW_BOX
 canvas 63 stamp on canvas 0 at 5,21 'globe
 canvas 64 stamp on canvas 0 at 35,21 'message
 
+'TODO: use another flag for debugging and logging
 if db=1 then goto DS_CALL_DEBUG
 goto DS_CALL_DSTA
 DS_CALL_DEBUG rem
 xx=1: yy=5: gosub MOVE_CURSOR_XX_YY
-print "call active=";dactive;"          ";
+print "Call active=";dactive;"          ";
 xx=1: yy=6: gosub MOVE_CURSOR_XX_YY
-print "call state=";dsta;"          ";
+print "Call state=";dsta;"          ";
 xx=1: yy=7: gosub MOVE_CURSOR_XX_YY
-print "dialing=";dia;"          ";
+print "Dialing=";dia;"          ";
 xx=1: yy=8: gosub MOVE_CURSOR_XX_YY
 print "cid$=";cid$;"          ";
 xx=1: yy=9: gosub MOVE_CURSOR_XX_YY
@@ -272,7 +273,7 @@ DS_CALL_DSTA rem
 if dsta=0 goto DS_CALL_ACTIVE
 if dsta=2 or dsta=3 goto DS_CALL_DIALING
 if dsta=4 or dsta=5 goto DS_CALL_RINGING
-ddisplay$="unknown status ("+str$(dsta)+")": gosub DS_CALL_DDISPLAY
+ddisplay$="Unknown status ("+str$(dsta)+")": gosub DS_CALL_DDISPLAY
 
 return
 '### end DRAW_SCREEN_CALL ###
@@ -280,7 +281,7 @@ return
 
 DS_CALL_ACTIVE rem
 '=== Call state: active ===
-ddisplay$="in-call with "+cid$
+ddisplay$="In-call with "+cid$
 gosub DS_CALL_DDISPLAY
 gosub DS_CALL_ERASE_GP
 gosub DS_CALL_TIMER
@@ -288,7 +289,7 @@ return
 
 DS_CALL_DIALING rem
 '=== Call state: dialing ===
-ddsiplay$="dialling "+dnumber$
+ddsiplay$="Dialling "+dnumber$
 if dr$<>"" then ddisplay$=ddisplay$+" ("+dr$+")"
 gosub DS_CALL_DDISPLAY
 gosub DS_CALL_ERASE_TMR
@@ -297,7 +298,7 @@ return
 
 DS_CALL_RINGING rem
 '=== Call state: ringing ===
-ddisplay$="incoming call from "+cid$
+ddisplay$="Incoming call from "+cid$
 gosub DS_CALL_DDISPLAY
 gosub DS_CALL_ERASE_TMR
 canvas 18 stamp on canvas 0 at 0,6 'greenphone
