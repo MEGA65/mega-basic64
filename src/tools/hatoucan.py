@@ -146,7 +146,8 @@ SPECIAL = (
     ('{line-dl}',   0xaf),
     ('{line-dr}',   0xb0),
     ('{line-udl}',   0xb1),
-    ('{line-udr}',   0xb2)
+    ('{line-udr}',   0xb2),
+    ('{elipsis}',   0xb3)
     
 
 )

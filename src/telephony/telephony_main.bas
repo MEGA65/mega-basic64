@@ -16,7 +16,7 @@ gosub LOOKUP_GOTO_LN_PATCH_ADDRESS
 gosub SETUP_PROGRAM
 'modem parser and modem setup
 gosub SETUP_PARSER: gosub SETUP_MODEM
-if db>=4 then print "waiting for modem setup"
+if db>=4 then print "waiting for modem setup{elipsis}"
 gosub WAIT_MODEM_READY
 if db>=4 then print "modem setup is complete"
 'GUI-related setup

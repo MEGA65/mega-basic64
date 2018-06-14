@@ -67,8 +67,8 @@ return
 PRINT_NETWORK_NAME rem
 xx=0: yy=0: gosub MOVE_CURSOR_XX_YY
 'limit to 10 characters
-print left$(nname$,10)
-if len(nname$)>10 then print "..."
+print left$(nname$,12)
+if len(nname$)>12 then print "{elipsis}"
 return
 
 
