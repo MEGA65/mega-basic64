@@ -132,29 +132,18 @@ return
 SETUP_PHONEBOOK rem
 pused%=-1 'the number of contacts in the phonebook memory (i.e. SIM)
 ptotal%=0 'the maximum number of contacts that can be stored in the phonebook memory (i.e. SIM)
-'maximum number of contacts in the phonebook
-plngth%=100
-'index array
-dim pindex%(plngth%)
+plngth%=100 'maximum number of contacts in the MEGA65 memory
+dim pindex%(plngth%) 'index array
 pindex%=0 'the last phonebook index that was filled (i.e. the higher used phonebook index)'
-'phone number array
-dim pnumber$(plngth%)
-'phone number type array [129, 145, 161]
-dim ptype%(plngth%)
-'text array
-dim ptxt$(plngth%)
-'sim index array
-dim psim%(plngth%)
-'dim of contact array
-cmaxindex%=16
-'max length that can be displayed in the contact pane
-clngth%=17
-'contact pane array: names to be displayed in the contact pane
-dim cpane$(cmaxindex%)
-'contact pane <-> phonebook index mapping
-dim cindex%(cmaxindex%)
-'number of entries in contact pane (<= cmaxindex%)
-centry%=0
+dim pnumber$(plngth%) 'phone number array
+dim ptype%(plngth%) 'phone number type array [129, 145, 161]
+dim ptxt$(plngth%) 'text array
+dim psim%(plngth%) 'sim index array
+cmaxindex%=16 'dim of contact array
+clngth%=17 'max length that can be displayed in the contact pane
+dim cpane$(cmaxindex%) 'contact pane array: names to be displayed in the contact pane
+dim cindex%(cmaxindex%) 'contact pane <-> phonebook index mapping
+centry%=0 'number of entries in contact pane (<= cmaxindex%)
 cselected%=0 'selected contact index (in phonebook)
 cdisplay$="" 'the text to be displayed on the contact screen
 ctrigger=0 'the trigger for opening the contact_edit screen

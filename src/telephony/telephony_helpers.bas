@@ -54,8 +54,9 @@ PETSCII_TO_ASCII rem
 ' converts the case of keyboard input character u$
 '   lowercase PETSCII input [a-z] -> uppercase ASCII: [65,90] __+32__> [97,122]
 '   uppercase PETSCII input [A-Z] -> lowercase ASCII: [193,218] __-128__> [65,90]
-if asc(u$)>=65 and asc(u$)<=90 then u$=chr$(asc(u$)+32): return
-if asc(u$)>=193 and asc(u$)<=218 then u$=chr$(asc(u$)-128): return
+if asc(c$)>=65 and asc(c$)<=90 then c$=chr$(asc(c$)+32): return
+if asc(c$)>=193 and asc(c$)<=218 then c$=chr$(asc(c$)-128): return
+return 'no conversion
 
 
 WAIT_FOR_KEY_PRESS rem
@@ -179,6 +180,7 @@ SWITCH_TO_SCREEN_DIALLER rem
 '=== switch to screen DIALLER (1) ===
 ls=sc: sc=1
 gosub SWITCH_SCREEN_CLEANUP
+hl%=cselected% 'set back previously highlighted contact
 'Mark entire screen as requiring a re-draw
 su=1: up=1: uc=1: ud=1
 return

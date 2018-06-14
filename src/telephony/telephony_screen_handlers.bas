@@ -57,25 +57,41 @@ HANDLER_SCREEN_CONTACT_EDIT rem
 u$="": get u$
 gosub POLL_TOUCH_CONTACT_EDIT
 if u$="" then return
-if u$=chr$(19) then u0$=u$: gosub SWITCH_TO_LAST_SCREEN
-if u$=chr$(13) then u0$=u$: gosub SWITCH_TO_LAST_SCREEN
-if u$="{up}" then mdv=2: hl%=fn mod(hl%-2)+1: gosub HS_CONTACT_EDIT_ACTIVE_STRING: su=1 'Redraw field list
-if u$="{down}" then mdv=2: hl%=fn mod(hl%)+1: gosub HS_CONTACT_EDIT_ACTIVE_STRING: su=1 'Redraw field list
+if u$=chr$(19) then u0$=u$: gosub SWITCH_TO_LAST_SCREEN: return
+if u$=chr$(13) then u0$=u$: gosub HS_CE_SAVE_CONTACT: gosub SWITCH_TO_LAST_SCREEN: return
+if u$="{up}" then mdv=2: hl%=fn mod(hl%-2)+1: gosub HS_CE_ACTIVE_STRING: su=1 'Redraw field list
+if u$="{down}" then mdv=2: hl%=fn mod(hl%)+1: gosub HS_CE_ACTIVE_STRING: su=1 'Redraw field list
 if u$="{left}" then mdv=len(cfields$(hl%))+1: ul%=fn mod(ul%-2)+1
 if u$="{rght}" then mdv=len(cfields$(hl%))+1: ul%=fn mod(ul%)+1
 'Modify the selected field
-if u$=chr$(20) and ul%>1 then s$=cfields$(hl%): s$=left$(s$, ul%-2)+right$(s$, len(s$)+1-ul%): cfields$(hl%)=s$: ul%=ul%-1
-if (asc(u$)>=32 and asc(u$)<=95) or (asc(u$)>=193 and asc(u$)<=218) then s$=cfields$(hl%): gosub HS_CE_INSERT_CHAR: cfields$(hl%)=s$
+if u$=chr$(20) and hl%>0 and ul%>1 then s$=cfields$(hl%): s$=left$(s$, ul%-2)+right$(s$, len(s$)+1-ul%): cfields$(hl%)=s$: ul%=ul%-1
+if u$<>"" and hl%>0 and ((asc(u$)>=32 and asc(u$)<=95) or (asc(u$)>=193 and asc(u$)<=218)) then s$=cfields$(hl%): gosub HS_CE_INSERT_CHAR: cfields$(hl%)=s$
 return
 
 HS_CE_INSERT_CHAR rem
-gosub PETSCII_TO_ASCII 'convert the PETSCII keyboard input to ASCII
+c$=u$: gosub PETSCII_TO_ASCII: u$=c$ 'convert the PETSCII keyboard input to ASCII
 ul%=ul%+1 'move the cursor one char to right
 if ul%>=len(s$)+1 then s$=s$+u$: return 'if the cursor is at len+1, just add the char
 s$=left$(s$, ul%-1)+u$+right$(s$, len(s$)-ul%): return 'if not (<=len), replace char at ul%
 
+HS_CE_ACTIVE_STRING ul%=len(cfields$(hl%))+1: return
 
-HS_CONTACT_EDIT_ACTIVE_STRING ul%=len(cfields$(hl%))+1: return
+HS_CE_SAVE_CONTACT rem
+'save the edited/created contact
+if cselected%>0 then pnumber$(cselected%)=cfields$(2): ptxt$(cselected%)=cfields$(1)
+if cselected%=0 then gosub HS_CE_NEW_CONTACT 'new contact
+gosub PHONEBOOK_TO_CONTACT_PANE: gosub TRIM_CONTACT_PANE 'update contact pane
+return
+
+HS_CE_NEW_CONTACT rem
+' create a new contact at index pindex%
+pindex%=pindex%+1
+pnumber$(pindex%)=cfields$(2)
+ptxt$(pindex%)=cfields$(1)
+ptype%(pindex%)=129 'unknow number type; TODO: add the type field or auto-determine type
+cselected%=pindex%
+return
+
 
 '### CALL screen handler ###
 HANDLER_SCREEN_CALL rem
