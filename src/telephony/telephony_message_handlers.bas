@@ -166,6 +166,7 @@ MESSAGE_HANDLER_39 rem
 
 'Message handler: OK
 MESSAGE_HANDLER_OK rem
+merror=0
 if dia=1 then gosub SEND_AT+CLCC 'ATD succeeded, dialling...
 14099 return
 
@@ -202,7 +203,7 @@ MH_NC_END rem
 MESSAGE_HANDLER_ERROR rem
 'Message handler: ERROR
 'This message is received if an AT command failed'
-'merror=1
+merror=1
 14499 return
 
 'Message handler: message type 45
@@ -227,15 +228,15 @@ MESSAGE_HANDLER_NO_ANSWER rem
 'Message handler: +CME ERROR
 MESSAGE_HANDLER_+CME_ERROR rem
 'This message is received after sending an AT command, if there is any error related to ME functionality'
-'merror=1
-'merror$=mf$(1)
+merror=1
+merror$=mf$(1)
 14999 return
 
 'Message handler: +CMS ERROR
 MESSAGE_HANDLER_+CMS_ERROR rem
 'This message is received after sending an AT command, if there is any error related to MS functionality'
-'merror=1
-'merror$=mf$(1)
+merror=1
+merror$=mf$(1)
 15099 return
 
 
