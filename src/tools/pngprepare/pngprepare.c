@@ -233,10 +233,11 @@ void process_file(int mode, int do_reverse, char *outputfilename)
 
   for(int i=0;i<1024;i++) fixed[i]=first_half[i];
 
-  // Copy lower case chars from 0x40+ to 0x00+
+  // Copy lower case chars from 0x60+ to 0x00+
   fprintf(stderr,"Updating lower case characters\n");
-  char_move(0x61,0x7a,0x01,first_half,fixed);
-  // Upper case chars are ok.
+  char_move(0x41,0x5a,0x01,first_half,fixed);
+  // And also upper case characters
+  char_move(0x61,0x7a,0x41,first_half,fixed);
 
   // Graphics chars should be at 0x60-, but come from 0x00
   fprintf(stderr,"Updating graphics characters\n");
