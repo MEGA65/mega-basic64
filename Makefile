@@ -171,6 +171,12 @@ MKTILESET_SRCS=	$(TOOLDIR)/mktileset.c \
 
 MKTILESET_HDRS=	$(TOOLDIR)/mktileset.h
 
+$(TOOLDIR)/pngprepare/pngprepare:       $(TOOLDIR)/pngprepare/pngprepare.c Makefile
+	$(CC) $(COPT) -I/usr/local/include -L/usr/local/lib -o $(TOOLDIR)/pngprepare/pngprepare $(TOOLDIR)/pngprepare/pngprepare.c -lpng
+
+$(BINDIR)/asciifont.bin:        $(TOOLDIR)/pngprepare/pngprepare $(ASSETS)/ascii00-7f.png
+	$(TOOLDIR)/pngprepare/pngprepare charrom $(ASSETS)/ascii00-7f.png $(BINDIR)/asciifont.bin
+
 $(TOOLDIR)/mktileset:	$(MKTILESET_SRCS) $(MKTILESET_HDRS) Makefile
 	$(CC) $(COPT) `pkg-config --cflags freetype2` -I/usr/local/include -L/usr/local/lib -o $(TOOLDIR)/mktileset $(MKTILESET_SRCS) -lpng `pkg-config --libs freetype2`
 
