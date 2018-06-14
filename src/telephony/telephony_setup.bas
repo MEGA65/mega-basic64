@@ -168,8 +168,8 @@ dim cfields$(cfields%) 'array containing the fields of the contact being created
 '  1: name
 '  2: number
 dim clabels$(cfields%) 'array containing the labels of the previous fields
-clabels$(1)="name"
-clabels$(2)="number"
+clabels$(1)="Name"
+clabels$(2)="Number"
 gosub LOAD_PHONEBOOK
 gosub PHONEBOOK_TO_CONTACT_PANE
 gosub TRIM_CONTACT_PANE

@@ -65,7 +65,15 @@ if u$="{left}" then mdv=len(cfields$(hl%))+1: ul%=fn mod(ul%-2)+1
 if u$="{rght}" then mdv=len(cfields$(hl%))+1: ul%=fn mod(ul%)+1
 'Modify the selected field
 if u$=chr$(20) and ul%>1 then s$=cfields$(hl%): s$=left$(s$, ul%-2)+right$(s$, len(s$)+1-ul%): cfields$(hl%)=s$: ul%=ul%-1
+if (asc(u$)>=32 and asc(u$)<=95) or (asc(u$)>=193 and asc(u$)<=218) then s$=cfields$(hl%): gosub HS_CE_INSERT_CHAR: cfields$(hl%)=s$
 return
+
+HS_CE_INSERT_CHAR rem
+gosub PETSCII_TO_ASCII 'convert the PETSCII keyboard input to ASCII
+ul%=ul%+1 'move the cursor one char to right
+if ul%>=len(s$)+1 then s$=s$+u$: return 'if the cursor is at len+1, just add the char
+s$=left$(s$, ul%-1)+u$+right$(s$, len(s$)-ul%): return 'if not (<=len), replace char at ul%
+
 
 HS_CONTACT_EDIT_ACTIVE_STRING ul%=len(cfields$(hl%))+1: return
 
