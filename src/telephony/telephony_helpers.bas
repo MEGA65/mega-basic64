@@ -12,9 +12,9 @@ poke ja,44
 return
 
 SETUP_DRAWING rem 'Prepare strings etc we use when drawing, to make drawing faster
-bt$="UCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+bt$="{line-dr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}"
 bm$="B{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}"
-bb$="JCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+bb$="{line-ur}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}"
 ll$="{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}"
 hd$="{home}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}"
 ss$="                                         "
@@ -77,11 +77,11 @@ DRAW_BOX rem
 '   none
 if w<3 or h<3 then return
 xx=x: yy=y: gosub MOVE_CURSOR_XX_YY
-print left$(bt$,w-1);"I";
+print left$(bt$,w-1);"{line-dl}";
 for i=1 to h-2
 print left$(ll$,w);"{down}";
 xx=x: yy=y+i
-print left$(bm$,w-1);"B";
+print left$(bm$,w-1);"{line-ul}";
 next i
 yy=y+h-1:xx=x:gosub MOVE_CURSOR_XX_YY
 print left$(bb$,w-1);
@@ -102,7 +102,7 @@ DRAW_HORIZONTAL_LINE rem
 '   none
 if w<3 then return
 xx=x: yy=y+r: gosub MOVE_CURSOR_XX_YY
-print chr$(171);: for j=1 to w-2: print "C";: next j: print chr$(179);
+print "{line-udr}";: for j=1 to w-2: print "{line-lr}";: next j: print "{line-udl}";
 return
 
 

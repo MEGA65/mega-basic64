@@ -136,6 +136,17 @@ SPECIAL = (
     ('{dgry}',     151),
     ('{brn}',      149),
     ('{up}',       0x91),
+    # For our ASCII-compatible font, we have the border drawing chars elsewhere
+    ('{line-lr}',   0xab),
+    ('{line-ud}',   0xac),
+    ('{line-ur}',   0xad),
+    ('{line-ul}',   0xae),
+    ('{line-dl}',   0xaf),
+    ('{line-dr}',   0xb0),
+    ('{line-udl}',   0xb1),
+    ('{line-udr}',   0xb2)
+    
+
 )
 
 
