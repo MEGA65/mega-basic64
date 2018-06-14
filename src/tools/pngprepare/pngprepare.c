@@ -164,6 +164,7 @@ int char_move(int from, int max,int dest,unsigned char *first_half,unsigned char
     }
     o++;
   }
+  return 0;
 }
 
 void process_file(int mode, int do_reverse, char *outputfilename)
@@ -232,13 +233,14 @@ void process_file(int mode, int do_reverse, char *outputfilename)
 
   for(int i=0;i<1024;i++) fixed[i]=first_half[i];
 
-  // Copy upper case chars from 0x40+ to 0x00+
-  fprintf(stderr,"Updating upper case characters\n");
-  char_move(0x61,0x7a,0x01,first_half,fixed);
-
-  // Lower case to upper case position
+  // Copy lower case chars from 0x40+ to 0x00+
   fprintf(stderr,"Updating lower case characters\n");
-  char_move(0x41,0x4a,0x61,first_half,fixed);
+  char_move(0x61,0x7a,0x01,first_half,fixed);
+  // Upper case chars are ok.
+
+  // Graphics chars should be at 0x60-, but come from 0x00
+  fprintf(stderr,"Updating graphics characters\n");
+  char_move(0x01,0x1e,0x61,first_half,fixed);
 
   // Write out the 128 characters normal and reverse, twice each
   // to make a complete 256 char ROM.
