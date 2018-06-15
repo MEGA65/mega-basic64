@@ -87,3 +87,12 @@ for i=1 to cmaxindex%
 if cindex%(i)=p then k=i: return
 next i
 return
+
+PHONEBOOK_GET_FIRST_EMPTY_INDEX rem
+'Get the first empty index in the phonebook in RAM
+'   if no empty index, return 0
+k=0
+for i=1 to plngth%
+if pindex%(i)=0 then k=i: return
+next i
+return
