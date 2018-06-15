@@ -212,6 +212,8 @@ return
 DRAW_SCREEN_CONTACT_EDIT rem
 'buttons
 xx=0: yy=2: p=0: gosub STAMP_ARROW_BACK 'arrow back
+xx=0: yy=6: p=0: gosub STAMP_GREENPHONE
+xx=0: yy=10: p=0: gosub STAMP_TRASH_BIN
 'heading box
 print "{wht}";
 x=4: y=2: w=36: h=3: gosub DRAW_BOX
@@ -224,17 +226,10 @@ if ctrigger=2 then s$="New contact"
 if cstatus$<>"" then s$=s$+" {red}"+cstatus$
 'trim and display heading
 l=34: gosub TRIM_STRING_SPACES: print s$;
+
 'contact fields box
 print "{wht}";
-x=4: y=5: w=36: h=20: gosub DRAW_BOX
-
-'xx=6: yy=7: gosub MOVE_CURSOR_XX_YY
-'print "name: ";: if hl%=1 then print "{yel}";
-'s$=cfields$(0): l=28: gosub TRIM_STRING: print s$;: print "{wht}";
-'xx=6: yy=9: gosub MOVE_CURSOR_XX_YY
-'print "number: ";: if hl%=2 then print "{yel}";
-'s$=cfields$(1): l=25: gosub TRIM_STRING: print s$;: print "{wht}";
-
+x=4: y=5: w=36: h=9: gosub DRAW_BOX
 'TODO: TO OPTIMIZE (do not use MOVE_CURSOR)
 for i=1 to cfields%
 print "{wht}";
