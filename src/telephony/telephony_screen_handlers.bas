@@ -121,8 +121,8 @@ HANDLER_SCREEN_CALL rem
 dtmr=time-tc
 dtmr$=""
 thour=int(dtmr/216000)
-tmin=int((dtmr-thour)/3600)
-tsec=int((dtmr-thour-tmin)/60)
+tmin=int((dtmr-thour*216000)/3600)
+tsec=int((dtmr-thour*216000-tmin*3600)/60)
 if thour>=0 and thour<=9 then dtmr$=dtmr$+"0"
 dtmr$=dtmr$+right$(str$(thour), len(str$(thour))-1)
 if tmin>=0 and tmin<=9 then dtmr$=dtmr$+"0"
