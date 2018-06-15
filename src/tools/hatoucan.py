@@ -139,14 +139,14 @@ SPECIAL = (
     ('{brn}',      149),
     ('{up}',       0x91),
     # For our ASCII-compatible font, we have the border drawing chars elsewhere
-    ('{line-lr}',   0xab),
-    ('{line-ud}',   0xac),
-    ('{line-ur}',   0xad),
-    ('{line-ul}',   0xae),
-    ('{line-dl}',   0xaf),
-    ('{line-dr}',   0xb0),
-    ('{line-udl}',   0xb1),
-    ('{line-udr}',   0xb2),
+    ('{line-lr}',   0xab),  # lr: left-right (horizontal line)
+    ('{line-ud}',   0xac),  # ud: up-down (vertical line)
+    ('{line-ur}',   0xad),  # ur: up-right (bottom-left corner)
+    ('{line-ul}',   0xae),  # ul: up-left (bottom-right corner)
+    ('{line-dl}',   0xaf),  # dl: down-left (top-right corner)
+    ('{line-dr}',   0xb0),  # dr: down-right (top-left corner)
+    ('{line-udl}',   0xb1),  # udl: up-down-left (T vertical line, right side)
+    ('{line-udr}',   0xb2),  # udr: up-down-right (T vertical line, left side)
     ('{elipsis}',   0xb3)
     
 

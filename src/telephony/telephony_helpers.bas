@@ -12,11 +12,19 @@ poke ja,44
 return
 
 SETUP_DRAWING rem 'Prepare strings etc we use when drawing, to make drawing faster
+'box-top line
 bt$="{line-dr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}"
+'box-middle line
 bm$="{line-ud}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}"
+'box-row line
+br$="{line-udr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}"
+'box-bottom line
 bb$="{line-ur}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}"
+'left line
 ll$="{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}"
+'home-down line
 hd$="{home}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}"
+'space line
 ss$="                                         "
 return
 
@@ -90,8 +98,9 @@ print left$(bt$,w-1);"{line-dl}";
 for i=1 to h-2
 print left$(ll$,w);"{down}";
 xx=x: yy=y+i
-print left$(bm$,w-1);"{line-ud}";
-next i
+if r(i)=0 then print left$(bm$,w-1);"{line-ud}";
+if r(i)=1 then print left$(br$,w-1);"{line-udl}";
+r(i)=0: next i
 yy=y+h-1:xx=x:gosub MOVE_CURSOR_XX_YY
 print left$(bb$,w-1);
 c=peek(646): poke 55296+(y+h-1)*40+x+w-1,c: poke 1024+(y+h-1)*40+x+w-1,110
@@ -111,7 +120,7 @@ DRAW_HORIZONTAL_LINE rem
 '   none
 if w<3 then return
 xx=x: yy=y+r: gosub MOVE_CURSOR_XX_YY
-print "{line-udr}";: for j=1 to w-2: print "{line-lr}";: next j: print "{line-udl}";
+print left$(br$,w-1);"{line-udl}";
 return
 
 

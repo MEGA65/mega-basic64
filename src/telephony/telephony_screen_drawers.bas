@@ -215,7 +215,7 @@ if cstatus$<>"" then s$=s$+" {red}"+cstatus$
 l=34: gosub TRIM_STRING_SPACES: print s$;
 'contact fields box
 print "{wht}";
-x=4: y=5: w=36: h=20: r(15)=1: gosub DRAW_BOX
+x=4: y=5: w=36: h=20: gosub DRAW_BOX
 
 'xx=6: yy=7: gosub MOVE_CURSOR_XX_YY
 'print "name: ";: if hl%=1 then print "{yel}";
