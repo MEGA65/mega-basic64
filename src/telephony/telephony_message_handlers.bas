@@ -338,13 +338,12 @@ ptotal%=val(mf$(3))
 MESSAGE_HANDLER_+CPBR rem
 'Phonebook entry: +CPBR: <index>,<number>,<type>,<text>
 ' Example: +CPBR: 1,"000",129,"emergency"
-pindex%=pindex%+1
-i=pindex%
-pindex%(i)=1 'entry i is now used
-psim%(i)=val(mf$(1)) 'SIM index of the entry
-s$=mf$(2): gosub REMOVE_QUOTES_STRING: pnumber$(i)=s$ 'phone number
-ptype%(i)=val(mf$(3)) 'type of phone number
-s$=mf$(4): gosub REMOVE_QUOTES_STRING: ptxt$(i)=s$ 'contact name
+pindex%=val(mf$(1))
+pindex%(pindex%)=1 'entry i is now used
+'psim%(i)=val(mf$(1)) 'SIM index of the entry
+s$=mf$(2): gosub REMOVE_QUOTES_STRING: pnumber$(pindex%)=s$ 'phone number
+ptype%(pindex%)=val(mf$(3)) 'type of phone number
+s$=mf$(4): gosub REMOVE_QUOTES_STRING: ptxt$(pindex%)=s$ 'contact name
 15699 return
 
 'Message handler: message type 57

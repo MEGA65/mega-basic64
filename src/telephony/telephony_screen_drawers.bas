@@ -75,6 +75,7 @@ return
 '### DEBUG screen update subroutine ###
 DRAW_SCREEN_DEBUG rem
 'we don't clr or print, and let debug messages be
+xx=0: yy=2: gosub MOVE_CURSOR_XX_YY
 return
 
 
@@ -212,8 +213,8 @@ return
 DRAW_SCREEN_CONTACT_EDIT rem
 'buttons
 xx=0: yy=2: p=0: gosub STAMP_ARROW_BACK 'arrow back
-xx=0: yy=6: p=0: gosub STAMP_GREENPHONE
-xx=0: yy=10: p=0: gosub STAMP_TRASH_BIN
+xx=0: yy=6: p=0: gosub STAMP_SAVE
+if cselected%>0 then xx=0: yy=10: p=0: gosub STAMP_TRASH_BIN
 'heading box
 print "{wht}";
 x=4: y=2: w=36: h=3: gosub DRAW_BOX
@@ -223,7 +224,7 @@ if ctrigger=0 then s$="?" 'should not happen
 if ctrigger=1 then s$="Edit contact"
 if ctrigger=2 then s$="New contact"
 'contact saving status
-if cstatus$<>"" then s$=s$+" {red}"+cstatus$
+if cstatus$<>"" then s$=s$+" "+cstatus$
 'trim and display heading
 l=34: gosub TRIM_STRING_SPACES: print s$;
 
@@ -241,6 +242,7 @@ xx=6+2+len(clabels$(i)): yy=6+2*i: gosub MOVE_CURSOR_XX_YY: l=34-3-len(clabels$(
 if hl%=i then xx=6+2+len(clabels$(i))+ul%-1: yy=6+2*i: gosub MOVE_CURSOR_XX_YY: print chr$(182); 'print underline char if the line is hilighted
 next i
 
+xx=0: yy=15: gosub MOVE_CURSOR_XX_YY
 return
 '### end DRAW_SCREEN_CONTACT_EDIT ###
 
@@ -375,3 +377,4 @@ STAMP_GLOBE k=gd%+10+14: gosub STAMP_BUTTON_CANVAS: return
 STAMP_MESSAGE k=gd%+10+15: gosub STAMP_BUTTON_CANVAS: return
 STAMP_SEND k=gd%+10+16: gosub STAMP_BUTTON_CANVAS: return
 STAMP_SEARCH k=gd%+10+17: gosub STAMP_BUTTON_CANVAS: return
+STAMP_SAVE k=gd%+10+18: gosub STAMP_BUTTON_CANVAS: return

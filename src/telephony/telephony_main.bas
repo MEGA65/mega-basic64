@@ -26,6 +26,7 @@ gosub SETUP_DRAWING
 gosub SETUP_PHONEBOOK
 'define functions (e.g. modulo)
 gosub DEFINE_FUNCTIONS
+'gosub WAIT_FOR_KEY_PRESS
 db=0 'turn off debugging information
 '--- switch to correct screen ---
 'if db=1, sc=0 (debug screen)

@@ -61,6 +61,7 @@ gosub POLL_TOUCH_CONTACT_EDIT
 if u$="" then return
 if u$=chr$(19) then u0$=u$: gosub HS_CE_CLEANUP: gosub SWITCH_TO_LAST_SCREEN: return
 if u$=chr$(13) then u0$=u$: gosub HS_CE_SAVE_CONTACT: return
+if u$=chr$(133) and cselected%>0 then u0$=u$: gosub HS_CE_DELETE_CONTACT: return 'delete on F1 (only if existing contact, not for new contacts!
 if u$="{up}" then mdv=2: hl%=fn mod(hl%-2)+1: gosub HS_CE_ACTIVE_STRING: su=1 'Redraw field list
 if u$="{down}" then mdv=2: hl%=fn mod(hl%)+1: gosub HS_CE_ACTIVE_STRING: su=1 'Redraw field list
 if u$="{left}" then mdv=len(cfields$(hl%))+1: ul%=fn mod(ul%-2)+1
@@ -79,23 +80,37 @@ return
 
 HS_CE_ACTIVE_STRING ul%=len(cfields$(hl%))+1: return
 
+
 HS_CE_SAVE_CONTACT rem
 'change status message and disable user interaction
-cstatus$="saving{elipsis}"
+cstatus$="{grn}saving{elipsis}"
 ni=1
+if cselected%>0 then pindex%=cselected% 'editing existing contact
+if cselected%=0 then gosub PHONEBOOK_GET_FIRST_EMPTY_INDEX: pindex%=k 'creating a new contact, we need an index
+'ask modem to write the edited/created contact to SIM phonebook
+jt%(99)= HS_CE_SAVE_CONTACT_CALLBACK
+s$="AT+CPBW="+right$(str$(pindex%), len(str$(pindex%))-1)+","+chr$(34)+cfields$(2)+chr$(34)+",129,"+chr$(34)+cfields$(1)+chr$(34)+chr$(13)
+gosub WRITE_STRING_TO_MODEM
+return
+
+HS_CE_SAVE_CONTACT_CALLBACK rem
+' modem sent a response to at+cpbw
+jt%(99)=0
+ni=0 're-enable user interaction
+db=0
+if merror=1 then merror=0: cstatus$="{red}error while saving!": return 'modem error, stay on screen
+if merror=0 then gosub HS_CE_CONTACT_SAVED: gosub HS_CE_CLEANUP: gosub SWITCH_TO_LAST_SCREEN: return 'modem OK, contact saved, switch to last screen
+return
+
+HS_CE_CONTACT_SAVED rem
 'save the edited/created contact to phonebook in RAM
 if cselected%>0 then pnumber$(cselected%)=cfields$(2): ptxt$(cselected%)=cfields$(1)
 if cselected%=0 then gosub HS_CE_NEW_CONTACT 'new contact
 gosub PHONEBOOK_TO_CONTACT_PANE: gosub TRIM_CONTACT_PANE 'update contact pane
-'ask modem to write the edited/created contact to SIM phonebook
-jt%(99)= HS_CE_CONTACT_SAVED
-s$="AT+CPBW="+right$(str$(cselected%), len(str$(cselected%))-1)+","+chr$(34)+pnumber$(cselected%)+chr$(34)+","+right$(str$(ptype%(cselected%)), len(str$(ptype%(cselected%)))-1)+","+chr$(34)+ptxt$(cselected%)+chr$(34)
-gosub WRITE_STRING_TO_MODEM
 return
 
 HS_CE_NEW_CONTACT rem
 ' create a new contact at the first available index
-gosub PHONEBOOK_GET_FIRST_EMPTY_INDEX: pindex%=k
 pindex%(pindex%)=1
 pnumber$(pindex%)=cfields$(2)
 ptxt$(pindex%)=cfields$(1)
@@ -103,15 +118,37 @@ ptype%(pindex%)=129 'unknow number type; TODO: add the type field or auto-determ
 cselected%=pindex%
 return
 
-HS_CE_CONTACT_SAVED rem
+
+HS_CE_DELETE_CONTACT rem
+'delete the selected contact
+'change status message and disable user interaction
+cstatus$="{yel}deleting{elipsis}"
+ni=1
+'ask modem to write the delete contact from SIM phonebook
+jt%(99)= HS_CE_DELETE_CONTACT_CALLBACK
+s$="AT+CPBW="+right$(str$(cselected%), len(str$(cselected%))-1)+chr$(13)
+gosub WRITE_STRING_TO_MODEM
+return
+
+HS_CE_DELETE_CONTACT_CALLBACK rem
 ' modem sent a response to at+cpbw
 jt%(99)=0
 ni=0 're-enable user interaction
-if merror=1 then merror=0: cstatus$="error while saving!": return 'modem error, stay on screen
-if merror=0 then gosub HS_CE_CLEANUP: gosub SWITCH_TO_LAST_SCREEN: return 'modem OK, contact saved, switch to last screen
+if merror=1 then merror=0: cstatus$="{red}error while deleting!": return 'modem error, stay on screen
+if merror=0 then gosub HS_CE_CONTACT_DELETED: gosub HS_CE_CLEANUP: gosub SWITCH_TO_SCREEN_DIALLER: return 'modem OK, contact deleted, go to screen dialler
 return
 
-HS_CE_CLEANUP ctrigger=0: cstatus$="": return 'clean-up before leaving screen
+HS_CE_CONTACT_DELETED rem
+'contact has been deleted from storage, delete it from RAM
+pindex%(cselected%)=0
+pnumber$(cselected%)=""
+ptxt$(cselected%)=""
+ptype%(cselected%)=0
+cselected%=0
+gosub PHONEBOOK_TO_CONTACT_PANE: gosub TRIM_CONTACT_PANE 'update contact pane
+return
+
+HS_CE_CLEANUP ctrigger=0: cstatus$="": cfields$(1)="": cfields$(2)="": return 'clean-up before leaving screen
 
 
 '### CALL screen handler ###

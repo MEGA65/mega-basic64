@@ -152,7 +152,9 @@ pindex%=0 'the last phonebook index that was filled (i.e. the higher used phoneb
 dim pnumber$(plngth%) 'phone number array
 dim ptype%(plngth%) 'phone number type array [129, 145, 161]
 dim ptxt$(plngth%) 'text array
-dim psim%(plngth%) 'sim index array
+'dim psim%(plngth%) 'sim index array
+'   0: contact not in sim
+'   X: contact in sim at index X
 cmaxindex%=16 'dim of contact array
 clngth%=17 'max length that can be displayed in the contact pane
 dim cpane$(cmaxindex%) 'contact pane array: names to be displayed in the contact pane

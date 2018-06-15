@@ -17,14 +17,17 @@ s$="at+cpbr=1,"+right$(str$(pused%),len(str$(pused%))-1)+chr$(13): gosub WRITE_S
 gosub WAIT_MODEM_READY
 if db>=4 then print "+CPBR received"
 'The memory phonebook should be filled with entries from the SIM phonebook
-print "+CPBR: phonebook entries received"
-if db>=4 and pindex%>0 then for i=1 to pindex%: print pnumber$(i)+" "+ptxt$(i)+" "+str$(psim%(i)): next i
-return
+if db>=4 then print "+CPBR: phonebook entries received": goto LP_SIM_1
+goto LP_SIM_2
+LP_SIM_1 for i=1 to pused%
+if pindex%(i)>0 then print pnumber$(i)+" "+ptxt$(i)+" "+str$(i)
+next i
+LP_SIM_2 return
 
 LOAD_PHONEBOOK_CODE rem
 '== load phonebook from code ==
 'For now, we load predefined entries from the program itself.
-for i=1 to 3: pindex%(i)=1: psim%(i)=0: next i
+for i=1 to 3: pindex%(i)=1: next i: 'psim%(i)=0:
 pnumber$(1)="+61882013911": ptype%(1)=129 : ptxt$(1)="flinders uni"
 pnumber$(2)="131444": ptype%(2)=129 : ptxt$(2)="sa police"
 pnumber$(3)="000": ptype%(3)=129 : ptxt$(3)="emergency"

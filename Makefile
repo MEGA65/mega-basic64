@@ -59,6 +59,7 @@ TELEPHONY_ASSETS= \
 		$(ASSETS)/message_1.png \
 		$(ASSETS)/send_1.png \
 		$(ASSETS)/search-s.png \
+		$(ASSETS)/save.png
 
 
 VEHICLE_ASSETS=	\
