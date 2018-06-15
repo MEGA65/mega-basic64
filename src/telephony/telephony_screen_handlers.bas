@@ -94,8 +94,8 @@ gosub WRITE_STRING_TO_MODEM
 return
 
 HS_CE_NEW_CONTACT rem
-' create a new contact at index pindex%
-pindex%=pindex%+1
+' create a new contact at the first available index
+gosub PHONEBOOK_GET_FIRST_EMPTY_INDEX: pindex%=k
 pindex%(pindex%)=1
 pnumber$(pindex%)=cfields$(2)
 ptxt$(pindex%)=cfields$(1)

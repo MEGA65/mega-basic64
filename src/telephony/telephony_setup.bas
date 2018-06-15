@@ -119,24 +119,21 @@ goto MLOOP
 
 '=== GUI-related setup ===
 SETUP_GUI rem
-'GUI offset: the offset between a canvas and its 'pressed' equivalent, i.e. the number of loaded 'button' canvas
-gffst=28
-
-'user-input char and number initialization
-u$="": nb$=""
-'Signal Level integer [0:5]
-sl%=0
-'Bit Error Rate string to be displayed
-ber$="?"
-'Battery Level integer [0:10]
-bl%=10
-'timer for keystrokes
-tmr=1000
-'highlighted line (for example in contact pane)
-hl%=0
-'rows to be printed in a box
-dim r(24)
-
+'--- Canvas & Tiles ---
+gs%=1 'Signal Index: index of the canvas at which the signal icons start
+gb%=7 'Battery Index: index of the canvas at which the battery icons start
+gd%=18 'Dialler Index: index of the canvas at which the dialler buttons start
+gffst=28 'GUI offset: the offset between a canvas and its 'pressed' equivalent, i.e. the number of loaded 'button' canvas
+'--- Other ---
+u$="" 'user-input char
+nb$="" 'phone number dialled on the dialler screen
+sl%=0 'Signal Level integer [0:5]
+ber$="?" 'Bit Error Rate string to be displayed
+bl%=10 'Battery Level integer [0:10]
+tmr=1000 'timer for keystrokes
+hl%=0 'highlighted line (for example in contact pane)
+ul%=0 'underlined column (when editing a field for example)
+dim r(24) 'rows to be printed in a box
 return
 
 '=== phonebook setup ===

@@ -14,6 +14,23 @@ BINDIR=		bin
 TELEPHONY=	$(SRCDIR)/telephony
 
 TELEPHONY_ASSETS= \
+		$(ASSETS)/signal0_24x16-s.png \
+		$(ASSETS)/signal1_24x16-s.png \
+		$(ASSETS)/signal2_24x16-s.png \
+		$(ASSETS)/signal3_24x16-s.png \
+		$(ASSETS)/signal4_24x16-s.png \
+		$(ASSETS)/signal5_24x16-s.png \
+		$(ASSETS)/battery0.png \
+		$(ASSETS)/battery10.png \
+		$(ASSETS)/battery20.png \
+		$(ASSETS)/battery30.png \
+		$(ASSETS)/battery40.png \
+		$(ASSETS)/battery50.png \
+		$(ASSETS)/battery60.png \
+		$(ASSETS)/battery70.png \
+		$(ASSETS)/battery80.png \
+		$(ASSETS)/battery90.png \
+		$(ASSETS)/battery100.png \
 		$(ASSETS)/dial0.png \
 		$(ASSETS)/dial1.png \
 		$(ASSETS)/dial2.png \
@@ -33,7 +50,15 @@ TELEPHONY_ASSETS= \
 		$(ASSETS)/erase.png \
 		$(ASSETS)/phone_green.png \
 		$(ASSETS)/phone_red.png \
-		$(ASSETS)/satellite.png \
+		$(ASSETS)/dualsim.png \
+		$(ASSETS)/contact_new.png \
+		$(ASSETS)/arrow_back.png \
+		$(ASSETS)/cog.png \
+		$(ASSETS)/trash_bin.png \
+		$(ASSETS)/globe.png \
+		$(ASSETS)/message_1.png \
+		$(ASSETS)/send_1.png \
+		$(ASSETS)/search-s.png \
 		$(ASSETS)/dial0_pressed.png \
 		$(ASSETS)/dial1_pressed.png \
 		$(ASSETS)/dial2_pressed.png \
@@ -53,34 +78,7 @@ TELEPHONY_ASSETS= \
 		$(ASSETS)/erase_pressed.png \
 		$(ASSETS)/phone_blue.png \
 		$(ASSETS)/phone_blue.png \
-		$(ASSETS)/satellite_pressed.png \
-		$(ASSETS)/signal0_24x16-s.png \
-		$(ASSETS)/signal1_24x16-s.png \
-		$(ASSETS)/signal2_24x16-s.png \
-		$(ASSETS)/signal3_24x16-s.png \
-		$(ASSETS)/signal4_24x16-s.png \
-		$(ASSETS)/signal5_24x16-s.png \
-		$(ASSETS)/dualsim.png \
 		$(ASSETS)/dualsim_pressed.png \
-		$(ASSETS)/battery0.png \
-		$(ASSETS)/battery10.png \
-		$(ASSETS)/battery20.png \
-		$(ASSETS)/battery30.png \
-		$(ASSETS)/battery40.png \
-		$(ASSETS)/battery50.png \
-		$(ASSETS)/battery60.png \
-		$(ASSETS)/battery70.png \
-		$(ASSETS)/battery80.png \
-		$(ASSETS)/battery90.png \
-		$(ASSETS)/battery100.png \
-		$(ASSETS)/arrow_back.png \
-		$(ASSETS)/cog.png \
-		$(ASSETS)/trash_bin.png \
-		$(ASSETS)/globe.png \
-		$(ASSETS)/message_1.png \
-		$(ASSETS)/send_1.png \
-		$(ASSETS)/search-s.png \
-		$(ASSETS)/contact_new.png \
 		$(ASSETS)/contact_new_pressed.png \
 
 VEHICLE_ASSETS=	\

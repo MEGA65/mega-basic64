@@ -28,7 +28,7 @@ for i=1 to shi: if shi<>0 then print " ";: next i
 'print the network type (abbreviation)
 print nt$;
 'print the signal level canvas in the status bar
-canvas 40+1+sl% stamp on canvas 0 at 32,0
+canvas gs%+sl% stamp on canvas 0 at 32,0
 'print the BER under signal strength
 'xx=28: yy=1: gosub MOVE_CURSOR_XX_YY: print "ber";ber$;
 return
@@ -51,7 +51,7 @@ if len(str$(int(btp+0.5)))<2 or len(str$(int(btp+0.5)))>4 then bls$="   ?%"
 'print the battery level string
 xx=35: yy=0: gosub MOVE_CURSOR_XX_YY: print bls$;
 'print the battery level canvas in the status bar
-canvas 49+bl% stamp on canvas 0 at 39,0
+canvas gb%+bl% stamp on canvas 0 at 39,0
 return
 
 '=== print clock in status bar ===
@@ -114,72 +114,99 @@ if hl%=i then print "{yel}";
 s$=cpane$(i): l=clngth%: gosub TRIM_STRING_SPACES: print s$;
 print "{lblu}";
 next i
-canvas 66 stamp on canvas 0 at 37,22 'stamp search icon
+xx=37:yy=22: gosub STAMP_SEARCH 'stamp search icon
 return
 
 '=== draw dialpad ===
 DS_DIALLER_DIALPAD rem 'reinitialize timer
 tmr=20
 for x=1 to 3: for y=1 to 3
+xx=x*5-4: yy=y*4+1
 if val(u0$)=x+(y-1)*3 then gosub STAMP_1_TO_9_PRESSED: goto NEXTYX
 gosub STAMP_1_TO_9
 NEXTYX next y,x
-T1 if u0$="#" then gosub STAMP_HASH_PRESSED: goto T2
+T1 xx=1:yy=17
+if u0$="#" then gosub STAMP_HASH_PRESSED: goto T2
 gosub STAMP_HASH
-T2 if u0$="0" then gosub STAMP_0_PRESSED: goto T3
+T2 xx=6:yy=17
+if u0$="0" then gosub STAMP_0_PRESSED: goto T3
 gosub STAMP_0
-T3 if u0$="*" then gosub STAMP_STAR_PRESSED: goto T4
+T3 xx=11:yy=17
+if u0$="*" then gosub STAMP_STAR_PRESSED: goto T4
 gosub STAMP_STAR
-T4 if u0$=chr$(13) then gosub STAMP_GREENPHONE_PRESSED: goto T5
+T4 xx=1:yy=21
+if u0$=chr$(13) then gosub STAMP_GREENPHONE_PRESSED: goto T5
 gosub STAMP_GREENPHONE
-T5 if u0$="+" then gosub STAMP_PLUS_PRESSED: goto T6
+T5 xx=6:yy=21
+if u0$="+" then gosub STAMP_PLUS_PRESSED: goto T6
 gosub STAMP_PLUS
-T6 if u0$=chr$(20) then gosub STAMP_BACKSPACE_PRESSED: goto T7
+T6 xx=11:yy=21
+if u0$=chr$(20) then gosub STAMP_BACKSPACE_PRESSED: goto T7
 gosub STAMP_BACKSPACE
-T7 if u0$="-" then gosub STAMP_MINUS_PRESSED: goto T8
+T7 xx=16:yy=9
+if u0$="-" then gosub STAMP_MINUS_PRESSED: goto T8
 gosub STAMP_MINUS
-T8 if u0$="/" then gosub STAMP_DIVIDE_PRESSED: goto T9
+T8 xx=16:yy=13
+if u0$="/" then gosub STAMP_DIVIDE_PRESSED: goto T9
 gosub STAMP_DIVIDE
-T9 if u0$="=" then gosub STAMP_EQUAL_PRESSED: goto T10
+T9 xx=16:yy=17
+if u0$="=" then gosub STAMP_EQUAL_PRESSED: goto T10
 gosub STAMP_EQUAL
-T10 if u0$="@" then gosub STAMP_CONTACT_NEW_PRESSED: goto T11
+T10 xx=16:yy=21
+if u0$="@" then gosub STAMP_CONTACT_NEW_PRESSED: goto T11
 gosub STAMP_CONTACT_NEW
-T11 if u0$="<" or u$=">" then gosub STAMP_DUALSIM_PRESSED: goto T99
+T11 xx=16:yy=5
+if u0$="<" or u$=">" then gosub STAMP_DUALSIM_PRESSED: goto T99
 gosub STAMP_DUALSIM
 T99 return
 
-STAMP_1_TO_9_PRESSED canvas x+(y-1)*3+1+20 stamp on canvas 0 at x*5-4,y*4+1: return
-STAMP_1_TO_9 canvas x+(y-1)*3+1 stamp on canvas 0 at x*5-4,y*4+1: return
-STAMP_HASH_PRESSED canvas 11+20 stamp on canvas 0 at 1,17: return
-STAMP_HASH canvas 11 stamp on canvas 0 at 1,17: return
-STAMP_0_PRESSED canvas 1+20 stamp on canvas 0 at 6,17: return
-STAMP_0 canvas 1 stamp on canvas 0 at 6,17: return
-STAMP_STAR_PRESSED canvas 12+20 stamp on canvas 0 at 11,17: return
-STAMP_STAR canvas 12 stamp on canvas 0 at 11,17: return
-STAMP_GREENPHONE_PRESSED canvas 18+20 stamp on canvas 0 at 1,21: return
-STAMP_GREENPHONE canvas 18 stamp on canvas 0 at 1,21: return
-STAMP_PLUS_PRESSED canvas 15+20 stamp on canvas 0 at 6,21: return
-STAMP_PLUS canvas 15 stamp on canvas 0 at 6,21: return
-STAMP_BACKSPACE_PRESSED canvas 17+20 stamp on canvas 0 at 11,21: return
-STAMP_BACKSPACE canvas 17 stamp on canvas 0 at 11,21: return
-STAMP_MINUS_PRESSED canvas 14+20 stamp on canvas 0 at 16,9: return
-STAMP_MINUS canvas 14 stamp on canvas 0 at 16,9: return
-STAMP_DIVIDE_PRESSED canvas 13+20 stamp on canvas 0 at 16,13: return
-STAMP_DIVIDE canvas 13 stamp on canvas 0 at 16,13: return
-STAMP_EQUAL_PRESSED canvas 16+20 stamp on canvas 0 at 16,17: return
-STAMP_EQUAL canvas 16 stamp on canvas 0 at 16,17: return
-STAMP_CONTACT_NEW_PRESSED canvas 68 stamp on canvas 0 at 16,21: return
-STAMP_CONTACT_NEW canvas 67 stamp on canvas 0 at 16,21: return
-STAMP_DUALSIM_PRESSED canvas 48 stamp on canvas 0 at 16,5: return
-STAMP_DUALSIM canvas 47 stamp on canvas 0 at 16,5: return
-
+STAMP_0 canvas gd% stamp on canvas 0 at xx,yy: return
+STAMP_0_PRESSED canvas gd%+gffset stamp on canvas 0 at xx,yy: return
+STAMP_1_TO_9 canvas gd%+x+(y-1)*3 stamp on canvas 0 at xx,yy: return
+STAMP_1_TO_9_PRESSED canvas gd%+x+(y-1)*3+gffset stamp on canvas 0 at xx,yy: return
+STAMP_HASH canvas gd%+10 stamp on canvas 0 at xx,yy: return
+STAMP_HASH_PRESSED canvas gd%+10+gffset stamp on canvas 0 at xx,yy: return
+STAMP_STAR canvas gd%+10+1 stamp on canvas 0 at xx,yy: return
+STAMP_STAR_PRESSED canvas gd%+10+1+gffset stamp on canvas 0 at xx,yy: return
+STAMP_DIVIDE canvas gd%+10+2 stamp on canvas 0 at xx,yy: return
+STAMP_DIVIDE_PRESSED canvas gd%+10+2+gffset stamp on canvas 0 at xx,yy: return
+STAMP_MINUS canvas gd%+10+3 stamp on canvas 0 at xx,yy: return
+STAMP_MINUS_PRESSED canvas gd%+10+3+gffset stamp on canvas 0 at xx,yy: return
+STAMP_PLUS canvas gd%+10+4 stamp on canvas 0 at xx,yy: return
+STAMP_PLUS_PRESSED canvas gd%+10+4+gffset stamp on canvas 0 at xx,yy: return
+STAMP_EQUAL canvas gd%+10+5 stamp on canvas 0 at xx,yy: return
+STAMP_EQUAL_PRESSED canvas gd%+10+5+gffset stamp on canvas 0 at xx,yy: return
+STAMP_BACKSPACE canvas gd%+10+6 stamp on canvas 0 at xx,yy: return
+STAMP_BACKSPACE_PRESSED canvas gd%+10+6+gffset stamp on canvas 0 at xx,yy: return
+STAMP_GREENPHONE canvas gd%+10+7 stamp on canvas 0 at xx,yy: return
+STAMP_GREENPHONE_PRESSED canvas gd%+10+7+gffset stamp on canvas 0 at xx,yy: return
+STAMP_REDPHONE canvas gd%+10+8 stamp on canvas 0 at xx,yy: return
+STAMP_REDPHONE_PRESSED canvas gd%+10+8+gffset stamp on canvas 0 at xx,yy: return
+STAMP_DUALSIM canvas gd%+10+9 stamp on canvas 0 at xx,yy: return
+STAMP_DUALSIM_PRESSED canvas gd%+10+9+gffset stamp on canvas 0 at xx,yy: return
+STAMP_CONTACT_NEW canvas gd%+10+10 stamp on canvas 0 at xx,yy: return
+STAMP_CONTACT_NEW_PRESSED canvas gd%+10+10+gffset stamp on canvas 0 at xx,yy: return
+STAMP_ARROW_BACK canvas gd%+10+11 stamp on canvas 0 at xx,yy: return
+STAMP_ARROW_BACK_PRESSED canvas gd%+10+11+gffset stamp on canvas 0 at xx,yy: return
+STAMP_COG canvas gd%+10+12 stamp on canvas 0 at xx,yy: return
+STAMP_COG_PRESSED canvas gd%+10+12+gffset stamp on canvas 0 at xx,yy: return
+STAMP_TRASH_BIN canvas gd%+10+13 stamp on canvas 0 at xx,yy: return
+STAMP_TRASH_BIN_PRESSED canvas gd%+10+13+gffset stamp on canvas 0 at xx,yy: return
+STAMP_GLOBE canvas gd%+10+14 stamp on canvas 0 at xx,yy: return
+STAMP_GLOBE_PRESSED canvas gd%+10+14+gffset stamp on canvas 0 at xx,yy: return
+STAMP_MESSAGE canvas gd%+10+15 stamp on canvas 0 at xx,yy: return
+STAMP_MESSAGE_PRESSED canvas gd%+10+15+gffset stamp on canvas 0 at xx,yy: return
+STAMP_SEND canvas gd%+10+16 stamp on canvas 0 at xx,yy: return
+STAMP_SEND_PRESSED canvas gd%+10+16+gffset stamp on canvas 0 at xx,yy: return
+STAMP_SEARCH canvas gd%+10+17 stamp on canvas 0 at xx,yy: return
+STAMP_SEARCH_PRESSED canvas gd%+10+17+gffset stamp on canvas 0 at xx,yy: return
 
 '### CONTACT screen update subroutine ###
 DRAW_SCREEN_CONTACT rem
 'buttons
-canvas 60 stamp on canvas 0 at 0,2 'arrow back
-canvas 18 stamp on canvas 0 at 0,6 'greephone
-canvas 61 stamp on canvas 0 at 0,10 'cog
+xx=0: yy=2: gosub STAMP_ARROW_BACK 'arrow back
+xx=0: yy=6: gosub STAMP_GREENPHONE 'greephone
+xx=0: yy=10: gosub STAMP_COG 'cog
 'canvas 62 stamp on canvas 0 at 0,14 'cog
 'contact name/number box
 gosub TRIM_CONTACT_DISPLAY_TEXT
@@ -191,8 +218,8 @@ if len(cdisplay$)<34 then for j=1 to 34-len(cdisplay$): print " ";: next j
 'SMS box
 print "{wht}";
 x=4: y=5: w=36: h=20: r(15)=1: gosub DRAW_BOX
-canvas 63 stamp on canvas 0 at 5,21 'globe
-canvas 64 stamp on canvas 0 at 35,21 'message
+xx=5: yy=21: gosub STAMP_GLOBE 'globe
+xx=35: yy=21: gosub STAMP_MESSAGE 'message
 return
 '### end DRAW_SCREEN_CONTACT ###
 
@@ -200,7 +227,7 @@ return
 '### CONTACT_EDIT screen update subroutine ###
 DRAW_SCREEN_CONTACT_EDIT rem
 'buttons
-canvas 60 stamp on canvas 0 at 0,2 'arrow back
+xx=0: yy=2: gosub STAMP_ARROW_BACK 'arrow back
 'heading box
 print "{wht}";
 x=4: y=2: w=36: h=3: gosub DRAW_BOX
@@ -246,15 +273,15 @@ print "{wht}";
 x=0: y=2: w=40: h=3: gosub DRAW_BOX
 
 'common buttons
-canvas 19 stamp on canvas 0 at 0,10 'redphone
-canvas 61 stamp on canvas 0 at 0,14 'cog
-canvas 61 stamp on canvas 0 at 0,18 'cog
+xx=0: yy=10: gosub STAMP_REDPHONE 'redphone
+xx=0: yy=14: gosub STAMP_COG 'cog
+'xx=0: yy=18: gosub STAMP_COG 'cog
 
 'SMS box
 print "{wht}";
 x=4: y=5: w=36: h=20: r(15)=1: gosub DRAW_BOX
-canvas 63 stamp on canvas 0 at 5,21 'globe
-canvas 64 stamp on canvas 0 at 35,21 'message
+xx=5: yy=21: gosub STAMP_GLOBE 'globe
+xx=35: yy=21: gosub STAMP_MESSAGE 'message
 
 'TODO: use another flag for debugging and logging
 if db=1 then goto DS_CALL_DEBUG
