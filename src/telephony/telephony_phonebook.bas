@@ -24,14 +24,19 @@ return
 LOAD_PHONEBOOK_CODE rem
 '== load phonebook from code ==
 'For now, we load predefined entries from the program itself.
-for i=1 to 5: pindex%(i)=1: psim%(i)=0: next i
+for i=1 to 3: pindex%(i)=1: psim%(i)=0: next i
 pnumber$(1)="+61882013911": ptype%(1)=129 : ptxt$(1)="flinders uni"
 pnumber$(2)="131444": ptype%(2)=129 : ptxt$(2)="sa police"
 pnumber$(3)="000": ptype%(3)=129 : ptxt$(3)="emergency"
-pnumber$(4)="": ptype%(4)=129 : ptxt$(4)=""
-pnumber$(5)="": ptype%(5)=129 : ptxt$(5)=""
-gosub PHONEBOOK_ENTRIES
-'This subroutine is in another file, not uploaded to Git. It simply contains the same preceding lines, with actual data.
+'Test of edge cases (text or number too long to be displayed in the contact screen)
+'   len(pnumber)>12 and len(ptxt)>20:
+pindex%(6)=1: pnumber$(6)="0123456789123": ptype%(6)=129 : ptxt$(6)="a string longer than 20"
+'   len(pnumber)<12 and len(ptxt)+len(pnumber)>35:
+pindex%(7)=1: pnumber$(7)="0123456789": ptype%(7)=161 : ptxt$(7)="a string that is way way too long"
+'   len(ptxt)<20 and len(ptxt)+len(pnumber)>35:
+pindex%(8)=1: pnumber$(8)="12345678901234567890123456": ptype%(8)=161 : ptxt$(8)="short string"
+'gosub PHONEBOOK_ENTRIES_PRIVATE
+'This subroutine is in another file, which updates are not uploaded to Git. It simply contains the same preceding lines, with private data.
 return
 
 PHONEBOOK_TO_CONTACT_PANE rem
@@ -71,3 +76,14 @@ if len(pnumber$(cselected%))<12 and len(ptxt$(cselected%))>34-3-len(pnumber$(cse
 if len(ptxt$(cselected%))<19 and len(pnumber$(cselected%))>34-3-len(ptxt$(cselected%)) then cdisplay$=ptxt$(cselected%)+" ("+left$(pnumber$(cselected%),34-3-1-len(ptxt$(cselected%)))+"{elipsis})": return
 'no trim
 cdisplay$=ptxt$(cselected%)+" ("+pnumber$(cselected%)+")": return
+
+PHONEBOOK_TO_CONTACT_PANE_INDEX rem
+'Get contact pane index k from phonebook index p
+'  array cindex%() provides a mapping contact pane -> phonebook
+'  we need to do the opposite operation
+k=0 'if phonebook entry not in contact pane, return 0
+if p=0 then return 'if phonebook index is 0, return 0
+for i=1 to cmaxindex%
+if cindex%(i)=p then k=i: return
+next i
+return

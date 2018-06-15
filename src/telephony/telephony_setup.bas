@@ -3,6 +3,14 @@ LOOKUP_GOTO_LN_PATCH_ADDRESS rem
 for ja=2048 to 40959: if peek(ja-1)<>141 or peek(ja)<>44 then next
 return
 
+'=== functions definition ===
+DEFINE_FUNCTIONS rem
+'modulo divisor
+mdv=1
+'x modulo mdv; x % mdv
+def fn mod(x) = x-(int(x/mdv)*mdv)
+return
+
 '=== program flags and variables setup ===
 SETUP_PROGRAM rem
 db=db 'flag db (debug): print debugging information
@@ -141,6 +149,8 @@ pused%=-1 'the number of contacts in the phonebook memory (i.e. SIM)
 ptotal%=0 'the maximum number of contacts that can be stored in the phonebook memory (i.e. SIM)
 plngth%=100 'maximum number of contacts in the MEGA65 memory
 dim pindex%(plngth%) 'index array
+'   0: contact at index i doesn't exist / isn't active
+'   1: contact at index i exists / is active
 pindex%=0 'the last phonebook index that was filled (i.e. the higher used phonebook index)'
 dim pnumber$(plngth%) 'phone number array
 dim ptype%(plngth%) 'phone number type array [129, 145, 161]
@@ -170,12 +180,4 @@ cstatus$="" 'status message on the contact edit screen
 gosub LOAD_PHONEBOOK
 gosub PHONEBOOK_TO_CONTACT_PANE
 gosub TRIM_CONTACT_PANE
-return
-
-'=== functions definition ===
-DEFINE_FUNCTIONS rem
-'modulo divisor
-mdv=1
-'x modulo mdv; x % mdv
-def fn mod(x) = x-(int(x/mdv)*mdv)
 return

@@ -190,7 +190,7 @@ SWITCH_TO_SCREEN_DIALLER rem
 '=== switch to screen DIALLER (1) ===
 ls=sc: sc=1
 gosub SWITCH_SCREEN_CLEANUP
-hl%=cselected% 'set back previously highlighted contact
+p=cselected%: gosub PHONEBOOK_TO_CONTACT_PANE_INDEX: hl%=k 'set back previously highlighted contact
 'Mark entire screen as requiring a re-draw
 su=1: up=1: uc=1: ud=1
 return
