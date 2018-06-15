@@ -170,6 +170,30 @@ if btp>85 and btp <=95 then bl%=9
 if btp>95 and btp <=100 then bl%=10
 return
 
+CALCULATE_CURRENT_TIME rem
+mdv=5183999: nrtm=fn mod((time-nmtm)+nltm)
+return
+
+REAL_TIME_TO_STRINGS rem
+'Converts a real time k to strings (thour$, tmin$, tsec$)
+mdv=5183999: k=fn mod(k)
+thour=int(k/216000)
+tmin=int((k-thour*216000)/3600)
+tsec=int((k-thour*216000-tmin*3600)/60)
+thour$="": tmin$="": tsec$=""
+if thour>=0 and thour<=9 then thour$=thour$+"0"
+thour$=thour$+right$(str$(thour), len(str$(thour))-1)
+if tmin>=0 and tmin<=9 then tmin$=tmin$+"0"
+tmin$=tmin$+right$(str$(tmin), len(str$(tmin))-1)
+if tsec>=0 and tsec<=9 then tsec$=tsec$+"0"
+tsec$=tsec$+right$(str$(tsec), len(str$(tsec))-1)
+return
+
+REAL_TIME_TO_STRING rem
+'Converts a real time k to string s$ ("HH:MM:SS")
+gosub REAL_TIME_TO_STRINGS
+s$=thour$+":"+tmin$+":"+tsec$
+return
 
 '### switch to screen ###
 'change the current screen

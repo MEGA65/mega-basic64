@@ -56,11 +56,16 @@ return
 
 '=== print clock in status bar ===
 PRINT_CLOCK rem
-t$=time$
+'t$=time$
 xx=16: yy=0: gosub MOVE_CURSOR_XX_YY
-print left$(t$,2);":";
-print mid$(t$,3,2);":";
-print right$(t$,2);
+'print left$(t$,2);":";
+'print mid$(t$,3,2);":";
+'print right$(t$,2);
+'ntm=time-tc
+'dtmr$=""
+gosub CALCULATE_CURRENT_TIME 'returns current time in nrtm
+k=nrtm: gosub REAL_TIME_TO_STRING 'conberts k time to string s$
+print s$
 return
 
 '=== print network name in status bar ===
@@ -327,7 +332,7 @@ DS_CALL_TIMER rem
 xx=0: yy=6: gosub MOVE_CURSOR_XX_YY
 print left$(dtmr$,2);
 xx=0: yy=7: gosub MOVE_CURSOR_XX_YY
-print ":";mid$(dtmr$,3,2);
+print ":";mid$(dtmr$,4,2);
 xx=1: yy=8: gosub MOVE_CURSOR_XX_YY
 print ":";right$(dtmr$,2);
 return

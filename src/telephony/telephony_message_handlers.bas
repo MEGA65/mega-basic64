@@ -346,8 +346,19 @@ ptype%(pindex%)=val(mf$(3)) 'type of phone number
 s$=mf$(4): gosub REMOVE_QUOTES_STRING: ptxt$(pindex%)=s$ 'contact name
 15699 return
 
-'Message handler: message type 57
-MESSAGE_HANDLER_57 rem
+'Message handler: +QLTS
+MESSAGE_HANDLER_+QLTS rem
+nmtm=time
+if mf$(1)="" then nmtm=0: return 'If the time has not been synchronized through network, the command will return a null time string: +QLTS:""
+'Synchronized network time: +QLTS: "2018/06/15,18:30:57+38,0"
+'/!\ After parsing, we get:
+'       mf$(1)="2018/06/15
+'       mf$(2)=183057+38
+'       mf$(3)=0"
+ntm$(1)=mid$(mf$(2),1,2) 'hours
+ntm$(2)=mid$(mf$(2),3,2) 'minutes
+ntm$(3)=mid$(mf$(2),5,2) 'seconds
+nltm=val(ntm$(1))*216000+val(ntm$(2))*3600+val(ntm$(3))*60
 15799 return
 
 'Message handler: message type 58

@@ -29,16 +29,29 @@ sr=10 'screen refresh rate: number of loops between 2 screen updates
 su=0 'flag su (screen update): a change in the program requires a screen update
 us=0 'flag us (updated screen): is set to 1 when the screen if actually updated
 ml=0 'last call to POLL_MODEM resulted in a call to HANDLE_MODEM_LINE
-cid$="" 'caller id (number)
-dr$="" 'dr (dialling result): user friendly information about dialling state
-dia=0 'flag dia (dialling): the modem is currently dialling
+cnt=0 'loop counter
+
+'=== various indicators ===
 rssi=99 'rssi: received signal strength indicator
 ber=99 'ber: channel bit error rate
 btp=100.0 'remaining battery percentage [0:100]
-cnt=0 'loop counter
+
+'=== network-related variables ===
 nact$="" 'network access technology (GSM, EDGE, HSPA, LTE...)
 ntype$="" 'network type, to be displayed (2G, 3G, 4G...)
 nname$="" 'network name to be displayed
+dim ntm$(3) 'network time
+'   1: hours
+'   2: minutes
+'   3: seconds
+nltm=0 'network last synchronized time (the real time)
+nmtm=0 'MEGA65 time when received network last synchronized time
+nrtm=0 'current real time, based on network synchronized time
+
+'=== dialling-related variables ===
+cid$="" 'caller id (number)
+dr$="" 'dr (dialling result): user friendly information about dialling state
+dia=0 'flag dia (dialling): the modem is currently dialling
 dactive=0 'dactive
 '   0: no call active
 '   1: call in progress
@@ -54,8 +67,12 @@ dnumber$="" 'number to be dialed
 ddisplay$="" 'the text to be displayed at the top of the call screen
 tc=0 'tc: initial time at beginning of call
 dtmr=0 'dtmr: call timer
-dtmr$="000000" 'dtmr$: call timer, in the format HHMMSS
+dtmr$="00:00:00" 'dtmr$: call timer, in the format HH:MM:SS
 
+
+'=== time-related variables ===
+thour=0: tmin=0: tsec=0
+thour$="": tmin$="": tsec$=""
 '=== arrays to time different parts of the program ===
 '  0: loop time
 '  1: screen handler

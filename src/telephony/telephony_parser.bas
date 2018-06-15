@@ -98,4 +98,5 @@ if mf$(0)="+QNWINFO" then mn=53
 if mf$(0)="+QSPN" then mn=54
 if mf$(0)="+CPBS" then mn=55
 if mf$(0)="+CPBR" then mn=56
+if mf$(0)="+QLTS" then mn=57
 return

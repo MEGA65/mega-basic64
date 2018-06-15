@@ -84,6 +84,8 @@ mdv=1000: if fn mod(cnt)=0 then mdv=100: btp=fn mod(btp-1): gosub BATTERY_UPDATE
 mdv=500: if fn mod(cnt+250)=0 then s$="at+qnwinfo"+chr$(13): gosub WRITE_STRING_TO_MODEM
 'request network name every 1000 loops
 mdv=500: if fn mod(cnt+500)=0 then s$="at+qspn"+chr$(13): gosub WRITE_STRING_TO_MODEM
+'request network time every 10000 loops
+mdv=10000: if fn mod(cnt-50)=0 then s$="at+qlts=2"+chr$(13): gosub WRITE_STRING_TO_MODEM
 'fix charset bug
 if (peek(53272)and 7)=0 then poke 53272,20
 ttmr(4)=ttmr(4)+(time-t1)

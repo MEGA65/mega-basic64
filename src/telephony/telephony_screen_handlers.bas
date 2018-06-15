@@ -156,16 +156,8 @@ HANDLER_SCREEN_CALL rem
 'general operations
 'update the call timer and timer string
 dtmr=time-tc
-dtmr$=""
-thour=int(dtmr/216000)
-tmin=int((dtmr-thour*216000)/3600)
-tsec=int((dtmr-thour*216000-tmin*3600)/60)
-if thour>=0 and thour<=9 then dtmr$=dtmr$+"0"
-dtmr$=dtmr$+right$(str$(thour), len(str$(thour))-1)
-if tmin>=0 and tmin<=9 then dtmr$=dtmr$+"0"
-dtmr$=dtmr$+right$(str$(tmin), len(str$(tmin))-1)
-if tsec>=0 and tsec<=9 then dtmr$=dtmr$+"0"
-dtmr$=dtmr$+right$(str$(tsec), len(str$(tsec))-1)
+k=dtmr: gosub REAL_TIME_TO_STRING
+dtmr$=s$
 
 'handle user actions
 u$="": get u$
