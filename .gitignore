@@ -6,9 +6,17 @@
 *.tiles
 src/tools/bpp
 src/tools/mktileset
+src/tools/pngprepare/pngprepare
 
 
 # Directories #
 ###############
 bin/
 games/
+
+
+# Specific files #
+##################
+1
+src/telephony/phonebook_entries.bas  # secret contacts
+
