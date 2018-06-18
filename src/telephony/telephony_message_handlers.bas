@@ -378,7 +378,7 @@ return
 
 CMGL_ADD_INDEX rem
 gosub SMS_GET_FIRST_EMPTY_INDEX 'we have the first empty index for SMS in memory, in variable k
-sindex%(k)=val(mf$(1))
+sidex%(k)=val(mf$(1))
 s$=mf$(3): gosub REMOVE_QUOTES_STRING: snumber$(k)=s$
 stxt$(k)=r$
 s$=mf$(2): gosub REMOVE_QUOTES_STRING: satus$(k)=s$

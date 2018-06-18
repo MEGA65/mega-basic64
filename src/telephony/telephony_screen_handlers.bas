@@ -43,7 +43,7 @@ return
 '### CONTACT screen handler ###
 HANDLER_SCREEN_CONTACT rem
 'SMS querying
-db=4: poke 0,64: gosub SWITCH_TO_SCREEN_DEBUG
+'db=4: poke 0,64: gosub SWITCH_TO_SCREEN_DEBUG
 if sq=0 then jt%(99)= HS_C_QUERY_SMS_CALLBACK: s$="AT+CMGL="+chr$(34)+"ALL"+chr$(34)+chr$(13): gosub WRITE_STRING_TO_MODEM: sq=1: satus$="{yel}fetching SMS{elipsis}"
 'handle user actions
 u$="": get u$
@@ -61,7 +61,7 @@ if db>=4 then print "merror=";merror
 'db=0: poke 0,65
 jt%(99)=0
 if merror=1 then sq=0: merror=0: satus$="{red}error!": return 'modem error, we set the flag back to not queried
-if merror=0 then sq=2: satus$="{grn}success" 'SMS for selected contact queried and received
+if merror=0 then sr%=cselected%: sq=2: satus$="{grn}success" 'SMS for selected contact queried and received
 return
 
 

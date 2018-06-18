@@ -212,8 +212,8 @@ SETUP_SMS rem
 sused%=-1 'the number of SMS in selected storage
 stotal%=0 'the maximum number of SMS that can be stored in the selected storage
 slngth%=255 'maximum number of SMS in the MEGA65 memory
-dim sindex%(slngth%) 'mapping between SMS in memory and in storage
-'   sindex%(1)=32: the SMS in memory with index 1 has index 32 in storage
+dim sidex%(slngth%) 'mapping between SMS in memory and in storage
+'   sidex%(1)=32: the SMS in memory with index 1 has index 32 in storage
 dim snumber$(slngth%) 'phone number of the sender of SMS
 dim stxt$(slngth%) 'text of the SMS
 dim sd$(slngth%) 'timestamp (date) of SMS
@@ -223,4 +223,5 @@ sq=0 'SMS for contact Queried. Flag to indicate if the SMS for the currently sel
 '	1: queried, not received
 '	2: queried and received
 satus$="" 'status message for SMS on the contact screen
+sr%=0 'last contact for which SMS were Retrieved
 return

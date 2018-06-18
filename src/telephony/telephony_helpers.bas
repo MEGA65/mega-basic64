@@ -239,6 +239,13 @@ SWITCH_TO_SCREEN_CONTACT rem
 ls=sc: sc=2
 gosub SWITCH_SCREEN_CLEANUP
 su=1
+gosub PREP_CONTACT
+return
+
+PREP_CONTACT rem
+satus$=""
+if sr%=cslected% then return
+gosub EMPTY_SMS: sq=0
 return
 
 SWITCH_TO_SCREEN_CALL rem

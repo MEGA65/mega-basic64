@@ -22,15 +22,17 @@ return
 HANDLE_MODEM_LINE rem
 'received complete line from modem
 if mf$<>"" and fc<20 then mf$(fc)=mf$: fc=fc+1
+if ml$="" and db>=5 then print "Empty line! (<CR> or <LF>)"
 if ml$="" then return
+
 for i=0 to(fc-1)
 'trim one space at the beginning of each field, if there is a whitespace
 if left$(mf$(i),1)=" " then mf$(i)=right$(mf$(i),len(mf$(i))-1)
 next i
-if db>=4 then print "Received modem line: ";ml$
+if db>=4 then print "Received modem line: ";: s$=ml$: gosub PRINT_STRING_CRLF: print chr$(13)
 if db>=5 then print "modem field count: ";fc
 if db>=5 then print "modem fields: ";
-if db>=5 then for i=0 to(fc-1): print"[";mf$(i);"]",: next i
+if db>=5 then for i=0 to(fc-1): print"(";mf$(i);")";: next i: print chr$(13)
 f1$="": ml$="": fc=0: mf$=""
 mn=0
 gosub GET_MESSAGE_TYPE: gosub JUMP_TO_HANDLER
@@ -45,6 +47,15 @@ if mn=40 or mn=44 or mn=49 or mn=50 then rc=1
 if rc=1 then mn=99: gosub JUMP_TO_HANDLER
 return
 
+
+PRINT_STRING_CRLF rem
+'Prints a string, replacing CR and LF by text <CR> and <LF>
+for i=1 to len(s$): b$=right$(left$(s$,i),1)
+if b$<>"" and b$<>chr$(13) and b$<>chr$(10) then print b$;
+if b$=chr$(13) then print chr$(13)+"<cr>";
+if b$=chr$(10) then print "<lf>"+chr$(13);
+next i
+return
 
 '=== Jump to handler ===
 JUMP_TO_HANDLER rem
@@ -106,14 +117,14 @@ return
 RECEIVE_MODEM_LINE rem
 ' Receive one line from the modem
 ' Format:
-'	<cr><lf>
+'	<cr><lf> or <lf>
 '	line of text
 '	<cr><lf>
 ' Returns: only the line of text, in variable r$
 r$="": c$="": last$="": crlf=0
 RML_LOOP last$=c$: c$="": get#1,c$
-if c$="" and last$="" goto RML_LOOP: rem "empty chars at the beginning of the response"
-if c$="" and last$<>"" then return: rem "empty chars at the end of the response"
+if c$="" and last$="" goto RML_LOOP 'empty chars at the beginning of the response"
+if c$="" and last$<>"" then return 'empty chars at the end of the response"
 if c$<>"" then gosub RML_ADD_CHAR: gosub RML_CRLF
 'We exit as soon as we encounter the second <CR><LF>
 if crlf>=2 then return
@@ -122,11 +133,14 @@ goto RML_LOOP
 RML_ADD_CHAR rem
 'Adds the char to result (if not <CR> or <LF>)
 if c$=chr$(13) or c$=chr$(10) then return
+'if c$=chr$(13) then r$=r$+"<cr>": return
+'if c$=chr$(10) then r$=r$+"<lf>": return
 r$=r$+c$: return
 
 RML_CRLF rem
 'If the two last received chars are <CR><LF>, we increment the crlf flag
 if c$=chr$(10) and last$=chr$(13) then crlf=crlf+1
+if c$=chr$(10) and last$="" then crlf=crlf+1
 return
 
 

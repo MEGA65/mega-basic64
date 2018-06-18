@@ -221,7 +221,7 @@ DS_C_PRINT_SMS rem
 print"{wht}";
 xx=5: yy=8: gosub MOVE_CURSOR_XX_YY
 for i=1 to slngth%
-if sindex%(i)<>0 then print stxt$(i);
+if sidex%(i)<>0 then print stxt$(i);
 xx=5: yy=8+i: gosub MOVE_CURSOR_XX_YY
 next i
 return
