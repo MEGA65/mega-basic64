@@ -52,7 +52,7 @@ TELEPHONY_ASSETS= \
 		$(ASSETS)/phone_red.png \
 		$(ASSETS)/dualsim.png \
 		$(ASSETS)/contact_new.png \
-		$(ASSETS)/arrow_back.png \
+		$(ASSETS)/arrow_back-w.png \
 		$(ASSETS)/cog.png \
 		$(ASSETS)/trash_bin.png \
 		$(ASSETS)/globe.png \
