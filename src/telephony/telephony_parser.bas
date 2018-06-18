@@ -99,4 +99,35 @@ if mf$(0)="+QSPN" then mn=54
 if mf$(0)="+CPBS" then mn=55
 if mf$(0)="+CPBR" then mn=56
 if mf$(0)="+QLTS" then mn=57
+if mf$(0)="+CMGL" then mn=58
 return
+
+'=== read one line from modem ===
+RECEIVE_MODEM_LINE rem
+' Receive one line from the modem
+' Format:
+'	<cr><lf>
+'	line of text
+'	<cr><lf>
+' Returns: only the line of text, in variable r$
+r$="": c$="": last$="": crlf=0
+RML_LOOP last$=c$: c$="": get#1,c$
+if c$="" and last$="" goto RML_LOOP: rem "empty chars at the beginning of the response"
+if c$="" and last$<>"" then return: rem "empty chars at the end of the response"
+if c$<>"" then gosub RML_ADD_CHAR: gosub RML_CRLF
+'We exit as soon as we encounter the second <CR><LF>
+if crlf>=2 then return
+goto RML_LOOP
+
+RML_ADD_CHAR rem
+'Adds the char to result (if not <CR> or <LF>)
+if c$=chr$(13) or c$=chr$(10) then return
+r$=r$+c$: return
+
+RML_CRLF rem
+'If the two last received chars are <CR><LF>, we increment the crlf flag
+if c$=chr$(10) and last$=chr$(13) then crlf=crlf+1
+return
+
+
+

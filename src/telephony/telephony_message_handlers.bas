@@ -361,8 +361,29 @@ ntm$(3)=mid$(mf$(2),5,2) 'seconds
 nltm=val(ntm$(1))*216000+val(ntm$(2))*3600+val(ntm$(3))*60
 15799 return
 
-'Message handler: message type 58
-MESSAGE_HANDLER_58 rem
+'Message handler: +CMGL
+MESSAGE_HANDLER_+CMGL rem
+'List SMS messages:
+'	+CMGL: 31,"REC UNREAD","+61412345678",,"18/06/18,12:42:21+38"
+'	text of the message
+'When receiving +CMGL, we have to get the body of the message
+gosub RECEIVE_MODEM_LINE 'the body of the message should be in variable r$
+'debugging
+if db>=4 then print "+CMGL;";mf$(1);";";mf$(2);";";mf$(3);";";mf$(4);";";mf$(5);";";mf$(6)
+if db>=4 then print ">";r$
+'If the message is sent from the selected contact, then we will store the index
+s$=mf$(3): gosub REMOVE_QUOTES_STRING 'get number and remove quotes
+if right$(s$,9)=right$(pnumber$(cselected%),9) then gosub CMGL_ADD_INDEX
+return
+
+CMGL_ADD_INDEX rem
+gosub SMS_GET_FIRST_EMPTY_INDEX 'we have the first empty index for SMS in memory, in variable k
+sindex%(k)=val(mf$(1))
+s$=mf$(3): gosub REMOVE_QUOTES_STRING: snumber$(k)=s$
+stxt$(k)=r$
+s$=mf$(2): gosub REMOVE_QUOTES_STRING: satus$(k)=s$
+return
+
 15899 return
 
 'Message handler: message type 59

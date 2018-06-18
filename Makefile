@@ -80,6 +80,7 @@ VEHICLE_ASSETS=	\
 TELEPHONY_SRCS=	\
 		$(TELEPHONY)/telephony_main.bas \
 		$(TELEPHONY)/telephony_phonebook.bas \
+		$(TELEPHONY)/telephony_sms.bas \
 		$(TELEPHONY)/phonebook_entries.bas \
 		$(TELEPHONY)/telephony_setup.bas \
 		$(TELEPHONY)/telephony_touch.bas \

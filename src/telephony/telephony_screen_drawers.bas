@@ -1,5 +1,5 @@
 SCREEN_DRAWER rem
-gosub DRAW_STATUS_BAR
+if sc<>0 then gosub DRAW_STATUS_BAR
 if sc=0 then gosub DRAW_SCREEN_DEBUG
 if sc=1 then gosub DRAW_SCREEN_DIALLER
 if sc=2 then gosub DRAW_SCREEN_CONTACT
@@ -80,7 +80,6 @@ return
 '### DEBUG screen update subroutine ###
 DRAW_SCREEN_DEBUG rem
 'we don't clr or print, and let debug messages be
-xx=0: yy=2: gosub MOVE_CURSOR_XX_YY
 return
 
 
@@ -207,10 +206,26 @@ if cdisplay$<>"" then print cdisplay$;
 if len(cdisplay$)<34 then for j=1 to 34-len(cdisplay$): print " ";: next j
 'SMS box
 print "{wht}";
-x=4: y=5: w=36: h=20: r(15)=1: gosub DRAW_BOX
+x=4: y=5: w=36: h=20: r(2)=1: r(15)=1: gosub DRAW_BOX
 xx=5: yy=21: p=0: gosub STAMP_GLOBE 'globe
 xx=35: yy=21: p=0: gosub STAMP_MESSAGE 'message
+'SMS box heading w/ status message
+xx=5: yy=6: gosub MOVE_CURSOR_XX_YY: l=34: s$="SMS conversation"
+if satus$<>"" then s$=s$+"("+satus$+"{wht})"
+gosub TRIM_STRING_SPACES: print s$;
+'SMS messages
+if sq=2 then gosub DS_C_PRINT_SMS
 return
+
+DS_C_PRINT_SMS rem
+print"{wht}";
+xx=5: yy=8: gosub MOVE_CURSOR_XX_YY
+for i=1 to slngth%
+if sindex%(i)<>0 then print stxt$(i);
+xx=5: yy=8+i: gosub MOVE_CURSOR_XX_YY
+next i
+return
+
 '### end DRAW_SCREEN_CONTACT ###
 
 

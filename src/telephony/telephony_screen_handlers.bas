@@ -42,6 +42,9 @@ return
 
 '### CONTACT screen handler ###
 HANDLER_SCREEN_CONTACT rem
+'SMS querying
+db=4: poke 0,64: gosub SWITCH_TO_SCREEN_DEBUG
+if sq=0 then jt%(99)= HS_C_QUERY_SMS_CALLBACK: s$="AT+CMGL="+chr$(34)+"ALL"+chr$(34)+chr$(13): gosub WRITE_STRING_TO_MODEM: sq=1: satus$="{yel}fetching SMS{elipsis}"
 'handle user actions
 u$="": get u$
 gosub POLL_TOUCH_CONTACT
@@ -49,6 +52,16 @@ if u$="" then return
 if u$=chr$(20) then u0$=u$: gosub SWITCH_TO_SCREEN_DIALLER
 if u$=chr$(13) then u0$=u$: dnumber$=pnumber$(cselected%): gosub CALL_DIAL: gosub SWITCH_TO_SCREEN_CALL
 if u$="e" or u$="E" then u0$=u$: ctrigger=1: gosub SWITCH_TO_SCREEN_CONTACT_EDIT
+return
+
+HS_C_QUERY_SMS_CALLBACK rem
+' modem sent a response to at+cmgl="all"
+if db>=4 then print "QUERY SMS CALLBACK"
+if db>=4 then print "merror=";merror
+'db=0: poke 0,65
+jt%(99)=0
+if merror=1 then sq=0: merror=0: satus$="{red}error!": return 'modem error, we set the flag back to not queried
+if merror=0 then sq=2: satus$="{grn}success" 'SMS for selected contact queried and received
 return
 
 
