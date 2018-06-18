@@ -277,7 +277,7 @@ poke 54795,192 'enable hardware zoom
 poke 54796,192 ' "
 poke 54807,127 'use primary keyboard
 poke 54806,127 'place it at the bottom position
-poke 54809,0 'center horizontally (offset to the right of 0)
+poke 54809,21 'center horizontally (21 centers the vk on the touchscreen)
 poke 54805,255 'make it appear
 return
 

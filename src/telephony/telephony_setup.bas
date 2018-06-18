@@ -118,7 +118,12 @@ SETUP_MODEM_STEP2 jt%(99)= SETUP_MODEM_STEP3: s$="at+qdai=1,0,0,4,0"+chr$(13): g
 's$="at+qdai=1,1,0,4,0"+chr$(13): gosub WRITE_STRING_TO_MODEM
 ' Disable audio muting
 SETUP_MODEM_STEP3 jt%(99)= SETUP_MODEM_STEP4: s$="at+cmut=0"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
-SETUP_MODEM_STEP4 jt%(99)=0
+'---SMS setup---
+'Set SMS mode to Text mode
+SETUP_MODEM_STEP4 jt%(99)= SETUP_MODEM_STEP5: s$="at+cmgf=1"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
+'Set the memories to use for SMS storage; the memory used is MT (or ME), which has more space'
+SETUP_MODEM_STEP5 jt%(99)= SETUP_MODEM_STEP6: s$="at+cpms="+chr$(34)+"MT"+chr$(34)+","+chr$(34)+"MT"+chr$(34)+","+chr$(34)+"MT"+chr$(34)+chr$(13): gosub WRITE_STRING_TO_MODEM: return
+SETUP_MODEM_STEP6 jt%(99)=0
 return
 
 '=== Simple terminal program for debugging/talking to modem. ===
