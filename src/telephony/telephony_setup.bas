@@ -130,8 +130,10 @@ s$="ate1"+chr$(13): gosub WRITE_STRING_TO_MODEM
 'Simple terminal program for debugging
 MLOOP rem
 get a$:if a$="{home}" then s$="ate0"+chr$(13): gosub WRITE_STRING_TO_MODEM: print "{clr}";: return
+if a$=chr$(20) then a$=chr$(8)
 if a$ <> "" then print#1, a$;
-get#1, a$:print a$;
+get#1, a$:if a$=chr$(8)then a$=chr$(20)
+print a$;
 goto MLOOP
 
 '=== GUI-related setup ===
