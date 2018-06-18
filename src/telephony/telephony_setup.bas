@@ -151,6 +151,7 @@ tmr=1000 'timer for keystrokes
 hl%=0 'highlighted line (for example in contact pane)
 ul%=0 'underlined column (when editing a field for example)
 dim r(24) 'rows to be printed in a box
+dim h(24) 'rows to be hidden in a box
 return
 
 '=== phonebook setup ===

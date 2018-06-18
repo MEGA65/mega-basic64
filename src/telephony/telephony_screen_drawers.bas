@@ -235,7 +235,10 @@ l=34: gosub TRIM_STRING_SPACES: print s$;
 
 'contact fields box
 print "{wht}";
+gosub VIRTUAL_KEYBOARD_IS_ENABLED: if b=1 then h(8)=1
 x=4: y=5: w=36: h=9: gosub DRAW_BOX
+'erase last
+
 'TODO: TO OPTIMIZE (do not use MOVE_CURSOR)
 for i=1 to cfields%
 print "{wht}";
@@ -247,7 +250,7 @@ xx=6+2+len(clabels$(i)): yy=6+2*i: gosub MOVE_CURSOR_XX_YY: l=34-3-len(clabels$(
 if hl%=i then xx=6+2+len(clabels$(i))+ul%-1: yy=6+2*i: gosub MOVE_CURSOR_XX_YY: print chr$(182); 'print underline char if the line is hilighted
 next i
 
-xx=0: yy=15: gosub MOVE_CURSOR_XX_YY
+'xx=0: yy=15: gosub MOVE_CURSOR_XX_YY
 return
 '### end DRAW_SCREEN_CONTACT_EDIT ###
 

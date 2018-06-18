@@ -54,7 +54,10 @@ return
 
 '### CONTACT_EDIT screen handler ###
 HANDLER_SCREEN_CONTACT_EDIT rem
+'check if user interactivity is enabled
 if ni=1 then return
+'enable virtual keyboard if it is disabled and a line is selected
+gosub VIRTUAL_KEYBOARD_IS_ENABLED: if hl%<> 0 and b=0 then gosub VIRTUAL_KEYBOARD_ENABLE
 'handle user actions
 u$="": get u$
 gosub POLL_TOUCH_CONTACT_EDIT

@@ -1,4 +1,4 @@
-poke 53280,11: poke 53281,0 'border and screen color (0: black)
+poke 53280,0: poke 53281,0 'border and screen color (0: black)
 poke 0,65 'fast mode (50mhz cpu clock)
 poke 53248+111,128 'fix screen artifacts (60hz display)
 poke 53272,20 'uppercase charset

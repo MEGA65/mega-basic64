@@ -22,6 +22,8 @@ br$="{line-udr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{l
 bb$="{line-ur}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}"
 'left line
 ll$="{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}"
+'right line
+rr$="{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}"
 'home-down line
 hd$="{home}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}"
 'space line
@@ -86,7 +88,7 @@ DRAW_BOX rem
 '   Draws a w*h box with rounded corners at position x,y
 'arguments
 '   w: width of the box, frame included (w>=3)
-'   h: width of the box, frame included (h>=3)
+'   h: height of the box, frame included (h>=3)
 '   x: horizontal position of the upper-left corner (0<=x<=39)
 '   y: vertical position of the upper-left corner (0<=y<=24)
 '   r(): array of rows' index to be printed as lines [0:24]
@@ -94,17 +96,21 @@ DRAW_BOX rem
 '   none
 if w<3 or h<3 then return
 xx=x: yy=y: gosub MOVE_CURSOR_XX_YY
-print left$(bt$,w-1);"{line-dl}";
+if h(0)=0 then print left$(bt$,w-1);"{line-dl}";
+if h(0)=1 then h(0)=0: print left$(ss$,w);
 for i=1 to h-2
 print left$(ll$,w);"{down}";
 xx=x: yy=y+i
-if r(i)=0 then print left$(bm$,w-1);"{line-ud}";
-if r(i)=1 then print left$(br$,w-1);"{line-udl}";
-r(i)=0: next i
-yy=y+h-1:xx=x:gosub MOVE_CURSOR_XX_YY
-print left$(bb$,w-1);
-c=peek(646): poke 55296+(y+h-1)*40+x+w-1,c: poke 1024+(y+h-1)*40+x+w-1,110
+if h(i)=1 then print " ";left$(rr$,w-2);" ";
+if r(i)=0 and h(i)=0 then print left$(bm$,w-1);"{line-ud}";
+if r(i)=1 and h(i)=0 then print left$(br$,w-1);"{line-udl}";
+r(i)=0: h(i)=0: next i
+yy=y+h-1: xx=x: gosub MOVE_CURSOR_XX_YY
+if h(h-1)=1 then print left$(ss$,w-1);: k=32 'print spaces and poke space
+if h(h-1)=0 then print left$(bb$,w-1);: k=110 'print bottom line and poke ul corner
+c=peek(646): poke 55296+(y+h-1)*40+x+w-1,c: poke 1024+(y+h-1)*40+x+w-1,k
 'we poke the last character to the screen RAM (1024) and the color to the color RAM (55296), in case it's in the lower-right-hand corner, to avoid a CR/LF
+h(h-1)=0
 print "{home}"
 return
 
@@ -262,4 +268,40 @@ return
 SWITCH_SCREEN_CLEANUP rem
 u0$="": u$=""
 print "{clr}";: canvas 0 clr
+gosub VIRTUAL_KEYBOARD_DISABLE
+return
+
+
+VIRTUAL_KEYBOARD_ENABLE rem
+poke 54795,192 'enable hardware zoom
+poke 54796,192 ' "
+poke 54807,127 'use primary keyboard
+poke 54806,127 'place it at the bottom position
+poke 54809,0 'center horizontally (offset to the right of 0)
+poke 54805,255 'make it appear
+return
+
+VIRTUAL_KEYBOARD_DISABLE rem
+poke 54795,0 'disable hardware zoom
+poke 54805,127
+return
+
+VIRTUAL_KEYBOARD_IS_ENABLED rem
+b=0
+k=peek(54805)
+if k=255 then b=1: return
+if k=127 then return
+return
+
+VIRTUAL_KEYBOARD_SWITCH rem
+gosub VIRTUAL_KEYBOARD_IS_ENABLED
+if b=1 then gosub VIRTUAL_KEYBOARD_DISABLE: return
+if b=0 then gosub VIRTUAL_KEYBOARD_ENABLE: return
+
+VIRTUAL_KEYBOARD_UP rem
+poke 54806,255
+return
+
+VIRTUAL_KEYBOARD_DOWN rem
+poke 54806,127
 return
