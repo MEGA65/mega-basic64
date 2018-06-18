@@ -6,6 +6,7 @@ cnt=0
 dbg=1: rem "print debug info (namely, <CR><LF>)"
 
 open 1,2,1
+m$="ate1"+chr$(13): gosub WRITE_STRING_TO_MODEM
 
 LOOP cnt=cnt+1
 gosub GET_KEYBOARD_CHAR
