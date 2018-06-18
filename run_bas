@@ -13,7 +13,7 @@ endif
 
 set coredir=~/dev/mega65-core
 
-set bitfile=${coredir}/bin/lcd4ddr.bit
+set bitfile=${coredir}/bin/nexys4ddr.bit
 set kickupfile=${coredir}/bin/KICKUP.M65
 set romfile=${coredir}/bin/MEGA65.ROM
 #set charromfile=${coredir}/bin/CHARROM.ROM
