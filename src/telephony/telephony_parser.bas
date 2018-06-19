@@ -124,6 +124,7 @@ if mf$(0)="+CPBS" then mn=55
 if mf$(0)="+CPBR" then mn=56
 if mf$(0)="+QLTS" then mn=57
 if mf$(0)="+CMGL" then mn=58
+if mf$(0)="+CPMS" then mn=59
 return
 
 '=== read one line from modem ===

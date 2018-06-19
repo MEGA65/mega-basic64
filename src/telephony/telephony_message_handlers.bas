@@ -389,8 +389,13 @@ return
 
 15899 return
 
-'Message handler: message type 59
-MESSAGE_HANDLER_59 rem
+'Message handler: +CPMS
+MESSAGE_HANDLER_+CPMS rem
+'Preferred message storage
+'  +CPMS: <used1>,<total1>,<used2>,<total2>,<used3>,<total3>
+'Update SMS used and total
+sused%=val(mf$(1))
+stotal%=val(mf$(2))
 15999 return
 
 'Message handler: message type 60
