@@ -40,7 +40,7 @@ return
 
 WAIT_MODEM_READY rem
 if db>=5 then print "wait modem ready"
-WMR if db>=5 then print "  jt%(99)=",jt%(99)
+WMR if db>=6 then print "  jt%(99)=",jt%(99)
 if jt%(99)<>0 then gosub POLL_MODEM: goto WMR
 if db>=5 then print "modem ready"
 return
@@ -56,7 +56,8 @@ MODEM_READY jt%(99)=0: return
 REMOVE_QUOTES_STRING rem
 '=== remove quotes from string ===
 ' remove the leading and trailing quotes (") from string s$
-'  (if it has quotes) 
+'  (if it is at least 2 chars and has quotes)
+if len(s$)<2 then return 'string is shorter than 2 chars, we immediatly return
 if left$(s$,1)=chr$(34) and right$(s$,1)=chr$(34) then s$=right$(left$(s$,len(s$)-1),len(s$)-2)
 return
 

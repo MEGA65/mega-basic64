@@ -1,17 +1,20 @@
 '=== read from modem ===
 POLL_MODEM rem
-if db>=5 then print "polling modem"
+if db>=6 then print "polling modem"
 'reinitialize parser counter
 cp=50
 'read one char from cellular modem and parse received fields
 PM_GET get#1,c$: if c$="" then return
 cp=cp-1
 if c$=chr$(13) or c$=chr$(10) then goto HANDLE_MODEM_LINE
+'quote mode: do not parse when between quotes
+if c$=chr$(34) then qm=1-qm 'flip quote mode flag
 'first field is separated with a column
-if c$=":" and fc=0 then mf$(0)=mf$: fc=1: mf$=""
+if c$=":" and fc=0 and qm=0 then mf$(0)=mf$: fc=1: mf$=""
 'other fields are separated with a comma; limit=20
-if c$="," and fc>0 and fc<20 then mf$(fc)=mf$: fc=fc+1: mf$=""
-if c$<>"," and c$<>":" then mf$=mf$+c$
+if c$="," and fc>0 and fc<20 and qm=0 then mf$(fc)=mf$: fc=fc+1: mf$=""
+if qm=0 and c$<>"," and c$<>":" then mf$=mf$+c$ 'when not in quote mode, do not add , or : to the current modem field
+if qm=1 then mf$=mf$+c$ 'when in quote mode, add any char to the current modem field
 ml$=ml$+c$
 
 'if we didn't handle a non-empty modem line, we poll the modem again (limit: cp times)
@@ -21,8 +24,9 @@ return
 '=== handle modem line ===
 HANDLE_MODEM_LINE rem
 'received complete line from modem
+qm=0 'reinit the quote mode, just to make sure the next line will start with quote mode off
 if mf$<>"" and fc<20 then mf$(fc)=mf$: fc=fc+1
-if ml$="" and db>=5 then print "Empty line! (<CR> or <LF>)"
+if ml$="" and db>=6 then print "Empty line! (<CR> or <LF>)"
 if ml$="" then return
 
 for i=0 to(fc-1)
@@ -32,7 +36,7 @@ next i
 if db>=4 then print "Received modem line: ";: s$=ml$: gosub PRINT_STRING_CRLF: print chr$(13)
 if db>=5 then print "modem field count: ";fc
 if db>=5 then print "modem fields: ";
-if db>=5 then for i=0 to(fc-1): print"(";mf$(i);")";: next i: print chr$(13)
+if db>=5 then for i=0 to(fc-1): print chr$(123);mf$(i);chr$(125);: next i: print chr$(13)
 f1$="": ml$="": fc=0: mf$=""
 mn=0
 gosub GET_MESSAGE_TYPE: gosub JUMP_TO_HANDLER

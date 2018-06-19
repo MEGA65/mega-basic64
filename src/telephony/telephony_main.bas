@@ -9,7 +9,7 @@ goto INIT
 
 '### initialization ###
 INIT rem
-db=4 'turn on debugging information
+db=5 'turn on debugging information
 'one-time only lookup patch address
 gosub LOOKUP_GOTO_LN_PATCH_ADDRESS
 'program state setup
@@ -25,6 +25,8 @@ gosub SETUP_GUI
 gosub SETUP_DRAWING
 'phonebook setup
 gosub SETUP_PHONEBOOK
+'SMS setup
+gosub SETUP_SMS
 'define functions (e.g. modulo)
 gosub DEFINE_FUNCTIONS
 'gosub WAIT_FOR_KEY_PRESS

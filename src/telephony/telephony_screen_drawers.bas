@@ -28,7 +28,7 @@ for i=1 to shi: if shi<>0 then print " ";: next i
 'print the network type (abbreviation)
 print nt$;
 'print the signal level canvas in the status bar
-canvas gs%+sl% stamp on canvas 0 at 32,0
+canvas gs%+sl stamp on canvas 0 at 32,0
 'print the BER under signal strength
 'xx=28: yy=1: gosub MOVE_CURSOR_XX_YY: print "ber";ber$;
 return
@@ -211,7 +211,7 @@ xx=5: yy=21: p=0: gosub STAMP_GLOBE 'globe
 xx=35: yy=21: p=0: gosub STAMP_MESSAGE 'message
 'SMS box heading w/ status message
 xx=5: yy=6: gosub MOVE_CURSOR_XX_YY: l=34: s$="SMS conversation"
-if satus$<>"" then s$=s$+"("+satus$+"{wht})"
+if satus$<>"" then s$=s$+" ("+satus$+"{wht})"
 gosub TRIM_STRING_SPACES: print s$;
 'SMS messages
 if sq=2 then gosub DS_C_PRINT_SMS

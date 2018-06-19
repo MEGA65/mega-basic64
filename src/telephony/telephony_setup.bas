@@ -69,7 +69,6 @@ tc=0 'tc: initial time at beginning of call
 dtmr=0 'dtmr: call timer
 dtmr$="00:00:00" 'dtmr$: call timer, in the format HH:MM:SS
 
-
 '=== time-related variables ===
 thour=0: tmin=0: tsec=0
 thour$="": tmin$="": tsec$=""
@@ -103,11 +102,17 @@ dim ol$(20) 'lines from modem that don't conform to any normal message format
 dim jt%(100) 'jump table for message handling
 for i=0 to 99: jt%(i)=10000+100*i: next i
 cp=50 'counter parser: number of times we poll a char from modem in a loop
+qm=0 'quote mode: flag to indicate that we are between quotes
 open 1,2,1
 return
 
 '=== modem setup ===
 SETUP_MODEM rem
+'--- configuration parameters ---
+smode%=0 'Mode for SMS
+'	0: PDU mode
+'	1: text mode
+'--- configuration commands ---
 'no echo from modem
 jt%(99)= SETUP_MODEM_STEP2: s$="ate0"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
 ' NOTE: Changing PCM master/slave mode requires the modem to be physically power cycled
@@ -118,12 +123,16 @@ SETUP_MODEM_STEP2 jt%(99)= SETUP_MODEM_STEP3: s$="at+qdai=1,0,0,4,0"+chr$(13): g
 's$="at+qdai=1,1,0,4,0"+chr$(13): gosub WRITE_STRING_TO_MODEM
 ' Disable audio muting
 SETUP_MODEM_STEP3 jt%(99)= SETUP_MODEM_STEP4: s$="at+cmut=0"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
-'---SMS setup---
-'Set SMS mode to Text mode
-SETUP_MODEM_STEP4 jt%(99)= SETUP_MODEM_STEP5: s$="at+cmgf=1"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
+'--- SMS setup ---
+'Set SMS mode to selected mode (smode%)
+SETUP_MODEM_STEP4 jt%(99)= SETUP_MODEM_STEP5: s$="at+cmgf="+right$(str$(smode%), len(str$(smode%))-1)+chr$(13): gosub WRITE_STRING_TO_MODEM: return
 'Set the memories to use for SMS storage; the memory used is MT (or ME), which has more space'
 SETUP_MODEM_STEP5 jt%(99)= SETUP_MODEM_STEP6: s$="at+cpms="+chr$(34)+"MT"+chr$(34)+","+chr$(34)+"MT"+chr$(34)+","+chr$(34)+"MT"+chr$(34)+chr$(13): gosub WRITE_STRING_TO_MODEM: return
-SETUP_MODEM_STEP6 jt%(99)=0
+'Set the modem to send all fields if in text mode
+SETUP_MODEM_STEP6 if smode%=1 then jt%(99)= SETUP_MODEM_STEP7: s$="at+csdh=1"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
+goto SETUP_MODEM_STEP7 'if not in text mode
+'--- End of modem setup ---
+SETUP_MODEM_STEP7 jt%(99)=0
 return
 
 '=== Simple terminal program for debugging/talking to modem. ===
@@ -151,7 +160,7 @@ gffst=28 'GUI offset: the offset between a canvas and its 'pressed' equivalent, 
 '--- Other ---
 u$="" 'user-input char
 nb$="" 'phone number dialled on the dialler screen
-sl%=0 'Signal Level integer [0:5]
+sl=0 'Signal Level integer [0:5]
 ber$="?" 'Bit Error Rate string to be displayed
 bl%=10 'Battery Level integer [0:10]
 tmr=1000 'timer for keystrokes

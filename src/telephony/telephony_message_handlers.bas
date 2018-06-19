@@ -281,9 +281,9 @@ gosub SEND_AT+CLCC
 MESSAGE_HANDLER_+CSQ rem
 su=1
 rssi=val(mf$(1)): ber=val(mf$(2))
-if rssi=99 or rssi=199 then sl%=0
-if rssi>=0 and rssi<=31 then sl%=int((rssi/32*5)+1)
-if rssi>=100 and rssi<=191 then sl%=int(((rssi-100)/92*5)+1)
+if rssi=99 or rssi=199 then sl=0
+if rssi>=0 and rssi<=31 then sl=int((rssi/32*5)+1)
+if rssi>=100 and rssi<=191 then sl=int(((rssi-100)/92*5)+1)
 if ber>=0 and ber<=7 then ber$=str$(ber)
 if ber=99 then ber$="?"
 15299 return
@@ -351,21 +351,22 @@ MESSAGE_HANDLER_+QLTS rem
 nmtm=time
 if mf$(1)="" then nmtm=0: return 'If the time has not been synchronized through network, the command will return a null time string: +QLTS:""
 'Synchronized network time: +QLTS: "2018/06/15,18:30:57+38,0"
-'/!\ After parsing, we get:
-'       mf$(1)="2018/06/15
-'       mf$(2)=183057+38
-'       mf$(3)=0"
-ntm$(1)=mid$(mf$(2),1,2) 'hours
-ntm$(2)=mid$(mf$(2),3,2) 'minutes
-ntm$(3)=mid$(mf$(2),5,2) 'seconds
+'After parsing, we get:
+'       mf$(1)="2018/06/15,18:30:57+38,0"
+ntm$(1)=mid$(mf$(1),13,2) 'hours
+ntm$(2)=mid$(mf$(1),16,2) 'minutes
+ntm$(3)=mid$(mf$(1),19,2) 'seconds
 nltm=val(ntm$(1))*216000+val(ntm$(2))*3600+val(ntm$(3))*60
 15799 return
 
 'Message handler: +CMGL
 MESSAGE_HANDLER_+CMGL rem
 'List SMS messages:
-'	+CMGL: 31,"REC UNREAD","+61412345678",,"18/06/18,12:42:21+38"
+'-- Text mode and details (+csdh=1) --
+'	+CMGL: 31,"REC UNREAD","+61412345678",,"18/06/18,12:42:21+38",145,40
+'		<index>, <stat>, <oa/da>, [<alpha>], [<scts>], <tooa/toda>, <length>
 '	text of the message
+'		<CR><LF><text of the message><CR><LF>
 'When receiving +CMGL, we have to get the body of the message
 gosub RECEIVE_MODEM_LINE 'the body of the message should be in variable r$
 'debugging
