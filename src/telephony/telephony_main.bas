@@ -9,7 +9,7 @@ goto INIT
 
 '### initialization ###
 INIT rem
-db=5 'turn on debugging information
+db=4 'turn on debugging information
 'one-time only lookup patch address
 gosub LOOKUP_GOTO_LN_PATCH_ADDRESS
 'program state setup

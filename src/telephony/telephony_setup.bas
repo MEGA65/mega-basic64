@@ -108,6 +108,9 @@ return
 
 '=== modem setup ===
 SETUP_MODEM rem
+'poke 0,64
+'--- purge UART buffer ---
+gosub PURGE_MODEM_BUFFER 'purges the UART buffer, to get rid of previously received chars
 '--- configuration parameters ---
 smode%=1 'Mode for SMS
 '	0: PDU mode
@@ -127,12 +130,13 @@ SETUP_MODEM_STEP3 jt%(99)= SETUP_MODEM_STEP4: s$="at+cmut=0"+chr$(13): gosub WRI
 'Set SMS mode to selected mode (smode%)
 SETUP_MODEM_STEP4 jt%(99)= SETUP_MODEM_STEP5: s$="at+cmgf="+right$(str$(smode%), len(str$(smode%))-1)+chr$(13): gosub WRITE_STRING_TO_MODEM: return
 'Set the memories to use for SMS storage; the memory used is MT (or ME), which has more space'
-SETUP_MODEM_STEP5 jt%(99)= SETUP_MODEM_STEP6: s$="at+cpms="+chr$(34)+"MT"+chr$(34)+","+chr$(34)+"MT"+chr$(34)+","+chr$(34)+"MT"+chr$(34)+chr$(13): gosub WRITE_STRING_TO_MODEM: return
+SETUP_MODEM_STEP5 jt%(99)= SETUP_MODEM_STEP6: s$="at+cpms="+chr$(34)+"mt"+chr$(34)+","+chr$(34)+"mt"+chr$(34)+","+chr$(34)+"mt"+chr$(34)+chr$(13): gosub WRITE_STRING_TO_MODEM: return
 'Set the modem to send all fields if in text mode
 SETUP_MODEM_STEP6 if smode%=1 then jt%(99)= SETUP_MODEM_STEP7: s$="at+csdh=1"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
 goto SETUP_MODEM_STEP7 'if not in text mode
 '--- End of modem setup ---
 SETUP_MODEM_STEP7 jt%(99)=0
+'poke 0,65
 return
 
 '=== Simple terminal program for debugging/talking to modem. ===

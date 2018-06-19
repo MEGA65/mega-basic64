@@ -182,3 +182,11 @@ RCFM_END rem 'End
 if l=k then return 'we reached k characters, return immediatly
 next i
 return
+
+'=== purge modem buffer ===
+PURGE_MODEM_BUFFER rem
+'Purge the modem buffer, more specifically it purges the buffered UART.
+'The size of the UART buffer is 2000 bytes (will be reduced in the future).
+for i=1 to 2000: get#1,c$: next i
+if db>=4 then print "Buffered UART purged"
+c$="": return
