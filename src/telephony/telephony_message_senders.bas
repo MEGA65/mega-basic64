@@ -33,9 +33,16 @@ SEND_AT+CLCC rem
 s$="at+clcc"+chr$(13): gosub WRITE_STRING_TO_MODEM
 return
 
-SEND_AT+CGML rem
-'send AT+CGML (list SMS)
+SEND_AT+CMGL rem
+'send AT+CMGL (list SMS)
 'Argument:
 '   int k: stat
 s$="at+cmgl="+sus$(k)+chr$(13): gosub WRITE_STRING_TO_MODEM
+return
+
+SEND_AT+CMGR rem
+'send AT+CMGR (read SMS)
+'Argument:
+'   int k: index
+s$="at+cmgr="+str$(k)+chr$(13): gosub WRITE_STRING_TO_MODEM
 return

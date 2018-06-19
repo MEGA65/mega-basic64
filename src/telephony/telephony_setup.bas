@@ -25,6 +25,7 @@ ni=0 'no interaction flag
 '  1: disables user input
 sc=1 'current screen to be displayed and user input to be taken
 ls=1 'last screen used before the current one
+s2=1 'the screen used even before
 sr=10 'screen refresh rate: number of loops between 2 screen updates
 su=0 'flag su (screen update): a change in the program requires a screen update
 us=0 'flag us (updated screen): is set to 1 when the screen if actually updated
@@ -101,6 +102,7 @@ dim mf$(20) 'fields from colon-comma formatted messages
 dim ol$(20) 'lines from modem that don't conform to any normal message format
 dim jt%(100) 'jump table for message handling
 for i=0 to 99: jt%(i)=10000+100*i: next i
+jt%(100)=0
 cp=50 'counter parser: number of times we poll a char from modem in a loop
 qm=0 'quote mode: flag to indicate that we are between quotes
 open 1,2,1
@@ -108,7 +110,7 @@ return
 
 '=== modem setup ===
 SETUP_MODEM rem
-'poke 0,64
+'poke 0,64 'for debugging only
 '--- purge UART buffer ---
 gosub PURGE_MODEM_BUFFER 'purges the UART buffer, to get rid of previously received chars
 '--- configuration parameters ---
@@ -117,25 +119,25 @@ smode%=1 'Mode for SMS
 '	1: text mode
 '--- configuration commands ---
 'no echo from modem
-jt%(99)= SETUP_MODEM_STEP2: s$="ate0"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
+jt%(100)= SETUP_MODEM_STEP2: s$="ate0"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
 ' NOTE: Changing PCM master/slave mode requires the modem to be physically power cycled
 ' before it takes effect!
 ' Setup modem as PCM audio master, 2MHz, 8KHz 16-bit linear samples
-SETUP_MODEM_STEP2 jt%(99)= SETUP_MODEM_STEP3: s$="at+qdai=1,0,0,4,0"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
+SETUP_MODEM_STEP2 jt%(100)= SETUP_MODEM_STEP3: s$="at+qdai=1,0,0,4,0"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
 ' Setup modem as PCM audio slave, 2MHz, 8KHz 16-bit linear samples
 's$="at+qdai=1,1,0,4,0"+chr$(13): gosub WRITE_STRING_TO_MODEM
 ' Disable audio muting
-SETUP_MODEM_STEP3 jt%(99)= SETUP_MODEM_STEP4: s$="at+cmut=0"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
+SETUP_MODEM_STEP3 jt%(100)= SETUP_MODEM_STEP4: s$="at+cmut=0"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
 '--- SMS setup ---
 'Set SMS mode to selected mode (smode%)
-SETUP_MODEM_STEP4 jt%(99)= SETUP_MODEM_STEP5: s$="at+cmgf="+right$(str$(smode%), len(str$(smode%))-1)+chr$(13): gosub WRITE_STRING_TO_MODEM: return
+SETUP_MODEM_STEP4 jt%(100)= SETUP_MODEM_STEP5: s$="at+cmgf="+right$(str$(smode%), len(str$(smode%))-1)+chr$(13): gosub WRITE_STRING_TO_MODEM: return
 'Set the memories to use for SMS storage; the memory used is MT (or ME), which has more space'
-SETUP_MODEM_STEP5 jt%(99)= SETUP_MODEM_STEP6: s$="at+cpms="+chr$(34)+"mt"+chr$(34)+","+chr$(34)+"mt"+chr$(34)+","+chr$(34)+"mt"+chr$(34)+chr$(13): gosub WRITE_STRING_TO_MODEM: return
+SETUP_MODEM_STEP5 jt%(100)= SETUP_MODEM_STEP6: s$="at+cpms="+chr$(34)+"mt"+chr$(34)+","+chr$(34)+"mt"+chr$(34)+","+chr$(34)+"mt"+chr$(34)+chr$(13): gosub WRITE_STRING_TO_MODEM: return
 'Set the modem to send all fields if in text mode
-SETUP_MODEM_STEP6 if smode%=1 then jt%(99)= SETUP_MODEM_STEP7: s$="at+csdh=1"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
+SETUP_MODEM_STEP6 if smode%=1 then jt%(100)= SETUP_MODEM_STEP7: s$="at+csdh=1"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
 goto SETUP_MODEM_STEP7 'if not in text mode
 '--- End of modem setup ---
-SETUP_MODEM_STEP7 jt%(99)=0
+SETUP_MODEM_STEP7 jt%(100)=0
 'poke 0,65
 return
 
@@ -225,22 +227,24 @@ return
 
 '=== SMS setup ===
 SETUP_SMS rem
-sused%=-1 'the number of SMS in selected storage
-stotal%=0 'the maximum number of SMS that can be stored in the selected storage
+sused%=sused% 'the number of SMS in selected storage
+stotal%=stotal% 'the maximum number of SMS that can be stored in the selected storage
 slngth%=255 'maximum number of SMS in the MEGA65 memory
 dim sidex%(slngth%) 'mapping between SMS in memory and in storage
 '   sidex%(1)=32: the SMS in memory with index 1 has index 32 in storage
+sidex%=0 'the last SMS index that was filled in RAM
 dim snumber$(slngth%) 'phone number of the sender of SMS
 dim stxt$(slngth%) 'text of the SMS
 dim sd$(slngth%) 'timestamp (date) of SMS
 dim satus$(slngth%) 's(t)atus of SMS ("READ", "UNREAD", etc.)
 sq=0 'SMS for contact Queried. Flag to indicate if the SMS for the currently selected contact have been queried.'
-'	0: not queried
-'	1: queried, not received
-'	2: queried and received
+'  0: not queried
+'  1: queried, not received
+'  2: queried and received
 satus$="" 'status message for SMS on the contact screen
 sr%=0 'last contact for which SMS were Retrieved
 dim sus$(4)
 if smode%=0 then sus$(0)="0": sus$(1)="1": sus$(2)="2": sus$(3)="3": sus$(3)="3"
-if smode%=1 then sus$(0)=chr$(34)+"rec unread"+chr$(34): sus$(1)=chr$(34)+"rec read"+chr$(34): sus$(2)=chr$(34)+"sto unsent"+chr$(34): sus$(3)=chr$(34)+"sto sent"+chr$(34): sus$(4)=chr$(34)+"all"+chr$(34):
+if smode%=1 then sus$(0)=chr$(34)+"rec unread"+chr$(34): sus$(1)=chr$(34)+"rec read"+chr$(34): sus$(2)=chr$(34)+"sto unsent"+chr$(34): sus$(3)=chr$(34)+"sto sent"+chr$(34): sus$(4)=chr$(34)+"all"+chr$(34)
+serror=0 'the number of error when getting SMS
 return

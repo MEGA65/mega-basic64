@@ -8,12 +8,12 @@ return
 LOAD_PHONEBOOK_SIM rem
 '== load phonebook from sim ==
 'We first need to get the number of contacts in storage
-s$="at+cpbs?"+chr$(13): gosub WRITE_STRING_TO_MODEM_READY: jt%(99)= MODEM_READY
+s$="at+cpbs?"+chr$(13): gosub WRITE_STRING_TO_MODEM_READY: jt%(100)= MODEM_READY
 gosub WAIT_MODEM_READY
 if db>=4 then print "+CPBS received, pused%=",pused%
 'At this point, we know how many contacts there are in the SIM phonebook
 'We try and retrieve those contacts
-s$="at+cpbr=1,"+right$(str$(pused%),len(str$(pused%))-1)+chr$(13): gosub WRITE_STRING_TO_MODEM_READY: jt%(99)= MODEM_READY
+s$="at+cpbr=1,"+right$(str$(pused%),len(str$(pused%))-1)+chr$(13): gosub WRITE_STRING_TO_MODEM_READY: jt%(100)= MODEM_READY
 gosub WAIT_MODEM_READY
 if db>=4 then print "+CPBR received"
 'The memory phonebook should be filled with entries from the SIM phonebook

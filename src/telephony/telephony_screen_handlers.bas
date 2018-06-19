@@ -43,9 +43,7 @@ return
 '### CONTACT screen handler ###
 HANDLER_SCREEN_CONTACT rem
 'SMS querying
-poke 0,64
-db=5: gosub SWITCH_TO_SCREEN_DEBUG
-if sq=0 then jt%(99)= HS_C_QUERY_SMS_CALLBACK: k=4: gosub SEND_AT+CGML: sq=1: satus$="{yel}fetching SMS{elipsis}"
+if sq=0 then gosub QUERY_SMS_FROM_CONTACT: sq=1: satus$="{yel}fetching SMS{elipsis}"
 'handle user actions
 u$="": get u$
 gosub POLL_TOUCH_CONTACT
@@ -53,16 +51,6 @@ if u$="" then return
 if u$=chr$(20) then u0$=u$: gosub SWITCH_TO_SCREEN_DIALLER
 if u$=chr$(13) then u0$=u$: dnumber$=pnumber$(cselected%): gosub CALL_DIAL: gosub SWITCH_TO_SCREEN_CALL
 if u$="e" or u$="E" then u0$=u$: ctrigger=1: gosub SWITCH_TO_SCREEN_CONTACT_EDIT
-return
-
-HS_C_QUERY_SMS_CALLBACK rem
-' modem sent a response to at+cmgl="all"
-if db>=4 then print "QUERY SMS CALLBACK"
-if db>=4 then print "merror=";merror
-'db=0: poke 0,65
-jt%(99)=0
-if merror=1 then sq=0: merror=0: satus$="{red}error!": return 'modem error, we set the flag back to not queried
-if merror=0 then sr%=cselected%: sq=2: satus$="{grn}success" 'SMS for selected contact queried and received
 return
 
 
@@ -105,14 +93,14 @@ ni=1
 if cselected%>0 then pindex%=cselected% 'editing existing contact
 if cselected%=0 then gosub PHONEBOOK_GET_FIRST_EMPTY_INDEX: pindex%=k 'creating a new contact, we need an index
 'ask modem to write the edited/created contact to SIM phonebook
-jt%(99)= HS_CE_SAVE_CONTACT_CALLBACK
+jt%(100)= HS_CE_SAVE_CONTACT_CALLBACK
 s$="AT+CPBW="+right$(str$(pindex%), len(str$(pindex%))-1)+","+chr$(34)+cfields$(2)+chr$(34)+",129,"+chr$(34)+cfields$(1)+chr$(34)+chr$(13)
 gosub WRITE_STRING_TO_MODEM
 return
 
 HS_CE_SAVE_CONTACT_CALLBACK rem
 ' modem sent a response to at+cpbw
-jt%(99)=0
+jt%(100)=0
 ni=0 're-enable user interaction
 db=0
 if merror=1 then merror=0: cstatus$="{red}error while saving!": return 'modem error, stay on screen
@@ -142,14 +130,14 @@ HS_CE_DELETE_CONTACT rem
 cstatus$="{yel}deleting{elipsis}"
 ni=1
 'ask modem to write the delete contact from SIM phonebook
-jt%(99)= HS_CE_DELETE_CONTACT_CALLBACK
+jt%(100)= HS_CE_DELETE_CONTACT_CALLBACK
 s$="AT+CPBW="+right$(str$(cselected%), len(str$(cselected%))-1)+chr$(13)
 gosub WRITE_STRING_TO_MODEM
 return
 
 HS_CE_DELETE_CONTACT_CALLBACK rem
 ' modem sent a response to at+cpbw
-jt%(99)=0
+jt%(100)=0
 ni=0 're-enable user interaction
 if merror=1 then merror=0: cstatus$="{red}error while deleting!": return 'modem error, stay on screen
 if merror=0 then gosub HS_CE_CONTACT_DELETED: gosub HS_CE_CLEANUP: gosub SWITCH_TO_SCREEN_DIALLER: return 'modem OK, contact deleted, go to screen dialler

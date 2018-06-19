@@ -39,9 +39,6 @@ if db>=4 then print "Received modem line: ";: s$=ml$: gosub PRINT_STRING_CRLF: p
 if db>=5 then print "  modem field count: ";fc
 if db>=5 then print "  modem fields: ";
 if db>=5 then for i=0 to(fc-1): print chr$(123);mf$(i);chr$(125);: next i: print chr$(13);
-'--- Reinit variables ---
-f1$="": ml$="": fc=0: mf$=""
-qm=0 'reinit the quote mode, just to make sure the next line will start with quote mode off
 '--- Message handling ---
 mn=0
 gosub GET_MESSAGE_TYPE: gosub JUMP_TO_HANDLER
@@ -53,7 +50,10 @@ ml=1 'a non-empty modem line has been handled
 rc=0
 if mn=40 or mn=44 or mn=49 or mn=50 then rc=1
 'Check if we have a common callback registered
-if rc=1 then mn=99: gosub JUMP_TO_HANDLER
+if rc=1 then mn=100: gosub JUMP_TO_HANDLER
+'--- Reinit variables ---
+ml$="": fc=0: mf$=""
+qm=0 'reinit the quote mode, just to make sure the next line will start with quote mode off
 '--- Debug ---
 if db>=5 then print "" 'print empty line in debug
 return
@@ -123,7 +123,7 @@ if mf$(0)="+QSPN" then mn=54
 if mf$(0)="+CPBS" then mn=55
 if mf$(0)="+CPBR" then mn=56
 if mf$(0)="+QLTS" then mn=57
-if mf$(0)="+CMGL" then mn=58
+if mf$(0)="+CMGR" then mn=58
 if mf$(0)="+CPMS" then mn=59
 return
 
@@ -167,14 +167,14 @@ RECEIVE_CHARS_FROM_MODEM rem
 'Arguments:
 '  k: the number of chars to get from modem
 'Returns:
-'  s$: the string of length k polled from modem
+'  r$: the string of length k polled from modem
 if k<1 then return
-s$="": l=0: crlf=0: last$="":
+r$="": l=0: crlf=0: last$="":
 for i=1 to 5*k 'timeout after 5*k chars polled
 last$=c$: c$="": get#1,c$: if c$="" then goto RCFM_END 'loop immediatly if empty char
 'Add character to string
-if c$<>chr$(13) and c$<>chr$(10) then s$=s$+c$: l=l+1 'if not <cr> or <lf>, add it in any case
-if c$=chr$(13) or c$=chr$(10) then if crlf>=1 then s$=s$+c$: l=l+1 'add <cr> or <lf> only after the first crlf was encountered
+if c$<>chr$(13) and c$<>chr$(10) then r$=r$+c$: l=l+1 'if not <cr> or <lf>, add it in any case
+if c$=chr$(13) or c$=chr$(10) then if crlf>=1 then r$=r$+c$: l=l+1 'add <cr> or <lf> only after the first crlf was encountered
 'Track <cr><lf>
 gosub RML_CRLF
 'Decrement l once when encountering additional <cr><lf>

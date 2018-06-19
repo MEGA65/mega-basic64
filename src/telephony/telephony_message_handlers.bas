@@ -359,32 +359,49 @@ ntm$(3)=mid$(mf$(1),19,2) 'seconds
 nltm=val(ntm$(1))*216000+val(ntm$(2))*3600+val(ntm$(3))*60
 15799 return
 
-'Message handler: +CMGL
-MESSAGE_HANDLER_+CMGL rem
-'List SMS messages:
-'-- Text mode and details (+csdh=1) --
-'	+CMGL: 31,"REC UNREAD","+61412345678",,"18/06/18,12:42:21+38",145,40
-'		<index>, <stat>, <oa/da>, [<alpha>], [<scts>], <tooa/toda>, <length>
-'		 mf$(1)   mf$(2)  mf$(3)   mf$(4)     mf$(5)     mf$(6)      mf$(7)
-'	text of the message
-'		<CR><LF><text of the message><CR><LF>
-'When receiving +CMGL, we have to get the body of the message
-k=val(mf$(7)) 'length of sms text
-gosub RECEIVE_CHARS_FROM_MODEM 'body of the message in variable s$
-'gosub RECEIVE_MODEM_LINE 'the body of the message should be in variable r$
+'Message handler: +CMGR
+MESSAGE_HANDLER_+CMGR rem
+'Read SMS message
+'--- Structure in text mode and details (+csdh=1) ---
+'- For SMS-DELIVER (11 fields):
+'    +CMGR: <stat>,<oa>,[<alpha>],<scts>[,<tooa>,<fo>,<pid>,<dcs>,<sca>,<tosca>,<length>]
+'    <CR><LF><data>
+'- For SMS-SUBMIT (11 fields):
+'    +CMGR: <stat>,<da>,[<alpha>][,<toda>,<fo>,<pid>,<dcs>,[<vp>],<sca>,<tosca>,<length>]
+'    <CR><LF><data>
+'- For SMS-STATUS-REPORTs (8 fields):
+'    +CMGR: <stat>,<fo>,<mr>,[<ra>],[<tora>],<scts>,<dt>,<st>
+'- For SMS-COMMANDs (8 fields):
+'    +CMGR: <stat>,<fo>,<ct>[,<pid>,[<mn>],[<da>],[<toda>],<length>
+'    <CR><LF><cdata>]
+'- For CBM storage (6 fields):
+'    +CMGR: <stat>,<sn>,<mid>,<dcs>,<page>,<pages>
+'    <CR><LF><data>
+
+' We can partially rely on the number of fields (fc) to determine what type we have
+' For now, we only consider SMS-DELIVER (i.e. received messages)
+
+'--- SMS-DELIVER ---
+'  +CMGR: "REC UNREAD","+61412345678",,"18/06/18,12:42:21+38",145,4,0,0,"+61411990181",145,21
+'         <stat>, <oa>, <alpha>, <scts>, <tooa>, <fo>, <pid>, <dcs>, <sca>, <tosca>, <length>
+'         mf$(1)  mf$(2) mf$(3)  mf$(4)  mf$(5)  mf$(6) mf$(7) mf$(8) mf$(9) mf$(10)  mf$(11)
+
+'When receiving +CMGR, we have to get the body of the message
+k=val(mf$(11)) 'length of sms text
+gosub RECEIVE_CHARS_FROM_MODEM 'body of the message in variable r$
 'debugging
-if db>=4 then print ">";: gosub PRINT_STRING_CRLF
+if db>=4 then print ">";: s$=r$: gosub PRINT_STRING_CRLF: print chr$(13);
 'If the message is sent from the selected contact, then we will store the index
-s$=mf$(3): gosub REMOVE_QUOTES_STRING 'get number and remove quotes
-if right$(s$,9)=right$(pnumber$(cselected%),9) then gosub CMGL_ADD_INDEX
+s$=mf$(2): gosub REMOVE_QUOTES_STRING 'get number and remove quotes
+if right$(s$,9)=right$(pnumber$(cselected%),9) then gosub CMGR_ADD_INDEX
 return
 
-CMGL_ADD_INDEX rem
+CMGR_ADD_INDEX rem
 gosub SMS_GET_FIRST_EMPTY_INDEX 'we have the first empty index for SMS in memory, in variable k
-sidex%(k)=val(mf$(1))
-s$=mf$(3): gosub REMOVE_QUOTES_STRING: snumber$(k)=s$
-stxt$(k)=r$
-s$=mf$(2): gosub REMOVE_QUOTES_STRING: satus$(k)=s$
+sidex%(k)=sidex% 'SMS index
+s$=mf$(2): gosub REMOVE_QUOTES_STRING: snumber$(k)=s$ 'SMS originating/destination number
+stxt$(k)=r$ 'SMS body
+s$=mf$(1): gosub REMOVE_QUOTES_STRING: satus$(k)=s$ 'SMS status
 return
 
 15899 return
@@ -396,6 +413,7 @@ MESSAGE_HANDLER_+CPMS rem
 'Update SMS used and total
 sused%=val(mf$(1))
 stotal%=val(mf$(2))
+if db>=4 then print "SMS storage:";sused%"used,";stotal%;"total"
 15999 return
 
 'Message handler: message type 60

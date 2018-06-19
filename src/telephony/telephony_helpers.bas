@@ -38,8 +38,8 @@ return
 
 WAIT_MODEM_READY rem
 if db>=5 then print "wait modem ready"
-WMR if db>=6 then print "  jt%(99)=",jt%(99)
-if jt%(99)<>0 then gosub POLL_MODEM: goto WMR
+WMR if db>=6 then print "  jt%(100)=",jt%(100)
+if jt%(100)<>0 then gosub POLL_MODEM: goto WMR
 if db>=5 then print "modem ready"
 return
 
@@ -48,7 +48,7 @@ gosub WAIT_MODEM_READY
 gosub WRITE_STRING_TO_MODEM
 return
 
-MODEM_READY jt%(99)=0: return
+MODEM_READY jt%(100)=0: return
 
 
 REMOVE_QUOTES_STRING rem
@@ -207,26 +207,27 @@ return
 
 SWITCH_TO_LAST_SCREEN rem
 '=== switch to the previous screen ===
-kk=sc 'tmp storage of sc
 ll=ls 'tmp storage of ls
 if ll=0 then gosub SWITCH_TO_SCREEN_DEBUG
 if ll=1 then gosub SWITCH_TO_SCREEN_DIALLER
 if ll=2 then gosub SWITCH_TO_SCREEN_CONTACT
 if ll=3 then gosub SWITCH_TO_SCREEN_CALL
 if ll=4 then gosub SWITCH_TO_SCREEN_CONTACT_EDIT
-ls=kk
+ls=s2 'set last screen back to the 2nd-last screen
 return
 
 SWITCH_TO_SCREEN_DEBUG rem
 '=== switch to screen DEBUG (0) ===
-ls=sc: sc=0
+gosub SWITCH_SCREEN_INIT
+sc=0
 gosub SWITCH_SCREEN_CLEANUP
 su=1
 return
 
 SWITCH_TO_SCREEN_DIALLER rem
 '=== switch to screen DIALLER (1) ===
-ls=sc: sc=1
+gosub SWITCH_SCREEN_INIT
+sc=1
 gosub SWITCH_SCREEN_CLEANUP
 p=cselected%: gosub PHONEBOOK_TO_CONTACT_PANE_INDEX: hl%=k 'set back previously highlighted contact
 'Mark entire screen as requiring a re-draw
@@ -235,7 +236,8 @@ return
 
 SWITCH_TO_SCREEN_CONTACT rem
 '=== switch to screen CONTACT (2) ===
-ls=sc: sc=2
+gosub SWITCH_SCREEN_INIT
+sc=2
 gosub SWITCH_SCREEN_CLEANUP
 su=1
 gosub PREP_CONTACT
@@ -249,14 +251,16 @@ return
 
 SWITCH_TO_SCREEN_CALL rem
 '=== switch to screen CALL (3) ===
-ls=sc: sc=3
+gosub SWITCH_SCREEN_INIT
+sc=3
 gosub SWITCH_SCREEN_CLEANUP
 su=1
 return
 
 SWITCH_TO_SCREEN_CONTACT_EDIT rem
 '=== switch to screen CONTACT_EDIT (4) ===
-ls=sc: sc=4
+gosub SWITCH_SCREEN_INIT
+sc=4
 gosub SWITCH_SCREEN_CLEANUP
 su=1
 hl%=0: ul%=0
@@ -275,6 +279,11 @@ SWITCH_SCREEN_CLEANUP rem
 u0$="": u$=""
 print "{clr}";: canvas 0 clr
 gosub VIRTUAL_KEYBOARD_DISABLE
+return
+
+SWITCH_SCREEN_INIT rem
+if sc<>0 then s2=ls: ls=sc 'don't change the last screen to debug when switching from debug to another screen
+if sc=0 then ls=s2 'when switching from debug to another screen, set last screen back to the 2nd-last screen
 return
 
 
