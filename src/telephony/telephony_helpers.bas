@@ -22,8 +22,6 @@ br$="{line-udr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{l
 bb$="{line-ur}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}"
 'left line
 ll$="{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}"
-'right line
-rr$="{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}"
 'home-down line
 hd$="{home}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}"
 'space line
@@ -78,7 +76,7 @@ return
 
 MOVE_CURSOR_XX_YY rem
 '=== move the cursor to position xx,yy ===
-print "{home}";
+'print "{home}";
 print left$(hd$,yy+1);
 print mid$(bm$,2,xx);
 'MCXY1 if xx>1 then print "{rght}";: xx = xx - 1: goto MCXY1
@@ -102,7 +100,7 @@ if h(0)=1 then h(0)=0: print left$(ss$,w);
 for i=1 to h-2
 print left$(ll$,w);"{down}";
 xx=x: yy=y+i
-if h(i)=1 then print " ";left$(rr$,w-2);" ";
+if h(i)=1 then print " ";mid$(bm$,2,w-2);" ";
 if r(i)=0 and h(i)=0 then print left$(bm$,w-1);"{line-ud}";
 if r(i)=1 and h(i)=0 then print left$(br$,w-1);"{line-udl}";
 r(i)=0: h(i)=0: next i
