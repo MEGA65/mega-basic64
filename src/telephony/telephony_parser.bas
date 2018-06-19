@@ -22,26 +22,31 @@ if ml=0 and cp>0 goto PM_GET
 return
 
 '=== handle modem line ===
-HANDLE_MODEM_LINE rem
-'received complete line from modem
-qm=0 'reinit the quote mode, just to make sure the next line will start with quote mode off
+HANDLE_MODEM_LINE rem 'received complete line from modem
+'--- Additional parsing ---
+'add the last field to the field array
 if mf$<>"" and fc<20 then mf$(fc)=mf$: fc=fc+1
-if ml$="" and db>=6 then print "Empty line! (<CR> or <LF>)"
+'debug information
+if ml$="" and db>=6 then print "empty line! (<CR> or <LF>)"
+'if empty line, immediatly return
 if ml$="" then return
-
-for i=0 to(fc-1)
 'trim one space at the beginning of each field, if there is a whitespace
+for i=0 to(fc-1)
 if left$(mf$(i),1)=" " then mf$(i)=right$(mf$(i),len(mf$(i))-1)
 next i
-if db>=4 then print "Received modem line: ";: s$=ml$: gosub PRINT_STRING_CRLF: print chr$(13)
-if db>=5 then print "modem field count: ";fc
-if db>=5 then print "modem fields: ";
-if db>=5 then for i=0 to(fc-1): print chr$(123);mf$(i);chr$(125);: next i: print chr$(13)
+'--- Debug ---
+if db>=4 then print "Received modem line: ";: s$=ml$: gosub PRINT_STRING_CRLF: print chr$(13);
+if db>=5 then print "  modem field count: ";fc
+if db>=5 then print "  modem fields: ";
+if db>=5 then for i=0 to(fc-1): print chr$(123);mf$(i);chr$(125);: next i: print chr$(13);
+'--- Reinit variables ---
 f1$="": ml$="": fc=0: mf$=""
+qm=0 'reinit the quote mode, just to make sure the next line will start with quote mode off
+'--- Message handling ---
 mn=0
 gosub GET_MESSAGE_TYPE: gosub JUMP_TO_HANDLER
-'a non-empty modem line has been handled
-ml=1
+ml=1 'a non-empty modem line has been handled
+'--- Callback handling ---
 'Check if we got an acceptable result code:
 '  ok, error, +cme error, +cms error'
 '  If so, then we will try and jump to a common callback
@@ -49,11 +54,15 @@ rc=0
 if mn=40 or mn=44 or mn=49 or mn=50 then rc=1
 'Check if we have a common callback registered
 if rc=1 then mn=99: gosub JUMP_TO_HANDLER
+'--- Debug ---
+if db>=5 then print "" 'print empty line in debug
 return
 
 
 PRINT_STRING_CRLF rem
 'Prints a string, replacing CR and LF by text <CR> and <LF>
+'Arguments:
+'  s$: the string to be printed
 for i=1 to len(s$): b$=right$(left$(s$,i),1)
 if b$<>"" and b$<>chr$(13) and b$<>chr$(10) then print b$;
 if b$=chr$(13) then print chr$(13)+"<cr>";
@@ -63,7 +72,7 @@ return
 
 '=== Jump to handler ===
 JUMP_TO_HANDLER rem
-if db>=5 then print "message is type";mn
+if db>=5 then print "  message is type";mn
 'Check if jumptable is set for this message type, if so, call handler
 ln=jt%(mn): if ln>0 then gosub GOTO_LN
 return
@@ -119,12 +128,13 @@ return
 
 '=== read one line from modem ===
 RECEIVE_MODEM_LINE rem
-' Receive one line from the modem
-' Format:
-'	<cr><lf> or <lf>
-'	line of text
-'	<cr><lf>
-' Returns: only the line of text, in variable r$
+'Receive one line from modem
+'Format:
+'  <cr><lf> or <lf>
+'  line of text
+'  <cr><lf>
+'Returns:
+'  r$: the line of text
 r$="": c$="": last$="": crlf=0
 RML_LOOP last$=c$: c$="": get#1,c$
 if c$="" and last$="" goto RML_LOOP 'empty chars at the beginning of the response"
@@ -147,5 +157,28 @@ if c$=chr$(10) and last$=chr$(13) then crlf=crlf+1
 if c$=chr$(10) and last$="" then crlf=crlf+1
 return
 
-
-
+'=== read chars from modem ===
+RECEIVE_CHARS_FROM_MODEM rem
+'Receive k characters from modem.
+'Timeout after 5*k characters polled.
+'It ignores the first <cr><lf> or <lf> encountered
+'Note: the modem considers <cr><lf> to be a single char (in a SMS at least), but when polling the buffered UART it is most definitely 2 chars. When encountering further <cr><lf>, we decrement the char counter by one.
+'Arguments:
+'  k: the number of chars to get from modem
+'Returns:
+'  s$: the string of length k polled from modem
+if k<1 then return
+s$="": l=0: crlf=0: last$="":
+for i=1 to 5*k 'timeout after 5*k chars polled
+last$=c$: c$="": get#1,c$: if c$="" then goto RCFM_END 'loop immediatly if empty char
+'Add character to string
+if c$<>chr$(13) and c$<>chr$(10) then s$=s$+c$: l=l+1 'if not <cr> or <lf>, add it in any case
+if c$=chr$(13) or c$=chr$(10) then if crlf>=1 then s$=s$+c$: l=l+1 'add <cr> or <lf> only after the first crlf was encountered
+'Track <cr><lf>
+gosub RML_CRLF
+'Decrement l once when encountering additional <cr><lf>
+if c$=chr$(10) and last$=chr$(13) and crlf>=2 then l=l-1
+RCFM_END rem 'End
+if l=k then return 'we reached k characters, return immediatly
+next i
+return
