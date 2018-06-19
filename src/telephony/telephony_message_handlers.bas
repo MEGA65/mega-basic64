@@ -365,13 +365,15 @@ MESSAGE_HANDLER_+CMGL rem
 '-- Text mode and details (+csdh=1) --
 '	+CMGL: 31,"REC UNREAD","+61412345678",,"18/06/18,12:42:21+38",145,40
 '		<index>, <stat>, <oa/da>, [<alpha>], [<scts>], <tooa/toda>, <length>
+'		 mf$(1)   mf$(2)  mf$(3)   mf$(4)     mf$(5)     mf$(6)      mf$(7)
 '	text of the message
 '		<CR><LF><text of the message><CR><LF>
 'When receiving +CMGL, we have to get the body of the message
-gosub RECEIVE_MODEM_LINE 'the body of the message should be in variable r$
+k=val(mf$(7)) 'length of sms text
+gosub RECEIVE_CHARS_FROM_MODEM 'body of the message in variable s$
+'gosub RECEIVE_MODEM_LINE 'the body of the message should be in variable r$
 'debugging
-if db>=4 then print "+CMGL;";mf$(1);";";mf$(2);";";mf$(3);";";mf$(4);";";mf$(5);";";mf$(6)
-if db>=4 then print ">";r$
+if db>=4 then print ">";: gosub PRINT_STRING_CRLF
 'If the message is sent from the selected contact, then we will store the index
 s$=mf$(3): gosub REMOVE_QUOTES_STRING 'get number and remove quotes
 if right$(s$,9)=right$(pnumber$(cselected%),9) then gosub CMGL_ADD_INDEX

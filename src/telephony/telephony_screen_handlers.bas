@@ -43,8 +43,9 @@ return
 '### CONTACT screen handler ###
 HANDLER_SCREEN_CONTACT rem
 'SMS querying
-db=4: poke 0,64: gosub SWITCH_TO_SCREEN_DEBUG
-if sq=0 then jt%(99)= HS_C_QUERY_SMS_CALLBACK: s$="AT+CMGL="+chr$(34)+"ALL"+chr$(34)+chr$(13): gosub WRITE_STRING_TO_MODEM: sq=1: satus$="{yel}fetching SMS{elipsis}"
+poke 0,64
+db=5: gosub SWITCH_TO_SCREEN_DEBUG
+if sq=0 then jt%(99)= HS_C_QUERY_SMS_CALLBACK: k=4: gosub SEND_AT+CGML: sq=1: satus$="{yel}fetching SMS{elipsis}"
 'handle user actions
 u$="": get u$
 gosub POLL_TOUCH_CONTACT

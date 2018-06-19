@@ -109,7 +109,7 @@ return
 '=== modem setup ===
 SETUP_MODEM rem
 '--- configuration parameters ---
-smode%=0 'Mode for SMS
+smode%=1 'Mode for SMS
 '	0: PDU mode
 '	1: text mode
 '--- configuration commands ---
@@ -138,15 +138,18 @@ return
 '=== Simple terminal program for debugging/talking to modem. ===
 'Press  HOME to exit.
 TERMINAL_PROGRAM rem
+poke 0,64 'slow down the computer
 canvas 0 clr: print "{clr}micro term. press home to exit."
 ' Set modem to echo mode for convenience
 s$="ate1"+chr$(13): gosub WRITE_STRING_TO_MODEM
 'Simple terminal program for debugging
 MLOOP rem
-get a$:if a$="{home}" then s$="ate0"+chr$(13): gosub WRITE_STRING_TO_MODEM: print "{clr}";: return
+get a$:if a$="{home}" then s$="ate0"+chr$(13): gosub WRITE_STRING_TO_MODEM: print "{clr}";: poke 0,65: return
 if a$=chr$(20) then a$=chr$(8)
-if a$ <> "" then print#1, a$;
-get#1, a$:if a$=chr$(8)then a$=chr$(20)
+if a$<>"" then print#1,a$;
+get#1,a$: if a$=chr$(8) then a$=chr$(20)
+if a$=chr$(13) then print chr$(13);"<cr>";: goto MLOOP
+if a$=chr$(10) then print "<lf>";chr$(13);: goto MLOOP
 print a$;
 goto MLOOP
 
@@ -233,4 +236,7 @@ sq=0 'SMS for contact Queried. Flag to indicate if the SMS for the currently sel
 '	2: queried and received
 satus$="" 'status message for SMS on the contact screen
 sr%=0 'last contact for which SMS were Retrieved
+dim sus$(4)
+if smode%=0 then sus$(0)="0": sus$(1)="1": sus$(2)="2": sus$(3)="3": sus$(3)="3"
+if smode%=1 then sus$(0)=chr$(34)+"rec unread"+chr$(34): sus$(1)=chr$(34)+"rec read"+chr$(34): sus$(2)=chr$(34)+"sto unsent"+chr$(34): sus$(3)=chr$(34)+"sto sent"+chr$(34): sus$(4)=chr$(34)+"all"+chr$(34):
 return

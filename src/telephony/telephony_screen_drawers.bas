@@ -219,10 +219,10 @@ return
 
 DS_C_PRINT_SMS rem
 print"{wht}";
-xx=5: yy=8: gosub MOVE_CURSOR_XX_YY
+k=0 'number of printed lines
 for i=1 to slngth%
-if sidex%(i)<>0 then print stxt$(i);
-xx=5: yy=8+i: gosub MOVE_CURSOR_XX_YY
+if k>=12 then return 'don't print more than 12 lines
+if sidex%(i)<>0 then xx=5: yy=8+k: gosub MOVE_CURSOR_XX_YY: s$=stxt$(i): l=34: gosub TRIM_STRING_SPACES: print s$;: k=k+1
 next i
 return
 
