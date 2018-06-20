@@ -144,7 +144,7 @@ return
 '=== Simple terminal program for debugging/talking to modem. ===
 'Press  HOME to exit.
 TERMINAL_PROGRAM rem
-poke 0,64 'slow down the computer
+'poke 0,64 'slow down the computer
 canvas 0 clr: print "{clr}micro term. press home to exit."
 ' Set modem to echo mode for convenience
 s$="ate1"+chr$(13): gosub WRITE_STRING_TO_MODEM
@@ -236,8 +236,8 @@ sidex%=0 'the last SMS index that was filled in RAM
 dim snumber$(slngth%) 'phone number of the sender of SMS
 dim stxt$(slngth%) 'text of the SMS
 dim sd$(slngth%) 'timestamp (date) of SMS
-dim satus$(slngth%) 's(t)atus of SMS ("READ", "UNREAD", etc.)
-sq=0 'SMS for contact Queried. Flag to indicate if the SMS for the currently selected contact have been queried.'
+dim satus%(slngth%) 's(t)atus of SMS (integer [0-4], corresponding to "READ", "UNREAD", etc.; see sus$)
+sq=0 'SMS Queried. Flag to indicate if the SMS have been queried.'
 '  0: not queried
 '  1: queried, not received
 '  2: queried and received
@@ -247,4 +247,6 @@ dim sus$(4)
 if smode%=0 then sus$(0)="0": sus$(1)="1": sus$(2)="2": sus$(3)="3": sus$(3)="3"
 if smode%=1 then sus$(0)=chr$(34)+"rec unread"+chr$(34): sus$(1)=chr$(34)+"rec read"+chr$(34): sus$(2)=chr$(34)+"sto unsent"+chr$(34): sus$(3)=chr$(34)+"sto sent"+chr$(34): sus$(4)=chr$(34)+"all"+chr$(34)
 serror=0 'the number of error when getting SMS
+smaxindex=20 'the number of messages that will see their body stored in memory
+gosub QUERY_ALL_SMS 'launch the asynchronous query of all the SMS
 return

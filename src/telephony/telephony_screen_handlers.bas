@@ -43,7 +43,7 @@ return
 '### CONTACT screen handler ###
 HANDLER_SCREEN_CONTACT rem
 'SMS querying
-if sq=0 then gosub QUERY_SMS_FROM_CONTACT: sq=1: satus$="{yel}fetching SMS{elipsis}"
+'if sq=0 then gosub QUERY_SMS_FROM_CONTACT: sq=1: satus$="{yel}fetching SMS{elipsis}"
 'handle user actions
 u$="": get u$
 gosub POLL_TOUCH_CONTACT

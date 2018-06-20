@@ -244,7 +244,7 @@ gosub PREP_CONTACT
 return
 
 PREP_CONTACT rem
-satus$=""
+'satus$=""
 if sr%=cslected% then return
 gosub EMPTY_SMS: sq=0
 return

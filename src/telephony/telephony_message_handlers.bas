@@ -391,17 +391,20 @@ k=val(mf$(11)) 'length of sms text
 gosub RECEIVE_CHARS_FROM_MODEM 'body of the message in variable r$
 'debugging
 if db>=4 then print ">";: s$=r$: gosub PRINT_STRING_CRLF: print chr$(13);
-'If the message is sent from the selected contact, then we will store the index
-s$=mf$(2): gosub REMOVE_QUOTES_STRING 'get number and remove quotes
-if right$(s$,9)=right$(pnumber$(cselected%),9) then gosub CMGR_ADD_INDEX
+'Store the message (metadata and maybe data) in memory
+gosub CMGR_ADD_INDEX
+'s$=mf$(2): gosub REMOVE_QUOTES_STRING 'get number and remove quotes
+'if right$(s$,9)=right$(pnumber$(cselected%),9) then gosub CMGR_ADD_INDEX
 return
 
 CMGR_ADD_INDEX rem
-gosub SMS_GET_FIRST_EMPTY_INDEX 'we have the first empty index for SMS in memory, in variable k
-sidex%(k)=sidex% 'SMS index
-s$=mf$(2): gosub REMOVE_QUOTES_STRING: snumber$(k)=s$ 'SMS originating/destination number
-stxt$(k)=r$ 'SMS body
-s$=mf$(1): gosub REMOVE_QUOTES_STRING: satus$(k)=s$ 'SMS status
+gosub SMS_GET_FIRST_EMPTY_INDEX: ii=k 'we have the first empty index for SMS in memory, in variable k
+sidex%(ii)=sidex% 'SMS index
+s$=mf$(2): gosub REMOVE_QUOTES_STRING: snumber$(ii)=s$ 'SMS originating/destination number
+s$=mf$(1): gosub GET_STATUS_FROM_STRING: satus%(ii)=k 'SMS status
+'SMS body: we store it only if the current queried SMS (sidex%) is among the last SMS
+stxt$(ii)="" 'clear SMS body
+if sused%-sidex% <= smaxindex then stxt$(ii)=r$ 'If true, SMS body is stored
 return
 
 15899 return
