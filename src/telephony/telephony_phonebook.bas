@@ -99,3 +99,32 @@ for i=1 to plngth%
 if pindex%(i)=0 then k=i: return
 next i
 return
+
+COMPARE_PHONE_NUMBERS rem
+'Compares to phone numbers
+'This method will use the country code.
+'Example (given cc$="+61")
+'  0412345678 = 0412345678
+'  +6141234567 = +6141234567
+'  0412345678 = +6141234567
+'  +6141234567 <> +3341234567
+'  +3341234567 <> 0412345678
+'Arguments:
+'  r$: the first number
+'  s$: the second number
+'  cc$: the country code
+'Returns:
+'  b: boolean result (0: false, 1: true)
+if db>=4 then print "  Comparing ";r$;" and ";s$
+b=0
+k=0: l=0 'the number is international type (first char is +), for r$ and s$ respectively
+if r$=s$ then b=1: return '1st case: numbers are exactly equal
+if left$(r$,1)="+" then k=1
+if left$(s$,1)="+" then l=1
+if k=l then return '2nd case: both number have the same type (either international or not), but are different
+'3rd case: one is an international number from current country, the other is the same number in national format
+if k=1 then if r$=cc$+right$(s$,len(s$)-1) then b=1: return
+if l=1 then if s$=cc$+right$(r$,len(r$)-1) then b=1: return
+'when arriving here, we are sure that those are not the same numbers
+return
+

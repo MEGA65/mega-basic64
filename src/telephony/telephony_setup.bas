@@ -13,6 +13,7 @@ return
 
 '=== program flags and variables setup ===
 SETUP_PROGRAM rem
+cc$="+61" 'Country Code to use in the program
 db=db 'flag db (debug): print debugging information
 '  0: no logging
 '  1: critical
@@ -242,17 +243,30 @@ sq=0 'SMS Queried. Flag to indicate if the SMS have been queried.'
 '  0: not queried
 '  1: queried, not received
 '  2: queried and received
-satus$="" 'status message for SMS on the contact screen
+satus$="" 'status message for SMS on the SMS screen
 sr%=0 'last contact for which SMS were Retrieved
 dim sus$(4)
 if smode%=0 then sus$(0)="0": sus$(1)="1": sus$(2)="2": sus$(3)="3": sus$(3)="3"
 if smode%=1 then sus$(0)=chr$(34)+"rec unread"+chr$(34): sus$(1)=chr$(34)+"rec read"+chr$(34): sus$(2)=chr$(34)+"sto unsent"+chr$(34): sus$(3)=chr$(34)+"sto sent"+chr$(34): sus$(4)=chr$(34)+"all"+chr$(34)
 serror=0 'the number of error when getting SMS
 smaxcache=20 'the size of cache: number of messages that will see their body stored in memory
+sx=0 'flag to indicate if received SMS should follow the cache mechanism or not
 '--- SMS pane ---
 smaxpane%=18 'dim of SMS pane array
 dim spt$(smaxpane%) 'SMS Pane Text array:
 dim spi%(smaxpane%) 'SMS Pane Index: SMS pane <-> SMS index mapping
+'--- SMS Contact pane ---
+mmaxpane%=12 'dim of SMS Contact pane array
+dim mpt$(mmaxpane%) 'SMS Contact Pane Text array:
+dim mpi%(mmaxpane%) 'SMS Contact Pane Index: SMS Contact pane <-> SMS index mapping
+dim mpindex(100) 'Index of the SMS belonging to Contact
+mpindex%=0 'the last index in mpindex that was handled
+mxindex%=0 'the max index that was filled in mpindex%
+matus$="" 'status message for Contact SMS on the Contact screen
+mq=0 'Contact's SMS Queried. Flag to indicate if the Contact's SMS have been queried.'
+'  0: not queried
+'  1: queried, not received
+'  2: queried and received
 '--- subroutines ---
 gosub QUERY_ALL_SMS 'launch the asynchronous query of all the SMS
 return

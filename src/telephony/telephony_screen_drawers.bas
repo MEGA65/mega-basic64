@@ -212,21 +212,21 @@ xx=5: yy=21: p=0: gosub STAMP_GLOBE 'globe
 xx=35: yy=21: p=0: gosub STAMP_MESSAGE 'message
 'SMS box heading w/ status message
 xx=5: yy=6: gosub MOVE_CURSOR_XX_YY: l=34: s$="SMS conversation"
-if satus$<>"" then s$=s$+" ("+satus$+"{wht})"
+if satus$<>"" then s$=s$+" ("+matus$+"{wht})"
 gosub TRIM_STRING_SPACES: print s$;
 'SMS messages
 if sq=2 then gosub DS_C_PRINT_SMS
 return
 
 DS_C_PRINT_SMS rem
+'Displays the Contact's SMS preformatted and stored in the Contact SMS pane array
 print"{wht}";
-k=0 'number of printed lines
-for i=1 to slngth%
-if k>=12 then return 'don't print more than 12 lines
-if sidex%(i)<>0 then xx=5: yy=8+k: gosub MOVE_CURSOR_XX_YY: s$=stxt$(i): l=34: gosub TRIM_STRING_SPACES: print s$;: k=k+1
-next i
+xx=5: yy=8: gosub MOVE_CURSOR_XX_YY
+for ii=1 to mmaxepane%
+print mpt$(ii);
+print left$(ll$,34);"{down}";
+next ii
 return
-
 '### end DRAW_SCREEN_CONTACT ###
 
 

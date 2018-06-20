@@ -27,7 +27,7 @@ if u$="@" then ctrigger=2: cfields$(2)=nb$: gosub SWITCH_TO_SCREEN_CONTACT_EDIT
 'navigation in contact pane
 if u$="{up}" then mdv=centry%: hl%=fn mod(hl%-2)+1: su=1: uc=1 'Redraw contact list
 if u$="{down}" then mdv=centry%: hl%=fn mod(hl%)+1: su=1: uc=1 'Redraw contact list
-if u$="{rght}" and hl%<>0 then cselected%=cindex%(hl%): su=1: gosub SWITCH_TO_SCREEN_CONTACT 'dialler
+if u$="{rght}" and hl%<>0 then cselected%=cindex%(hl%): gosub SWITCH_TO_SCREEN_CONTACT 'Go to contact screen
 'limit length is 18, go to loop start if over it or not enter or backspace
 if u$<>chr$(20) and u$<>chr$(13) and len(nb$)>=19 then return
 if (u$>="0" and u$<="9") or u$="+" or u$="*" or u$="#" or u$="a" or u$="b" or u$="c" or u$="d" or u$="A" or u$="B" or u$="C" or u$="D" then nb$=nb$+u$: u0$=u$: su=1: up=1: ud=1 'request dialpad and number update
@@ -46,7 +46,7 @@ return
 '### CONTACT screen handler ###
 HANDLER_SCREEN_CONTACT rem
 'SMS querying
-'if sq=0 then gosub QUERY_SMS_FROM_CONTACT: sq=1: satus$="{yel}fetching SMS{elipsis}"
+if mq=0 then r$=pnumber$(cselected%): gosub GET_SMS_FROM_CONTACT
 'handle user actions
 u$="": get u$
 gosub POLL_TOUCH_CONTACT
