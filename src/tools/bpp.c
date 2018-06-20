@@ -89,6 +89,7 @@ int notKeyword(char *s)
 	if (!strcmp(s,"from")) return 0;
 	if (!strcmp(s,"slow")) return 0;
 	if (!strcmp(s,"fast")) return 0;
+	if (!strcmp(s,"step")) return 0;
 
 	return 1;
 }

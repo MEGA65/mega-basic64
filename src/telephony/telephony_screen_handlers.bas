@@ -4,6 +4,7 @@ if sc=1 then gosub HANDLER_SCREEN_DIALLER
 if sc=2 then gosub HANDLER_SCREEN_CONTACT
 if sc=3 then gosub HANDLER_SCREEN_CALL
 if sc=4 then gosub HANDLER_SCREEN_CONTACT_EDIT
+if sc=5 then gosub HANDLER_SCREEN_SMS
 return
 
 
@@ -19,6 +20,8 @@ tmr=tmr-1: if tmr=0 then up=1: su=1 'Request redrawing of dialpad (up), and mark
 if u$="" then return
 ' Run terminal program for debugging modem communications
 if u$="t" or u$="T" then up=1: su=1: gosub TERMINAL_PROGRAM: gosub SWITCH_TO_SCREEN_DIALLER
+' Go to SMS screen
+if u$="s" or u$="S" then up=1: su=1: gosub SWITCH_TO_SCREEN_SMS
 ' Open the new contact screen with dialled number pre-populated
 if u$="@" then ctrigger=2: cfields$(2)=nb$: gosub SWITCH_TO_SCREEN_CONTACT_EDIT
 'navigation in contact pane
@@ -238,4 +241,12 @@ cid$=""
 dr$="": dnumber$=""
 if dia=1 then dia=0
 tc=0: dtmr=0: dtmr$="000000"
+return
+
+'### SMS screen handler ###
+HANDLER_SCREEN_SMS rem
+'user actions
+u$="": get u$
+if u$="" then return
+if u$=chr$(20) then u0$=u$: gosub SWITCH_TO_LAST_SCREEN
 return

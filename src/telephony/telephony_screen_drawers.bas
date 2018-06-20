@@ -5,6 +5,7 @@ if sc=1 then gosub DRAW_SCREEN_DIALLER
 if sc=2 then gosub DRAW_SCREEN_CONTACT
 if sc=3 then gosub DRAW_SCREEN_CALL
 if sc=4 then gosub DRAW_SCREEN_CONTACT_EDIT
+if sc=5 then gosub DRAW_SCREEN_SMS
 u0$="": us=1
 return
 
@@ -369,6 +370,38 @@ DS_CALL_ERASE_GP rem
 'erase green phone (answer/pick-up)
 canvas 0 clr from 0,6 to 4,9
 return
+
+
+'### SMS screen update subroutine ###
+DRAW_SCREEN_SMS rem
+'buttons
+xx=0: yy=2: p=0: gosub STAMP_ARROW_BACK 'arrow back
+'heading box
+print "{wht}";
+x=4: y=2: w=36: h=3: gosub DRAW_BOX
+xx=5: yy=3: gosub MOVE_CURSOR_XX_YY
+s$="All SMS"
+'contact saving status
+if satus$<>"" then s$=s$+" ("+satus$+"{wht})"
+'trim and display heading
+l=34: gosub TRIM_STRING_SPACES: print s$;
+'contact fields box
+print "{wht}";
+x=0: y=5: w=40: h=20: gosub DRAW_BOX
+'print SMS
+gosub DS_S_PRINT_SMS
+return
+
+DS_S_PRINT_SMS rem
+'This method is horribly non-optimized! (the delay is vastly noticeable on screen...)
+print"{wht}";
+k=0 'number of printed lines
+for ii=slngth% to 1 step -1
+if k>=18 then return 'don't print more than 18 lines
+if sidex%(ii)<>0 and stxt$(ii)<>"" then xx=1: yy=6+k: gosub MOVE_CURSOR_XX_YY: s$=snumber$(ii)+": "+stxt$(ii): gosub RM_STRING_CRLF: l=38: gosub TRIM_STRING_SPACES: print s$;: k=k+1
+next ii
+return
+'### end DRAW_SCREEN_SMS ###
 
 
 '### STAMP SUBROUTINES ###

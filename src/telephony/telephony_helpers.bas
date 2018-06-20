@@ -144,6 +144,21 @@ gosub TRIM_STRING
 if len(s$)<l then s$=s$+left$(ss$,l-len(s$)) 'add l-len spaces, so that len(s$)=l
 return
 
+RM_STRING_CRLF rem
+'Remove characters <CR> and <LF> from string
+'Arguments:
+'  s$: the string to be modified
+'Returns:
+'  s$: the modified string
+ww$="" 'temp string
+for i=1 to len(s$)
+c$=mid$(s$,i,1)
+if c$<>chr$(13) and c$<>chr$(10) then ww$=ww$+c$: goto RMSCRLF_NEXT 'add the char to string if not <CR> or <LF>
+ww$=ww$+" " 'add a space if <CR> or <LF>
+RMSCRLF_NEXT next i
+s$=ww$ 'set s$ to the new string
+return
+
 SPACES rem
 'SPACES
 '   Returns a string with l spaces'
@@ -213,6 +228,7 @@ if ll=1 then gosub SWITCH_TO_SCREEN_DIALLER
 if ll=2 then gosub SWITCH_TO_SCREEN_CONTACT
 if ll=3 then gosub SWITCH_TO_SCREEN_CALL
 if ll=4 then gosub SWITCH_TO_SCREEN_CONTACT_EDIT
+if ll=5 then gosub SWITCH_TO_SCREEN_SMS
 ls=s2 'set last screen back to the 2nd-last screen
 return
 
@@ -268,6 +284,14 @@ if ctrigger=1 and cselected%<=0 then stop 'we should have cselected% pointing to
 if ctrigger=1 and cselected%>0 then gosub PREP_EDIT_CONTACT: return
 if ctrigger=2 then cselected%=0
 if ctrigger>2 then stop 'that shouldn't happen
+return
+
+SWITCH_TO_SCREEN_SMS rem
+'=== switch to screen SMS (5) ===
+gosub SWITCH_SCREEN_INIT
+sc=5
+gosub SWITCH_SCREEN_CLEANUP
+su=1
 return
 
 PREP_EDIT_CONTACT rem

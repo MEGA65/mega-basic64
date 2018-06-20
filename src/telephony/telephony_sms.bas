@@ -42,8 +42,8 @@ return
 
 QAS_ALL_SMS_LOADED rem
 if db>=4 then print "All SMS queried!"
-if serror>0 then sq=2: satus$="{red}not all SMS fetched!" 'at least 1 error
-if serror=0 then sr%=cselected%: sq=2: satus$="{grn}SMS successfully fetched" 'SMS queried and all received
+if serror>0 then sq=2: satus$="{red}some not fetched!" 'at least 1 error
+if serror=0 then sq=2: satus$="{grn}successfully fetched" 'SMS queried and all received
 serror=0
 'gosub WAIT_FOR_KEY_PRESS
 'poke 0,65
