@@ -146,9 +146,9 @@ mq=2 'Current contact's SMS have been queried
 serror=0
 gosub SMS_TO_SMS_CONTACT_PANE 'update Contact SMS pane
 sr%=cselected%
-gosub WAIT_FOR_KEY_PRESS
+if db>=4 then gosub WAIT_FOR_KEY_PRESS
 poke 0,65
-db=0: gosub SWITCH_TO_LAST_SCREEN
+'db=0: gosub SWITCH_TO_LAST_SCREEN
 return
 
 
