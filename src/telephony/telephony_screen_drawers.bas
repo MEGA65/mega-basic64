@@ -393,14 +393,12 @@ gosub DS_S_PRINT_SMS
 return
 
 DS_S_PRINT_SMS rem
-'This method is horribly non-optimized! (the delay is vastly noticeable on screen...)
-'TODO: The display method recalculates the string each time: it is horribly slow and vastly suboptimal. Consider having an array that is updated only when needed, like for the contact pane on the dialler.
-'NOTE: small optimization. Remove <CR><LF> after having trimmed the string. It should speed up things, since the RM_STRING_CRLF subroutine will go through 38 chars max instead of the whole string.
+'Displays the SMS preformatted and stored in the SMS pane array
 print"{wht}";
-k=0 'number of printed lines
-for ii=slngth% to 1 step -1
-if k>=18 then return 'don't print more than 18 lines
-if sidex%(ii)<>0 and stxt$(ii)<>"" then xx=1: yy=6+k: gosub MOVE_CURSOR_XX_YY: s$=snumber$(ii)+": "+stxt$(ii): l=38: gosub TRIM_STRING_SPACES: gosub RM_STRING_CRLF: print s$;: k=k+1
+xx=1: yy=6: gosub MOVE_CURSOR_XX_YY
+for ii=1 to smaxepane%
+print spt$(ii);
+print left$(ll$,38);"{down}";
 next ii
 return
 '### end DRAW_SCREEN_SMS ###

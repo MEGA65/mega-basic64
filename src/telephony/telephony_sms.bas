@@ -35,7 +35,7 @@ QAS_END return
 QAS_CALLBACK rem
 ' modem sent a response to at+cmgr=<i>
 if db>=4 then print "SMS";sidex%;"/";sused%;"..."
-if merror=0 then rem '1 SMS was successfully retrieved
+if merror=0 then gosub SMS_TO_SMS_PANE '1 SMS was successfully retrieved, update SMS pane
 if merror=1 then merror=0: serror=serror+1 'error getting 1 SMS
 gosub QAS_NEXT
 return
@@ -45,6 +45,7 @@ if db>=4 then print "All SMS queried!"
 if serror>0 then sq=2: satus$="{red}some not fetched!" 'at least 1 error
 if serror=0 then sq=2: satus$="{grn}successfully fetched" 'SMS queried and all received
 serror=0
+gosub SMS_TO_SMS_PANE 'update SMS pane
 'gosub WAIT_FOR_KEY_PRESS
 'poke 0,65
 'db=0: gosub SWITCH_TO_LAST_SCREEN
@@ -68,4 +69,15 @@ GET_SMS_FROM_CONTACT rem
 '  s$: the number of the contact to get the SMS from
 'Returns:
 '  
+return
+
+
+SMS_TO_SMS_PANE rem
+'Fill the SMS pane with in-RAM SMS entries (from highest index to lowest)
+'Only entries in cache (i.e. with their body in memory) are displayed
+k=1
+for ii=sused% to 1 step -1
+if k>smaxpane% then return 'don't fill more than 18 lines
+if sidex%(ii)<>0 and stxt$(ii)<>"" then s$=snumber$(ii)+": "+stxt$(ii): l=38: gosub TRIM_STRING_SPACES: gosub RM_STRING_CRLF: spt$(k)=s$: spi%(k)=ii: k=k+1 'Remove <CR><LF> after having trimmed the string. It should speed up things a bit, since the RM_STRING_CRLF subroutine will go through 38 chars max instead of the whole string
+next ii
 return

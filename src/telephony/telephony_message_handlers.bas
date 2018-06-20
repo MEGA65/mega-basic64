@@ -404,7 +404,7 @@ s$=mf$(2): gosub REMOVE_QUOTES_STRING: snumber$(ii)=s$ 'SMS originating/destinat
 s$=mf$(1): gosub GET_STATUS_FROM_STRING: satus%(ii)=k 'SMS status
 'SMS body: we store it only if the current queried SMS (sidex%) is among the last SMS
 stxt$(ii)="" 'clear SMS body
-if sused%-sidex% <= smaxindex then stxt$(ii)=r$ 'If true, SMS body is stored
+if sused%-sidex% <= smaxcache then stxt$(ii)=r$ 'If true, SMS body is stored
 return
 
 15899 return

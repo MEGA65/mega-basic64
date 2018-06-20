@@ -219,6 +219,7 @@ dim clabels$(cfields%) 'array containing the labels of the previous fields
 clabels$(1)="Name"
 clabels$(2)="Number"
 cstatus$="" 'status message on the contact edit screen
+'--- subroutines ---
 gosub LOAD_PHONEBOOK
 gosub PHONEBOOK_TO_CONTACT_PANE
 gosub TRIM_CONTACT_PANE
@@ -247,6 +248,11 @@ dim sus$(4)
 if smode%=0 then sus$(0)="0": sus$(1)="1": sus$(2)="2": sus$(3)="3": sus$(3)="3"
 if smode%=1 then sus$(0)=chr$(34)+"rec unread"+chr$(34): sus$(1)=chr$(34)+"rec read"+chr$(34): sus$(2)=chr$(34)+"sto unsent"+chr$(34): sus$(3)=chr$(34)+"sto sent"+chr$(34): sus$(4)=chr$(34)+"all"+chr$(34)
 serror=0 'the number of error when getting SMS
-smaxindex=20 'the number of messages that will see their body stored in memory
+smaxcache=20 'the size of cache: number of messages that will see their body stored in memory
+'--- SMS pane ---
+smaxpane%=18 'dim of SMS pane array
+dim spt$(smaxpane%) 'SMS Pane Text array:
+dim spi%(smaxpane%) 'SMS Pane Index: SMS pane <-> SMS index mapping
+'--- subroutines ---
 gosub QUERY_ALL_SMS 'launch the asynchronous query of all the SMS
 return
