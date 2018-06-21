@@ -46,7 +46,8 @@ return
 '### CONTACT screen handler ###
 HANDLER_SCREEN_CONTACT rem
 'SMS querying
-if mq=0 then r$=pnumber$(cselected%): gosub GET_SMS_FROM_CONTACT
+if sq=2 and mq=0 then r$=pnumber$(cselected%): gosub GET_SMS_FROM_CONTACT
+if sq=0 or sq=1 then matus$="{yel}please wait{elipsis}"
 'handle user actions
 u$="": get u$
 gosub POLL_TOUCH_CONTACT
