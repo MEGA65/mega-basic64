@@ -52,10 +52,28 @@ if sq=0 or sq=1 then matus$="{yel}please wait{elipsis}"
 u$="": get u$
 gosub POLL_TOUCH_CONTACT
 if u$="" then return
+if wsms=1 then goto HS_C_WRITE_SMS
+goto HS_C_NORMAL
+
+HS_C_NORMAL rem 'normal interaction when not writing SMS
 if u$=chr$(20) then u0$=u$: gosub SWITCH_TO_SCREEN_DIALLER
 if u$=chr$(13) then u0$=u$: dnumber$=pnumber$(cselected%): gosub CALL_DIAL: gosub SWITCH_TO_SCREEN_CALL
 if u$="e" or u$="E" then u0$=u$: ctrigger=1: gosub SWITCH_TO_SCREEN_CONTACT_EDIT
+if u$="m" or u$="M" then u0$=u$: gosub HS_C_BEGIN_WRITING: gosub ERASE_SCREEN: gosub VIRTUAL_KEYBOARD_ENABLE
 return
+
+HS_C_WRITE_SMS rem 'interaction when writing SMS
+if u$=chr$(19) then wsms=0: gosub ERASE_SCREEN: gosub VIRTUAL_KEYBOARD_DISABLE: return 'HOME --> stop writing SMS
+'Move cursor left and right
+if u$="{left}" then mdv=len(wsms$)+1: ul%=fn mod(ul%-2)+1 'move cursor left
+if u$="{rght}" then mdv=len(wsms$)+1: ul%=fn mod(ul%)+1 'move cursor right
+'Backspace: remove character
+if u$=chr$(20) and ul%>1 then s$=wsms$: s$=left$(s$, ul%-2)+right$(s$, len(s$)+1-ul%): wsms$=s$: ul%=ul%-1
+'Alphanumeric+ char: insert char in SMS
+l=26*3-1: if u$<>"" and ((asc(u$)>=32 and asc(u$)<=95) or (asc(u$)>=193 and asc(u$)<=218)) then s$=wsms$: gosub STRING_INSERT_CHAR: wsms$=s$
+return
+
+HS_C_BEGIN_WRITING wsms=1: ul%=len(wsms$)+1: return
 
 
 '### CONTACT_EDIT screen handler ###
@@ -77,14 +95,23 @@ if u$="{left}" then mdv=len(cfields$(hl%))+1: ul%=fn mod(ul%-2)+1
 if u$="{rght}" then mdv=len(cfields$(hl%))+1: ul%=fn mod(ul%)+1
 'Modify the selected field
 if u$=chr$(20) and hl%>0 and ul%>1 then s$=cfields$(hl%): s$=left$(s$, ul%-2)+right$(s$, len(s$)+1-ul%): cfields$(hl%)=s$: ul%=ul%-1
-if u$<>"" and hl%>0 and ((asc(u$)>=32 and asc(u$)<=95) or (asc(u$)>=193 and asc(u$)<=218)) then s$=cfields$(hl%): gosub HS_CE_INSERT_CHAR: cfields$(hl%)=s$
+l=20: if u$<>"" and hl%>0 and ((asc(u$)>=32 and asc(u$)<=95) or (asc(u$)>=193 and asc(u$)<=218)) then s$=cfields$(hl%): gosub STRING_INSERT_CHAR: cfields$(hl%)=s$
 return
 
-HS_CE_INSERT_CHAR rem
+STRING_INSERT_CHAR rem
+'Insert char c$ in string s$, at position ul%
+'Arguments:
+'  c$: char to insert
+'  s$: string in which to insert
+'  ul%: position of insertion
+'  l: limit length of the string
+'Returns:
+'  s$: the new string with inserted char
+k=0 'move cursor flag
 c$=u$: gosub PETSCII_TO_ASCII: u$=c$ 'convert the PETSCII keyboard input to ASCII
-if ul%>=len(s$)+1 then s$=s$+u$ 'if the cursor is at len+1, just add the char
-if ul%<len(s$)+1 then s$=left$(s$, ul%-1)+u$+right$(s$, len(s$)-ul%) 'if not (<=len), replace char at ul%
-ul%=ul%+1 'move the cursor one char to right
+if len(s$)<l and ul%>=len(s$)+1 then s$=s$+u$: k=1 'if the string is under the limit length, and the cursor is at len+1, just add the char
+if ul%<len(s$)+1 then s$=left$(s$, ul%-1)+u$+right$(s$, len(s$)-ul%): k=1 'if not (<=len), replace char at ul%
+if k=1 then ul%=ul%+1 'move the cursor one char to right
 return
 
 HS_CE_ACTIVE_STRING ul%=len(cfields$(hl%))+1: return

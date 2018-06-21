@@ -71,6 +71,11 @@ tc=0 'tc: initial time at beginning of call
 dtmr=0 'dtmr: call timer
 dtmr$="00:00:00" 'dtmr$: call timer, in the format HH:MM:SS
 
+'=== messaging-related variables ===
+wsms=0 'Writing SMS flag: if set to 1, the user interface in the Contact and Call screen changes
+wsms$="" 'The SMS being written
+dim wsms$(2) 'An array for displaying the message being written
+
 '=== time-related variables ===
 thour=0: tmin=0: tsec=0
 thour$="": tmin$="": tsec$=""
@@ -268,5 +273,5 @@ mq=0 'Contact's SMS Queried. Flag to indicate if the Contact's SMS have been que
 '  1: queried, not received
 '  2: queried and received
 '--- subroutines ---
-gosub QUERY_ALL_SMS 'launch the asynchronous query of all the SMS
+'gosub QUERY_ALL_SMS 'launch the asynchronous query of all the SMS
 return

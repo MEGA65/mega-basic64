@@ -197,7 +197,6 @@ DRAW_SCREEN_CONTACT rem
 xx=0: yy=2: p=0: gosub STAMP_ARROW_BACK 'arrow back
 xx=0: yy=6: p=0: gosub STAMP_GREENPHONE 'greephone
 xx=0: yy=10: p=0: gosub STAMP_COG 'cog
-'canvas 62 stamp on canvas 0 at 0,14 'cog
 'contact name/number box
 gosub TRIM_CONTACT_DISPLAY_TEXT
 print "{wht}";
@@ -207,15 +206,46 @@ if cdisplay$<>"" then print cdisplay$;
 if len(cdisplay$)<34 then for j=1 to 34-len(cdisplay$): print " ";: next j
 'SMS box
 print "{wht}";
-x=4: y=5: w=36: h=20: r(2)=1: r(15)=1: gosub DRAW_BOX
-xx=5: yy=21: p=0: gosub STAMP_GLOBE 'globe
-xx=35: yy=21: p=0: gosub STAMP_MESSAGE 'message
+x=4: y=5: w=36
+if wsms=0 then h=20: r(2)=1: r(15)=1 'box (when not writing SMS)
+if wsms=1 then h=8: r(2)=1: 'box (when writing SMS)
+gosub DRAW_BOX
+'globe and message buttons
+if wsms=0 then yy=21 'globe and message buttons height
+if wsms=1 then yy=9 'globe and message buttons height
+xx=5: p=0: gosub STAMP_GLOBE 'globe
+xx=35: p=0: gosub STAMP_MESSAGE 'message
 'SMS box heading w/ status message
-xx=5: yy=6: gosub MOVE_CURSOR_XX_YY: l=34: s$="SMS conversation"
-if satus$<>"" then s$=s$+" ("+matus$+"{wht})"
+xx=5: yy=6: gosub MOVE_CURSOR_XX_YY: l=34
+if wsms=0 then s$="SMS conversation": if satus$<>"" then s$=s$+" ("+matus$+"{wht})"
+if wsms=1 then s$="SMS writing"
 gosub TRIM_STRING_SPACES: print s$;
 'SMS messages
-if sq=2 then gosub DS_C_PRINT_SMS
+if wsms=0 and sq=2 then gosub DS_C_PRINT_SMS 'print SMS (if not writing one)
+'Writen SMS message
+l=26
+'Split the wsms$ string in 3 strings for display on three lines
+'TODO: code a cleaner way to do this
+if len(wsms$)<=l then wsms$(0)=wsms$: wsms$(1)="": wsms$(2)=""
+if len(wsms$)>l and len(wsms$)<=2*l then wsms$(0)=left$(wsms$,l): wsms$(1)=right$(wsms$,len(wsms$)-l): wsms$(2)=""
+if len(wsms$)>2*l and len(wsms$)<=3*l then wsms$(0)=left$(wsms$,l): wsms$(1)=mid$(wsms$,l+1,l): wsms$(2)=right$(wsms$,len(wsms$)-2*l)
+'Print the wsms$ strings on 3 lines:
+if wsms=0 then yy=21: y=21
+if wsms=1 then yy=9: y=9
+xx=9: x=9
+for ii=0 to 2:
+gosub MOVE_CURSOR_XX_YY
+s$=wsms$(ii): gosub TRIM_STRING_SPACES: print s$;
+yy=yy+1
+next ii
+'Revert the underlined character
+if wsms=1 then mdv=26: k=fn mod(ul%-1): x=x+k: y=y+int((ul%-1)/26): gosub REVERT_CHAR 'revert underlined char
+return
+
+REVERT_CHAR rem
+'For some reason, the character can be >127, which will provoke an ILLEGAL QUANTITY ERROR (poking a value >255)
+'We get the modulo 128 of the value we peek to avoid this.
+mdv=128: poke 1024+y*40+x,fn mod(peek(1024+y*40+x))+128
 return
 
 DS_C_PRINT_SMS rem

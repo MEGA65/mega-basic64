@@ -256,6 +256,7 @@ gosub SWITCH_SCREEN_INIT
 sc=2
 gosub SWITCH_SCREEN_CLEANUP
 su=1
+ul%=0
 gosub PREP_CONTACT
 return
 
@@ -304,6 +305,8 @@ u0$="": u$=""
 print "{clr}";: canvas 0 clr
 gosub VIRTUAL_KEYBOARD_DISABLE
 return
+
+ERASE_SCREEN print "{clr}";: canvas 0 clr: return
 
 SWITCH_SCREEN_INIT rem
 if sc<>0 then s2=ls: ls=sc 'don't change the last screen to debug when switching from debug to another screen
