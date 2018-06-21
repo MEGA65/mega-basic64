@@ -142,8 +142,13 @@ SETUP_MODEM_STEP5 jt%(100)= SETUP_MODEM_STEP6: s$="at+cpms="+chr$(34)+"mt"+chr$(
 'Set the modem to send all fields if in text mode
 SETUP_MODEM_STEP6 if gf%=1 then jt%(100)= SETUP_MODEM_STEP7: s$="at+csdh=1"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
 goto SETUP_MODEM_STEP7 'if not in text mode
+'Set the reporting mode for SMS
+'+cnmi=2,2,0,0,0: SMS-DELIVERs are routed directly to the TE using unsolicited result code: +CMT
+'+cnmi=2,1,0,0,0 (default): If SMS-DELIVER is stored into ME/TA, indication of the memory location is routed to the TE by using unsolicited result code: +CMTI
+'In the first case, SMS are not stored in SIM storage. We will use the second case.
+SETUP_MODEM_STEP7 jt%(100)= SETUP_MODEM_STEP8: s$="AT+CNMI=2,1,0,0,0"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
 '--- End of modem setup ---
-SETUP_MODEM_STEP7 jt%(100)=0
+SETUP_MODEM_STEP8 jt%(100)=0
 'poke 0,65
 return
 
@@ -256,7 +261,7 @@ if gf%=1 then sus$(0)=chr$(34)+"REC UNREAD"+chr$(34): sus$(1)=chr$(34)+"REC READ
 serror=0 'the number of error when getting SMS
 smaxcache=10 'the size of cache: number of messages that will see their body stored in memory
 sx=0 'flag to indicate if received SMS should follow the cache mechanism or not
-sd=0 'SMS Delete flag: delete SMS upon reception flag
+sd=1 'SMS Delete flag: delete SMS upon reception flag
 '--- SMS pane ---
 smaxpane%=18 'dim of SMS pane array
 dim spt$(smaxpane%-1) 'SMS Pane Text array:

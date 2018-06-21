@@ -36,9 +36,47 @@ MESSAGE_HANDLER_6 rem
 MESSAGE_HANDLER_7 rem
 10799 return
 
-'Message handler: message type 8
-MESSAGE_HANDLER_8 rem
+'Message handler: +CMT (new SMS message)
+MESSAGE_HANDLER_+CMT rem
+'+CMT is an URC indicating a new message
+'It is received in place of +CMTI, because of configuration AT+CNMI=1,2,0,0,0
+'--- Structure in text mode and details (+csdh=1) ---
+'  +CMT: "+61412345678",,"18/06/18,12:42:21+38",145,4,0,0,"+61411990181",145,21
+'         <oa>, <alpha>, <scts>, <tooa>, <fo>, <pid>, <dcs>, <sca>, <tosca>, <length>
+'         mf$(1)  mf$(2) mf$(3)  mf$(4)  mf$(5)  mf$(6) mf$(7) mf$(8) mf$(9) mf$(10)
+'  <CR><LF><data>
+'db=4: gosub SWITCH_TO_SCREEN_DEBUG
+if db>=4 then print "Received: ";ml$
+'When receiving +CMT, we have to get the body of the message
+k=val(mf$(10)) 'length of sms text
+gosub RECEIVE_CHARS_FROM_MODEM 'body of the message in variable r$
+'Store the message (metadata and maybe data) in memory
+gosub CMT_ADD_SMS 'we use the same method
 10899 return
+
+CMT_ADD_SMS rem
+'TODO: share the code between CMT and CMGR, as only one field differs
+'Add the SMS to memory/cache, store it on SD card and delete it from SIM storage
+'--- Store SMS on SD CARD ---
+gosub SD_CARD_STORE_SMS 'dummy subroutine
+'--- Add SMS to memory/cache ---
+'We get the next free index in memory. In the future, get the next free index in SD card.
+gosub SMS_GET_FIRST_EMPTY_INDEX: sindex%=k
+sidex%(sidex%)=sidex% 'SMS index
+s$=mf$(1): gosub REMOVE_QUOTES_STRING: snumber$(sidex%)=s$ 'SMS originating/destination number
+satus%(sidex%)=0 'SMS status
+'s$=mf$(3): gosub REMOVE_QUOTES_STRING: sd$(sidex%)=s$ 'SMS timestamp
+'SMS body and timestamp: if caching is enabled, we store it only if the current queried SMS (sidex%) is among the last SMS
+if sx=1 then if (sused%-sidex% <= smaxcache) then stxt$(sidex%)=r$:  'If true, SMS body is stored
+if sx=0 then stxt$(sidex%)=r$ 'if caching is deactivated, we store it in any case
+'--- Delete SMS from SIM/modem storage ---
+'if sd=1 then k=sidex%: gosub SEND_AT+CMGD 'delete if SMS Delete flag is set to 1
+'Note: we should set-up a callback to make sure the SMS was deleted
+'--- Debugging ---
+if db>=4 then print "New message incoming: ";sidex%(sidex%); " "; snumber$(sidex%); " "; stxt$(sidex%)
+if db>=4 then WAIT_FOR_KEY_PRESS: db=0: gosub SWITCH_TO_SCREEN_CONTACT
+return
+
 
 'Message handler: message type 9
 MESSAGE_HANDLER_9 rem
@@ -397,16 +435,17 @@ return
 
 CMGR_ADD_SMS rem
 'Add the SMS to memory/cache, store it on SD card and delete it from SIM storage
+'--- Store SMS on SD CARD ---
+gosub SD_CARD_STORE_SMS 'dummy subroutine
 '--- Add SMS to memory/cache ---
+'We use sidex%, the index in SIM storage. In the future, replace with the index given by SD_CARD_STORE_SMS subroutine
+sidex%(sidex%)=sidex% 'SMS index
 s$=mf$(2): gosub REMOVE_QUOTES_STRING: snumber$(sidex%)=s$ 'SMS originating/destination number
 s$=mf$(1): gosub GET_STATUS_FROM_STRING: satus%(sidex%)=k 'SMS status
 's$=mf$(4): gosub REMOVE_QUOTES_STRING: sd$(sidex%)=s$ 'SMS timestamp
 'SMS body and timestamp: if caching is enabled, we store it only if the current queried SMS (sidex%) is among the last SMS
 if sx=1 then if (sused%-sidex% <= smaxcache) then stxt$(sidex%)=r$:  'If true, SMS body is stored
 if sx=0 then stxt$(sidex%)=r$ 'if caching is deactivated, we store it in any case
-'--- Store SMS on SD CARD ---
-gosub SD_CARD_STORE_SMS 'dummy subroutine
-sidex%(sidex%)=sidex% 'SMS index (replace with the index given by SD_CARD_STORE_SMS subroutine)
 '--- Delete SMS from SIM/modem storage ---
 if sd=1 then k=sidex%: gosub SEND_AT+CMGD 'delete if SMS Delete flag is set to 1
 'Note: we should set-up a callback to make sure the SMS was deleted

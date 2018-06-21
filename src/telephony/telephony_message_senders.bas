@@ -59,5 +59,5 @@ SEND_AT+CMGD rem
 'send AT+CMGD (delete SMS)
 'Argument:
 '  k: index of the SMS (on modem storage) to delete
-s$="AT+CMGD="+str(k)+chr$(13): gosub WRITE_STRING_TO_MODEM
+s$="AT+CMGD="+str$(k)+chr$(13): gosub WRITE_STRING_TO_MODEM
 return

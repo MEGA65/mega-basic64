@@ -56,8 +56,9 @@ if wsms=1 then goto HS_C_WRITE_SMS
 goto HS_C_NORMAL
 
 HS_C_NORMAL rem 'normal interaction when not writing SMS
-if u$=chr$(20) then u0$=u$: gosub SWITCH_TO_SCREEN_DIALLER
-if u$=chr$(13) then u0$=u$: dnumber$=pnumber$(cselected%): gosub CALL_DIAL: gosub SWITCH_TO_SCREEN_CALL
+if u$=chr$(20) then u0$=u$: gosub SWITCH_TO_SCREEN_DIALLER 'BACKSPACE: go back to dialler
+if u$=chr$(13) then u0$=u$: dnumber$=pnumber$(cselected%): gosub CALL_DIAL: gosub SWITCH_TO_SCREEN_CALL 'ENTER: call contact
+if u$=chr$(135) and sq=2 then r$=pnumber$(cselected%): gosub GET_SMS_FROM_CONTACT 'F5: refresh SMS from contact
 if u$="e" or u$="E" then u0$=u$: ctrigger=1: gosub SWITCH_TO_SCREEN_CONTACT_EDIT
 if u$="m" or u$="M" then u0$=u$: gosub HS_C_BEGIN_WRITING: gosub ERASE_SCREEN: gosub VIRTUAL_KEYBOARD_ENABLE
 return
