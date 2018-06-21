@@ -27,7 +27,7 @@ return
 
 QUERY_ALL_SMS rem
 'poke 0,64 'for debugging only, far too slow!
-'db=4: gosub SWITCH_TO_SCREEN_DEBUG
+db=4: gosub SWITCH_TO_SCREEN_DEBUG
 gosub EMPTY_SMS
 sq=1: satus$="{yel}fetching SMS{elipsis}"
 sx=1 'enable cache mechanism for further SMS
@@ -36,31 +36,32 @@ return
 
 QAS_NEXT rem
 if sidex%<sused% then goto QAS_QUERY 'we didn't query all SMS, so we query next one
-jt%(100)=0: gosub QAS_ALL_SMS_LOADED: goto QAS_END 'we queried all SMS, so we go to ALL_SMS_LOADED
+jt%(98)=0: gosub QAS_ALL_SMS_LOADED: goto QAS_END 'we queried all SMS, so we go to ALL_SMS_LOADED
 '--- Query next SMS ---
 QAS_QUERY rem
+if db>=4 then print "SMS";sidex%;"/";sused%-1;":"
+jt%(98)= QAS_CALLBACK: k=sidex%: gosub SEND_AT+CMGR 'set callback and send message
 sidex%=sidex%+1 'next SMS has index sidex%+1
-jt%(100)= QAS_CALLBACK: k=sidex%: gosub SEND_AT+CMGR 'set callback and send message
 QAS_END return
 
 QAS_CALLBACK rem
 ' modem sent a response to at+cmgr=<i>
-if db>=4 then print "SMS";sidex%;"/";sused%;"..."
-if merror=0 then gosub SMS_TO_SMS_PANE '1 SMS was successfully retrieved, update SMS pane
+'NOTE: since we stopped to rely on Result Codes to call our callback, merror cannot longer be used.
+if merror=0 then rem 'gosub SMS_TO_SMS_PANE '1 SMS was successfully retrieved. Updating the SMS pane is time consuming.
 if merror=1 then merror=0: serror=serror+1 'error getting 1 SMS
 gosub QAS_NEXT
 return
 
 QAS_ALL_SMS_LOADED rem
 if db>=4 then print "All SMS queried!"
+'NOTE: since we stopped to rely on Result Codes to call our callback, this serror number cannot be trusted
 if serror>0 then sq=2: satus$="{red}some not fetched!" 'at least 1 error
 if serror=0 then sq=2: satus$="{grn}successfully fetched" 'SMS queried and all received
 serror=0
 sx=0 'disable cache mechanism for further SMS
 gosub SMS_TO_SMS_PANE 'update SMS pane
-'gosub WAIT_FOR_KEY_PRESS
+if db=4 then gosub WAIT_FOR_KEY_PRESS: db=0: gosub SWITCH_TO_LAST_SCREEN
 'poke 0,65
-'db=0: gosub SWITCH_TO_LAST_SCREEN
 return
 
 GET_STATUS_FROM_STRING rem

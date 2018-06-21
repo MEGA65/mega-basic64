@@ -3,7 +3,7 @@ poke 0,65 'fast mode (50mhz cpu clock)
 poke 53248+111,128 'fix screen artifacts (60hz display)
 poke 53272,20 'uppercase charset
 
-print "{clr}";: canvas 0 clr 'clear screen
+print "{clr}";: canvas 0 clr: print "{wht}" 'clear screen
 
 goto INIT
 

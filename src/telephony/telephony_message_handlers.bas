@@ -390,7 +390,7 @@ MESSAGE_HANDLER_+CMGR rem
 k=val(mf$(11)) 'length of sms text
 gosub RECEIVE_CHARS_FROM_MODEM 'body of the message in variable r$
 'debugging
-if db>=4 then print ">";: s$=r$: gosub PRINT_STRING_CRLF: print chr$(13);
+'if db>=4 then print ">";: s$=r$: gosub PRINT_STRING_CRLF: print chr$(13);
 'Store the message (metadata and maybe data) in memory
 gosub CMGR_ADD_INDEX
 return
@@ -573,6 +573,9 @@ MESSAGE_HANDLER_96 rem
 'Message handler: message type 97
 MESSAGE_HANDLER_97 rem
 19799 return
+
+
+'### Reserved for callbacks ###
 
 'Message handler: message type 98
 MESSAGE_HANDLER_98 rem

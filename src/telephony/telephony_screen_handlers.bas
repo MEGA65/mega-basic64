@@ -297,6 +297,7 @@ return
 
 '### SMS screen handler ###
 HANDLER_SCREEN_SMS rem
+if sq=0 then gosub QUERY_ALL_SMS 'launch the asynchronous query of all the SMS
 'user actions
 u$="": get u$
 if u$="" then return

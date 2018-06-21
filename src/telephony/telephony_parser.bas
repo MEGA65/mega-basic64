@@ -37,7 +37,7 @@ for i=0 to(fc-1)
 if left$(mf$(i),1)=" " then mf$(i)=right$(mf$(i),len(mf$(i))-1)
 next i
 '--- Debug ---
-if db>=4 then print "Received modem line: ";: s$=ml$: gosub PRINT_STRING_CRLF: print chr$(13);
+if db>=4 then print "Received modem line: ";ml$ 's$=ml$: gosub PRINT_STRING_CRLF: print chr$(13);
 if db>=5 then print "  modem field count: ";fc
 if db>=5 then print "  modem fields: ";
 if db>=5 then for i=0 to(fc-1): print chr$(123);mf$(i);chr$(125);: next i: print chr$(13);
@@ -52,9 +52,11 @@ ml=1 'a non-empty modem line has been handled
 rc=0
 if mn=40 or mn=44 or mn=49 or mn=50 then rc=1
 if mn=60 then rc=2 'received message prompt ">"
+if mn=58 then rc=3
 'Check if we have a common callback registered
 if rc=1 then mn=100: gosub JUMP_TO_HANDLER
 if rc=2 then mn=99: gosub JUMP_TO_HANDLER
+if rc=3 then mn=98: gosub JUMP_TO_HANDLER
 '--- Reinit variables ---
 ml$="": fc=0: mf$=""
 qm=0 'reinit the quote mode, just to make sure the next line will start with quote mode off

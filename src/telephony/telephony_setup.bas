@@ -116,7 +116,7 @@ return
 
 '=== modem setup ===
 SETUP_MODEM rem
-'poke 0,64 'for debugging only
+poke 0,64 'for debugging only
 '--- purge UART buffer ---
 gosub PURGE_MODEM_BUFFER 'purges the UART buffer, to get rid of previously received chars
 '--- configuration parameters ---
@@ -140,11 +140,11 @@ SETUP_MODEM_STEP4 jt%(100)= SETUP_MODEM_STEP5: s$="at+cmgf="+right$(str$(gf%), l
 'Set the memories to use for SMS storage; the memory used is MT (or ME), which has more space'
 SETUP_MODEM_STEP5 jt%(100)= SETUP_MODEM_STEP6: s$="at+cpms="+chr$(34)+"mt"+chr$(34)+","+chr$(34)+"mt"+chr$(34)+","+chr$(34)+"mt"+chr$(34)+chr$(13): gosub WRITE_STRING_TO_MODEM: return
 'Set the modem to send all fields if in text mode
-SETUP_MODEM_STEP6 if smode%=1 then jt%(100)= SETUP_MODEM_STEP7: s$="at+csdh=1"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
+SETUP_MODEM_STEP6 if gf%=1 then jt%(100)= SETUP_MODEM_STEP7: s$="at+csdh=1"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
 goto SETUP_MODEM_STEP7 'if not in text mode
 '--- End of modem setup ---
 SETUP_MODEM_STEP7 jt%(100)=0
-'poke 0,65
+poke 0,65
 return
 
 '=== Simple terminal program for debugging/talking to modem. ===
@@ -254,7 +254,7 @@ dim sus$(4)
 if smode%=0 then sus$(0)="0": sus$(1)="1": sus$(2)="2": sus$(3)="3": sus$(3)="3"
 if smode%=1 then sus$(0)=chr$(34)+"rec unread"+chr$(34): sus$(1)=chr$(34)+"rec read"+chr$(34): sus$(2)=chr$(34)+"sto unsent"+chr$(34): sus$(3)=chr$(34)+"sto sent"+chr$(34): sus$(4)=chr$(34)+"all"+chr$(34)
 serror=0 'the number of error when getting SMS
-smaxcache=20 'the size of cache: number of messages that will see their body stored in memory
+smaxcache=10 'the size of cache: number of messages that will see their body stored in memory
 sx=0 'flag to indicate if received SMS should follow the cache mechanism or not
 '--- SMS pane ---
 smaxpane%=18 'dim of SMS pane array
