@@ -74,7 +74,7 @@ dtmr$="00:00:00" 'dtmr$: call timer, in the format HH:MM:SS
 '=== messaging-related variables ===
 wsms=0 'Writing SMS flag: if set to 1, the user interface in the Contact and Call screen changes
 wsms$="" 'The SMS being written
-dim wsms$(2) 'An array for displaying the message being written
+dim wsms$(3) 'An array for displaying the message being written
 
 '=== time-related variables ===
 thour=0: tmin=0: tsec=0
@@ -120,7 +120,7 @@ SETUP_MODEM rem
 '--- purge UART buffer ---
 gosub PURGE_MODEM_BUFFER 'purges the UART buffer, to get rid of previously received chars
 '--- configuration parameters ---
-smode%=1 'Mode for SMS
+gf%=1 'Mode for SMS (at+cmGF: Message Format)
 '	0: PDU mode
 '	1: text mode
 '--- configuration commands ---
@@ -136,7 +136,7 @@ SETUP_MODEM_STEP2 jt%(100)= SETUP_MODEM_STEP3: s$="at+qdai=1,0,0,4,0"+chr$(13): 
 SETUP_MODEM_STEP3 jt%(100)= SETUP_MODEM_STEP4: s$="at+cmut=0"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
 '--- SMS setup ---
 'Set SMS mode to selected mode (smode%)
-SETUP_MODEM_STEP4 jt%(100)= SETUP_MODEM_STEP5: s$="at+cmgf="+right$(str$(smode%), len(str$(smode%))-1)+chr$(13): gosub WRITE_STRING_TO_MODEM: return
+SETUP_MODEM_STEP4 jt%(100)= SETUP_MODEM_STEP5: s$="at+cmgf="+right$(str$(gf%), len(str$(gf%))-1)+chr$(13): gosub WRITE_STRING_TO_MODEM: return
 'Set the memories to use for SMS storage; the memory used is MT (or ME), which has more space'
 SETUP_MODEM_STEP5 jt%(100)= SETUP_MODEM_STEP6: s$="at+cpms="+chr$(34)+"mt"+chr$(34)+","+chr$(34)+"mt"+chr$(34)+","+chr$(34)+"mt"+chr$(34)+chr$(13): gosub WRITE_STRING_TO_MODEM: return
 'Set the modem to send all fields if in text mode
@@ -274,4 +274,9 @@ mq=0 'Contact's SMS Queried. Flag to indicate if the Contact's SMS have been que
 '  2: queried and received
 '--- subroutines ---
 'gosub QUERY_ALL_SMS 'launch the asynchronous query of all the SMS
+watus$="" 'status message when sending (Writing) a SMS
+sm$="" 'text of the message being sent
+sn$="" 'destination number of the message being sent
+mr=0 'Message Reference of the last sent message
+mc=0 'Message sent Callback
 return

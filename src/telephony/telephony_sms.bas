@@ -186,3 +186,38 @@ mpt$(ii)="": mpi%(ii)=0
 next ii
 return
 
+
+SEND_SMS rem
+'Send SMS
+'Argument (text mode):
+'  sm$: the message string
+'  sn$: the phone number to send to
+'  gf%: the SMS Message Format (0: PDU, 1: text)
+'  mc: callback to call after message has been sent
+if gf%=1 then goto S_AT+CMGS_TEXT 'text mode
+if db>=4 then print "SMS PDU mode not implemented!": return
+S_AT+CMGS_TEXT rem
+'Message to send:
+'  AT+CMGS=<da>[,<toda>]<CR>
+'The modem will reply with:
+'  >
+jt%(99)= SEND_SMS_PROMPT_CALLBACK 'callback for the message prompt (">")
+gosub SEND_AT+CMGS_1 'send the actual command
+return
+
+SEND_SMS_PROMPT_CALLBACK rem
+'Received the message prompt (">")
+'We can now enter the message, and end with:
+'  <ctrl+z>  (ctrl-z is the SUB ASCII char, dec=26)
+jt%(99)=0
+if db>=4 then gosub WAIT_FOR_KEY_PRESS
+jt%(100)= SEND_SMS_CALLBACK 'set the callback for result code
+s$=sm$+chr$(26): gosub WRITE_STRING_TO_MODEM 'send the body of message + ctrl-z
+return
+
+SEND_SMS_CALLBACK rem
+'Response to AT+CMGS received
+jt%(100)=0
+if db>=4 then gosub WAIT_FOR_KEY_PRESS
+ln=mc: gosub GOTO_LN 'jump to Message sent callback
+return

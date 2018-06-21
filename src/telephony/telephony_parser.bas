@@ -6,6 +6,8 @@ cp=50
 'read one char from cellular modem and parse received fields
 PM_GET get#1,c$: if c$="" then return
 cp=cp-1
+'Special case for message prompt. Maybe we should do it another way (don't use the parser).
+if ml$="" and c$=">" then ml$=c$: mf$=c$: goto HANDLE_MODEM_LINE
 if c$=chr$(13) or c$=chr$(10) then goto HANDLE_MODEM_LINE
 'quote mode: do not parse when between quotes
 if c$=chr$(34) then qm=1-qm 'flip quote mode flag
@@ -49,8 +51,10 @@ ml=1 'a non-empty modem line has been handled
 '  If so, then we will try and jump to a common callback
 rc=0
 if mn=40 or mn=44 or mn=49 or mn=50 then rc=1
+if mn=60 then rc=2 'received message prompt ">"
 'Check if we have a common callback registered
 if rc=1 then mn=100: gosub JUMP_TO_HANDLER
+if rc=2 then mn=99: gosub JUMP_TO_HANDLER
 '--- Reinit variables ---
 ml$="": fc=0: mf$=""
 qm=0 'reinit the quote mode, just to make sure the next line will start with quote mode off
@@ -125,6 +129,9 @@ if mf$(0)="+CPBR" then mn=56
 if mf$(0)="+QLTS" then mn=57
 if mf$(0)="+CMGR" then mn=58
 if mf$(0)="+CPMS" then mn=59
+if mf$(0)=chr$(62) then mn=60 '">"
+if mf$(0)="+CMGS" then mn=61
+
 return
 
 '=== read one line from modem ===

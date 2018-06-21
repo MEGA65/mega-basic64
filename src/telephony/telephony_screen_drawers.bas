@@ -208,7 +208,7 @@ if len(cdisplay$)<34 then for j=1 to 34-len(cdisplay$): print " ";: next j
 print "{wht}";
 x=4: y=5: w=36
 if wsms=0 then h=20: r(2)=1: r(15)=1 'box (when not writing SMS)
-if wsms=1 then h=8: r(2)=1: 'box (when writing SMS)
+if wsms=1 then h=8: r(3)=1: 'box (when writing SMS)
 gosub DRAW_BOX
 'globe and message buttons
 if wsms=0 then yy=21 'globe and message buttons height
@@ -217,10 +217,11 @@ xx=5: p=0: gosub STAMP_GLOBE 'globe
 xx=35: p=0: gosub STAMP_MESSAGE 'message
 'SMS box heading w/ status message
 xx=5: yy=6: gosub MOVE_CURSOR_XX_YY: l=34
-if wsms=0 then s$="SMS conversation": if satus$<>"" then s$=s$+" ("+matus$+"{wht})"
-if wsms=1 then s$="SMS writing"
+if wsms=0 then s$="SMS conversation": if matus$<>"" then s$=s$+" ("+matus$+"{wht})"
+if wsms=1 then s$="SMS writing": if watus$<>"" then s$=s$+" ("+watus$+"{wht})"
 gosub TRIM_STRING_SPACES: print s$;
 'SMS messages
+print "{wht}";
 if wsms=0 and sq=2 then gosub DS_C_PRINT_SMS 'print SMS (if not writing one)
 'Writen SMS message
 l=26

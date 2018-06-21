@@ -417,12 +417,17 @@ stotal%=val(mf$(2))
 if db>=4 then print "SMS storage:";sused%"used,";stotal%;"total"
 15999 return
 
-'Message handler: message type 60
+'Message handler: message prompt (">")
 MESSAGE_HANDLER_60 rem
+if db>=4 then print "Received message prompt ('>')"
 16099 return
 
-'Message handler: message type 61
-MESSAGE_HANDLER_61 rem
+'Message handler: +CMGS
+MESSAGE_HANDLER_+CMGS rem
+'Send message
+'  +CMGS: <mr>
+mr=val(mf$(1))
+if db>=4 then print "SMS sent, mr=";mr
 16199 return
 
 'Message handler: message type 62

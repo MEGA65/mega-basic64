@@ -63,7 +63,10 @@ if u$="m" or u$="M" then u0$=u$: gosub HS_C_BEGIN_WRITING: gosub ERASE_SCREEN: g
 return
 
 HS_C_WRITE_SMS rem 'interaction when writing SMS
-if u$=chr$(19) then wsms=0: gosub ERASE_SCREEN: gosub VIRTUAL_KEYBOARD_DISABLE: return 'HOME --> stop writing SMS
+'Stop writing SMS: HOME
+if u$=chr$(19) then wsms=0: watus$="": gosub ERASE_SCREEN: gosub VIRTUAL_KEYBOARD_DISABLE: return
+'Send SMS: ENTER / RETURN
+if u$=chr$(13) then gosub HS_C_SEND_SMS: return
 'Move cursor left and right
 if u$="{left}" then mdv=len(wsms$)+1: ul%=fn mod(ul%-2)+1 'move cursor left
 if u$="{rght}" then mdv=len(wsms$)+1: ul%=fn mod(ul%)+1 'move cursor right
@@ -74,6 +77,27 @@ l=26*3-1: if u$<>"" and ((asc(u$)>=32 and asc(u$)<=95) or (asc(u$)>=193 and asc(
 return
 
 HS_C_BEGIN_WRITING wsms=1: ul%=len(wsms$)+1: return
+
+HS_C_SEND_SMS rem
+if len(wsms$)<=0 then watus$="{red}empty message": return
+'db=5: gosub SWITCH_TO_SCREEN_DEBUG
+ni=1 'disable user-interaction
+if db>=4 then poke 0,64
+'Send the message
+sm$=wsms$ 'text of the message
+sn$=pnumber$(cselected%) 'destination number for the message
+mc= HS_C_SEND_SMS_CALLBACK 'callback subroutine to be called when message sent (or at least response received)
+gosub SEND_SMS
+watus$="{yel}sending SMS{elipsis}"
+return
+
+HS_C_SEND_SMS_CALLBACK rem
+ni=0 're-enable user interaction
+if db>=4 then poke 0,65: db=0: gosub SWITCH_TO_LAST_SCREEN
+if merror=1 then merror=0: watus$="{red}error sending SMS": gosub HS_C_BEGIN_WRITING: return 'modem error, stay on screen
+if merror=0 then watus$="{grn}successfully sent": wsms$="": gosub HS_C_BEGIN_WRITING: return 'modem OK --> SMS sent; erase the SMS field
+'TODO: add SMS to cache!!
+return
 
 
 '### CONTACT_EDIT screen handler ###

@@ -46,3 +46,11 @@ SEND_AT+CMGR rem
 '   int k: index
 s$="at+cmgr="+str$(k)+chr$(13): gosub WRITE_STRING_TO_MODEM
 return
+
+SEND_AT+CMGS_1 rem
+'send AT+CMGS (send SMS), text mode
+'Argument:
+'  sm$: the message string
+'  sn$: the phone number to send to
+s$="AT+CMGS="+chr$(34)+sn$+chr$(34)+chr$(13): gosub WRITE_STRING_TO_MODEM
+return
