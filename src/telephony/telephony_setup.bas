@@ -116,7 +116,7 @@ return
 
 '=== modem setup ===
 SETUP_MODEM rem
-poke 0,64 'for debugging only
+'poke 0,64 'for debugging only
 '--- purge UART buffer ---
 gosub PURGE_MODEM_BUFFER 'purges the UART buffer, to get rid of previously received chars
 '--- configuration parameters ---
@@ -144,7 +144,7 @@ SETUP_MODEM_STEP6 if gf%=1 then jt%(100)= SETUP_MODEM_STEP7: s$="at+csdh=1"+chr$
 goto SETUP_MODEM_STEP7 'if not in text mode
 '--- End of modem setup ---
 SETUP_MODEM_STEP7 jt%(100)=0
-poke 0,65
+'poke 0,65
 return
 
 '=== Simple terminal program for debugging/talking to modem. ===
@@ -160,8 +160,8 @@ get a$:if a$="{home}" then s$="ate0"+chr$(13): gosub WRITE_STRING_TO_MODEM: prin
 if a$=chr$(20) then a$=chr$(8)
 if a$<>"" then print#1,a$;
 get#1,a$: if a$=chr$(8) then a$=chr$(20)
-if a$=chr$(13) then print chr$(13);"<cr>";: goto MLOOP
-if a$=chr$(10) then print "<lf>";chr$(13);: goto MLOOP
+'if a$=chr$(13) then print chr$(13);"<cr>";: goto MLOOP 'print <cr> if <CR> received
+'if a$=chr$(10) then print "<lf>";chr$(13);: goto MLOOP 'print <lf> if <LF> received
 print a$;
 goto MLOOP
 
@@ -239,7 +239,7 @@ stotal%=stotal% 'the maximum number of SMS that can be stored in the selected st
 slngth%=255 'maximum number of SMS in the MEGA65 memory
 dim sidex%(slngth%) 'mapping between SMS in memory and in storage
 '   sidex%(1)=32: the SMS in memory with index 1 has index 32 in storage
-sidex%=0 'the last SMS index that was filled in RAM
+sidex%=-1 'the last SMS index that was filled in RAM
 dim snumber$(slngth%) 'phone number of the sender of SMS
 dim stxt$(slngth%) 'text of the SMS
 dim sd$(slngth%) 'timestamp (date) of SMS
@@ -251,28 +251,32 @@ sq=0 'SMS Queried. Flag to indicate if the SMS have been queried.'
 satus$="" 'status message for SMS on the SMS screen
 sr%=0 'last contact for which SMS were Retrieved
 dim sus$(4)
-if smode%=0 then sus$(0)="0": sus$(1)="1": sus$(2)="2": sus$(3)="3": sus$(3)="3"
-if smode%=1 then sus$(0)=chr$(34)+"rec unread"+chr$(34): sus$(1)=chr$(34)+"rec read"+chr$(34): sus$(2)=chr$(34)+"sto unsent"+chr$(34): sus$(3)=chr$(34)+"sto sent"+chr$(34): sus$(4)=chr$(34)+"all"+chr$(34)
+if gf%=0 then sus$(0)="0": sus$(1)="1": sus$(2)="2": sus$(3)="3": sus$(3)="3": sus$(4)="4"
+if gf%=1 then sus$(0)=chr$(34)+"REC UNREAD"+chr$(34): sus$(1)=chr$(34)+"REC READ"+chr$(34): sus$(2)=chr$(34)+"STO UNSENT"+chr$(34): sus$(3)=chr$(34)+"STO SENT"+chr$(34): sus$(4)=chr$(34)+"ALL"+chr$(34)
 serror=0 'the number of error when getting SMS
-smaxcache=10 'the size of cache: number of messages that will see their body stored in memory
+smaxcache=5 'the size of cache: number of messages that will see their body stored in memory
 sx=0 'flag to indicate if received SMS should follow the cache mechanism or not
 '--- SMS pane ---
 smaxpane%=18 'dim of SMS pane array
-dim spt$(smaxpane%) 'SMS Pane Text array:
-dim spi%(smaxpane%) 'SMS Pane Index: SMS pane <-> SMS index mapping
+dim spt$(smaxpane%-1) 'SMS Pane Text array:
+dim spi%(smaxpane%-1) 'SMS Pane Index: SMS pane <-> SMS index mapping
 '--- SMS Contact pane ---
 mmaxpane%=12 'dim of SMS Contact pane array
-dim mpt$(mmaxpane%) 'SMS Contact Pane Text array:
-dim mpi%(mmaxpane%) 'SMS Contact Pane Index: SMS Contact pane <-> SMS index mapping
+dim mpt$(mmaxpane%-1) 'SMS Contact Pane Text array:
+dim mpi%(mmaxpane%-1) 'SMS Contact Pane Index: SMS Contact pane <-> SMS index mapping
 dim mpindex(100) 'Index of the SMS belonging to Contact
-mpindex%=0 'the last index in mpindex that was handled
-mxindex%=0 'the max index that was filled in mpindex%
+mpindex%=-1 'the last index in mpindex that was handled
+mxindex%=-1 'the max index that was filled in mpindex%
 matus$="" 'status message for Contact SMS on the Contact screen
-mq=0 'Contact's SMS Queried. Flag to indicate if the Contact's SMS have been queried.'
+mq=0 'Contact's SMS Queried. Flag to indicate if the Contact's SMS have been queried.
 '  0: not queried
 '  1: queried, not received
 '  2: queried and received
 '--- subroutines ---
+gosub EMPTY_SMS
+gosub EMPTY_CONTACT_SMS
+gosub EMPTY_SMS_PANE
+gosub EMPTY_SMS_CONTACT_PANE
 'gosub QUERY_ALL_SMS 'launch the asynchronous query of all the SMS
 watus$="" 'status message when sending (Writing) a SMS
 sm$="" 'text of the message being sent

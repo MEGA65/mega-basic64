@@ -1,28 +1,28 @@
 SMS_GET_FIRST_EMPTY_INDEX rem
 'Get the first empty index of the SMS storage in RAM
-'   if no empty index, return 0
-k=0
-for i=1 to slngth%
-if sidex%(i)=0 then k=i: return
+'   if no empty index, return -1
+k=-1
+for i=0 to slngth%
+if sidex%(i)=-1 then k=i: return
 next i
 return
 
 EMPTY_SMS rem
 ' Delete all SMS from RAM
 for i=1 to slngth%
-sidex%(i)=0: stxt$(i)="": snumber$(i)="": sd$(i)="": satus%(i)=-1
+sidex%(i)=-1: stxt$(i)="": snumber$(i)="": sd$(i)="": satus%(i)=-1
 next i
-sidex%=0
+sidex%=-1
 gosub EMPTY_SMS_PANE
 return
 
 EMPTY_CONTACT_SMS rem
 'Delete the indices of Contact SMS
-for i=1 to 100
-mpindex(i)=0
+for i=0 to 100
+mpindex(i)=-1
 next i
 gosub EMPTY_SMS_CONTACT_PANE
-mpindex%=0: mxindex%=0: mq=0
+mpindex%=-1: mxindex%=-1: mq=0
 return
 
 QUERY_ALL_SMS rem
@@ -31,17 +31,18 @@ db=4: gosub SWITCH_TO_SCREEN_DEBUG
 gosub EMPTY_SMS
 sq=1: satus$="{yel}fetching SMS{elipsis}"
 sx=1 'enable cache mechanism for further SMS
+sidex%=-1 'begin at SIM index 0
 gosub QAS_NEXT
 return
 
 QAS_NEXT rem
+sidex%=sidex%+1 'index initialized at -1 --> begins at 0
 if sidex%<sused% then goto QAS_QUERY 'we didn't query all SMS, so we query next one
 jt%(98)=0: gosub QAS_ALL_SMS_LOADED: goto QAS_END 'we queried all SMS, so we go to ALL_SMS_LOADED
 '--- Query next SMS ---
 QAS_QUERY rem
 if db>=4 then print "SMS";sidex%;"/";sused%-1;":"
 jt%(98)= QAS_CALLBACK: k=sidex%: gosub SEND_AT+CMGR 'set callback and send message
-sidex%=sidex%+1 'next SMS has index sidex%+1
 QAS_END return
 
 QAS_CALLBACK rem
@@ -60,6 +61,8 @@ if serror=0 then sq=2: satus$="{grn}successfully fetched" 'SMS queried and all r
 serror=0
 sx=0 'disable cache mechanism for further SMS
 gosub SMS_TO_SMS_PANE 'update SMS pane
+
+if db=4 then for ii=0 to sused%-1: print sidex%(ii);" ";snumber$(ii);" ";satus%(ii);" ";stxt$(ii); " "; sd$(ii): gosub WAIT_FOR_KEY_PRESS: next ii
 if db=4 then gosub WAIT_FOR_KEY_PRESS: db=0: gosub SWITCH_TO_LAST_SCREEN
 'poke 0,65
 return
@@ -88,9 +91,9 @@ if db>=4 then print "Get SMS from contact "+r$
 '--- Get Contact's SMS indices ---
 'We first get all the indices of the contact's SMS to fill pindex()
 kk=1
-for ii=sused% to 1 step -1
+for ii=sused%-1 to 0 step -1
 if db>=4 then print "SMS";ii ';snumber$(ii);left$(stxt$(ii),5)
-if sidex%(ii)<>0 then goto GSFC_COMPARE
+if sidex%(ii)>=0 then goto GSFC_COMPARE
 if db>=4 then print " SMS";ii;"doesn't exist"
 goto GSFC_NEXT 'SMS doesn't exist --> next
 GSFC_COMPARE s$=snumber$(ii) 'get the number of current SMS
@@ -157,33 +160,33 @@ return
 SMS_TO_SMS_PANE rem
 'Fill the SMS pane with in-RAM SMS entries (from highest index to lowest)
 'Only entries in cache (i.e. with their body in memory) are displayed
-kk=1
-for ii=sused% to 1 step -1
+kk=0
+for ii=sused%-1 to 0 step -1
 if kk>smaxpane% then return 'don't fill more than smaxpane% (18) lines
-if sidex%(ii)<>0 and stxt$(ii)<>"" then s$=snumber$(ii)+": "+stxt$(ii): l=38: gosub TRIM_STRING_SPACES: gosub RM_STRING_CRLF: spt$(kk)=s$: spi%(kk)=ii: kk=kk+1 'Remove <CR><LF> after having trimmed the string. It should speed up things a bit, since the RM_STRING_CRLF subroutine will go through 38 chars max instead of the whole string
+if sidex%(ii)>=0 and stxt$(ii)<>"" then s$=snumber$(ii)+": "+stxt$(ii): l=38: gosub TRIM_STRING_SPACES: gosub RM_STRING_CRLF: spt$(kk)=s$: spi%(kk)=ii: kk=kk+1 'Remove <CR><LF> after having trimmed the string. It should speed up things a bit, since the RM_STRING_CRLF subroutine will go through 38 chars max instead of the whole string
 next ii
 return
 
 EMPTY_SMS_PANE rem
 'Empty the SMS pane
-for ii=1 to smaxpane%
-spt$(ii)="": spi%(ii)=0
+for ii=0 to smaxpane%-1
+spt$(ii)="": spi%(ii)=-1
 next ii
 return
 
 SMS_TO_SMS_CONTACT_PANE rem
 'Fill the SMS Contact pane with in-RAM SMS entries, iterating on the array of SMS belonging to the current contact
-kk=1
-for ii=1 to mxindex% 'no more than mxindex% SMS for this contact
+kk=0
+for ii=0 to mxindex% 'no more than mxindex% SMS for this contact
 if kk>mmaxpane% then return 'don't fill more than mmaxpane% (12) lines
-if mpindex(ii)<>0 then s$=stxt$(mpindex(ii)):l=34: gosub TRIM_STRING_SPACES: gosub RM_STRING_CRLF: mpt$(kk)=s$: mpi%(kk)=mpindex(ii): kk=kk+1
+if mpindex(ii)>=0 then s$=stxt$(mpindex(ii)):l=34: gosub TRIM_STRING_SPACES: gosub RM_STRING_CRLF: mpt$(kk)=s$: mpi%(kk)=mpindex(ii): kk=kk+1
 next ii
 return
 
 EMPTY_SMS_CONTACT_PANE rem
 'Empty the Contact SMS pane
-for ii=1 to mxindex%
-mpt$(ii)="": mpi%(ii)=0
+for ii=0 to mmaxpane%-1
+mpt$(ii)="": mpi%(ii)=-1
 next ii
 return
 

@@ -86,53 +86,53 @@ return
 '=== List of all messages ===
 GET_MESSAGE_TYPE rem
 '--- URC (Unsollicited Result Codes) ---
-if mf$(0)="+CREG" then mn=1
-if mf$(0)="+CGREG" then mn=3
-if mf$(0)="+CTZV" then mn=5
-if mf$(0)="+CTZE" then mn=6
-if mf$(0)="+CMTI" then mn=7
-if mf$(0)="+CMT" then mn=8
-if mf$(0)="^HCMT" then mn=10
-if mf$(0)="+CBM" then mn=11
-if mf$(0)="+CDS" then mn=13
-if mf$(0)="+CDSI" then mn=15
-if mf$(0)="^HCDS" then mn=16
-if mf$(0)="+COLP" then mn=17
-if mf$(0)="+CLIP" then mn=18
-if mf$(0)="+CRING" then mn=19
-if mf$(0)="+CCWA" then mn=20
-if mf$(0)="+CSSI" then mn=21
-if mf$(0)="+CSSU" then mn=22
-if mf$(0)="+CUSD" then mn=23
-if mf$(0)="RDY" then mn=24
-if mf$(0)="+CFUN" then mn=25
-if mf$(0)="+CPIN" then mn=26
-if mf$(0)="+QIND" then mn=27
-if mf$(0)="POWERED DOWN" then mn=29
-if mf$(0)="+CGEV" then mn=30
+if mf$(0)="+CREG" then mn=1: return
+if mf$(0)="+CGREG" then mn=3: return
+if mf$(0)="+CTZV" then mn=5: return
+if mf$(0)="+CTZE" then mn=6: return
+if mf$(0)="+CMTI" then mn=7: return
+if mf$(0)="+CMT" then mn=8: return
+if mf$(0)="^HCMT" then mn=10: return
+if mf$(0)="+CBM" then mn=11: return
+if mf$(0)="+CDS" then mn=13: return
+if mf$(0)="+CDSI" then mn=15: return
+if mf$(0)="^HCDS" then mn=16: return
+if mf$(0)="+COLP" then mn=17: return
+if mf$(0)="+CLIP" then mn=18: return
+if mf$(0)="+CRING" then mn=19: return
+if mf$(0)="+CCWA" then mn=20: return
+if mf$(0)="+CSSI" then mn=21: return
+if mf$(0)="+CSSU" then mn=22: return
+if mf$(0)="+CUSD" then mn=23: return
+if mf$(0)="RDY" then mn=24: return
+if mf$(0)="+CFUN" then mn=25: return
+if mf$(0)="+CPIN" then mn=26: return
+if mf$(0)="+QIND" then mn=27: return
+if mf$(0)="POWERED DOWN" then mn=29: return
+if mf$(0)="+CGEV" then mn=30: return
 '--- Result Codes ---
-if mf$(0)="OK" then mn=40
-if mf$(0)="CONNECT" then mn=41
-if mf$(0)="RING" then mn=42
-if mf$(0)="NO CARRIER" then mn=43
-if mf$(0)="ERROR" then mn=44
-if mf$(0)="NO DIALTONE" then mn=46
-if mf$(0)="BUSY" then mn=47
-if mf$(0)="NO ANSWER" then mn=48
-if mf$(0)="+CME ERROR" then mn=49
-if mf$(0)="+CMS ERROR" then mn=50
+if mf$(0)="OK" then mn=40: return
+if mf$(0)="CONNECT" then mn=41: return
+if mf$(0)="RING" then mn=42: return
+if mf$(0)="NO CARRIER" then mn=43: return
+if mf$(0)="ERROR" then mn=44: return
+if mf$(0)="NO DIALTONE" then mn=46: return
+if mf$(0)="BUSY" then mn=47: return
+if mf$(0)="NO ANSWER" then mn=48: return
+if mf$(0)="+CME ERROR" then mn=49: return
+if mf$(0)="+CMS ERROR" then mn=50: return
 '--- AT commands responses ---
-if mf$(0)="+CLCC" then mn=51
-if mf$(0)="+CSQ" then mn=52
-if mf$(0)="+QNWINFO" then mn=53
-if mf$(0)="+QSPN" then mn=54
-if mf$(0)="+CPBS" then mn=55
-if mf$(0)="+CPBR" then mn=56
-if mf$(0)="+QLTS" then mn=57
-if mf$(0)="+CMGR" then mn=58
-if mf$(0)="+CPMS" then mn=59
-if mf$(0)=chr$(62) then mn=60 '">"
-if mf$(0)="+CMGS" then mn=61
+if mf$(0)="+CLCC" then mn=51: return
+if mf$(0)="+CSQ" then mn=52: return
+if mf$(0)="+QNWINFO" then mn=53: return
+if mf$(0)="+QSPN" then mn=54: return
+if mf$(0)="+CPBS" then mn=55: return
+if mf$(0)="+CPBR" then mn=56: return
+if mf$(0)="+QLTS" then mn=57: return
+if mf$(0)="+CMGR" then mn=58: return
+if mf$(0)="+CPMS" then mn=59: return
+if mf$(0)=chr$(62) then mn=60: return '">"
+if mf$(0)="+CMGS" then mn=61: return
 
 return
 

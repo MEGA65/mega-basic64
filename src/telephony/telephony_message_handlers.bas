@@ -399,10 +399,16 @@ CMGR_ADD_INDEX rem
 'gosub SMS_GET_FIRST_EMPTY_INDEX: ii=k 'we have the first empty index for SMS in memory, in variable k
 sidex%(sidex%)=sidex% 'SMS index
 s$=mf$(2): gosub REMOVE_QUOTES_STRING: snumber$(sidex%)=s$ 'SMS originating/destination number
-'s$=mf$(1): gosub GET_STATUS_FROM_STRING: satus%(sidex%)=k 'SMS status
-'SMS body: if caching is enabled, we store it only if the current queried SMS (sidex%) is among the last SMS
-if sx=1 then if (sused%-sidex% <= smaxcache) then stxt$(sidex%)=r$ 'If true, SMS body is stored
+s$=mf$(1): gosub GET_STATUS_FROM_STRING: satus%(sidex%)=k 'SMS status
+'SMS body and timestamp: if caching is enabled, we store it only if the current queried SMS (sidex%) is among the last SMS
+if sx=1 then if (sused%-sidex% <= smaxcache) then stxt$(sidex%)=r$:  'If true, SMS body is stored
 if sx=0 then stxt$(sidex%)=r$ 'if caching is deactivated, we store it in any case
+
+'s$=mf$(4): gosub REMOVE_QUOTES_STRING: sd$(sidex%)=s$' SMS timestamp
+
+'Store SMS on SD CARD
+gosub SD_CARD_STORE_SMS 'dummy subroutine
+
 return
 
 15899 return

@@ -253,7 +253,7 @@ DS_C_PRINT_SMS rem
 'Displays the Contact's SMS preformatted and stored in the Contact SMS pane array
 print"{wht}";
 xx=5: yy=8: gosub MOVE_CURSOR_XX_YY
-for ii=1 to mmaxepane%
+for ii=0 to mmaxepane%-1
 print mpt$(ii);
 print left$(ll$,34);"{down}";
 next ii
@@ -427,7 +427,7 @@ DS_S_PRINT_SMS rem
 'Displays the SMS preformatted and stored in the SMS pane array
 print"{wht}";
 xx=1: yy=6: gosub MOVE_CURSOR_XX_YY
-for ii=1 to smaxepane%
+for ii=0 to smaxepane%-1
 print spt$(ii);
 print left$(ll$,38);"{down}";
 next ii
