@@ -392,23 +392,24 @@ gosub RECEIVE_CHARS_FROM_MODEM 'body of the message in variable r$
 'debugging
 'if db>=4 then print ">";: s$=r$: gosub PRINT_STRING_CRLF: print chr$(13);
 'Store the message (metadata and maybe data) in memory
-gosub CMGR_ADD_INDEX
+gosub CMGR_ADD_SMS
 return
 
-CMGR_ADD_INDEX rem
-'gosub SMS_GET_FIRST_EMPTY_INDEX: ii=k 'we have the first empty index for SMS in memory, in variable k
-sidex%(sidex%)=sidex% 'SMS index
+CMGR_ADD_SMS rem
+'Add the SMS to memory/cache, store it on SD card and delete it from SIM storage
+'--- Add SMS to memory/cache ---
 s$=mf$(2): gosub REMOVE_QUOTES_STRING: snumber$(sidex%)=s$ 'SMS originating/destination number
 s$=mf$(1): gosub GET_STATUS_FROM_STRING: satus%(sidex%)=k 'SMS status
+'s$=mf$(4): gosub REMOVE_QUOTES_STRING: sd$(sidex%)=s$ 'SMS timestamp
 'SMS body and timestamp: if caching is enabled, we store it only if the current queried SMS (sidex%) is among the last SMS
 if sx=1 then if (sused%-sidex% <= smaxcache) then stxt$(sidex%)=r$:  'If true, SMS body is stored
 if sx=0 then stxt$(sidex%)=r$ 'if caching is deactivated, we store it in any case
-
-'s$=mf$(4): gosub REMOVE_QUOTES_STRING: sd$(sidex%)=s$' SMS timestamp
-
-'Store SMS on SD CARD
+'--- Store SMS on SD CARD ---
 gosub SD_CARD_STORE_SMS 'dummy subroutine
-
+sidex%(sidex%)=sidex% 'SMS index (replace with the index given by SD_CARD_STORE_SMS subroutine)
+'--- Delete SMS from SIM/modem storage ---
+if sd=1 then k=sidex%: gosub SEND_AT+CMGD 'delete if SMS Delete flag is set to 1
+'Note: we should set-up a callback to make sure the SMS was deleted
 return
 
 15899 return

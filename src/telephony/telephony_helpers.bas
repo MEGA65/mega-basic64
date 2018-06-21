@@ -347,4 +347,6 @@ VIRTUAL_KEYBOARD_UP poke 54806,255: return
 VIRTUAL_KEYBOARD_DOWN poke 54806,127: return
 
 
-SD_CARD_STORE_SMS return
+SD_CARD_STORE_SMS return 'should return the index on SD card in which it was stored
+
+SD_CARD_GET_SMS return 'subroutine to get an SMS, given an index, from SD card

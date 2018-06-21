@@ -27,7 +27,7 @@ return
 
 QUERY_ALL_SMS rem
 'poke 0,64 'for debugging only, far too slow!
-db=4: gosub SWITCH_TO_SCREEN_DEBUG
+'db=4: gosub SWITCH_TO_SCREEN_DEBUG
 gosub EMPTY_SMS
 sq=1: satus$="{yel}fetching SMS{elipsis}"
 sx=1 'enable cache mechanism for further SMS
@@ -62,8 +62,8 @@ serror=0
 sx=0 'disable cache mechanism for further SMS
 gosub SMS_TO_SMS_PANE 'update SMS pane
 
-if db=4 then for ii=0 to sused%-1: print sidex%(ii);" ";snumber$(ii);" ";satus%(ii);" ";stxt$(ii); " "; sd$(ii): gosub WAIT_FOR_KEY_PRESS: next ii
-if db=4 then gosub WAIT_FOR_KEY_PRESS: db=0: gosub SWITCH_TO_LAST_SCREEN
+if db>=4 then for ii=0 to sused%-1: print sidex%(ii);" ";snumber$(ii);" ";satus%(ii);" ";stxt$(ii); " "; sd$(ii): gosub WAIT_FOR_KEY_PRESS: next ii
+if db>=4 then gosub WAIT_FOR_KEY_PRESS: db=0: gosub SWITCH_TO_LAST_SCREEN
 'poke 0,65
 return
 
@@ -82,11 +82,11 @@ return
 GET_SMS_FROM_CONTACT rem
 'Get the SMS from a particular contact
 'Arguments:
-'  r$: the number of the contact from whom we want the SMS
+'  r$: the phone number of the contact from whom we want the SMS
 'Returns:
 '  no return (fills the mpindex() array and query SMS missing from cache
-'db=4: gosub SWITCH_TO_SCREEN_DEBUG
-'poke 0,64 'for debugging only
+if sused%=0 then return 'no SMS were loaded from SIM
+'db=4: gosub SWITCH_TO_SCREEN_DEBUG: poke 0,64 'for debugging only
 if db>=4 then print "Get SMS from contact "+r$
 '--- Get Contact's SMS indices ---
 'We first get all the indices of the contact's SMS to fill pindex()
@@ -119,6 +119,7 @@ return
 
 GSFC_STEP rem
 mpindex%=mpindex%+1 'increment mpindex% at the beginning of STEP --> start at mpindex%=0
+if db>=4 then print "Contact SMS";mpindex%;"/";mxindex%;"..."
 if mpindex%>mxindex% then jt%(100)=0: gosub GSFC_ALL_SMS_LOADED: goto GSFC_END 'we handled all SMS
 sidex%=mpindex(mpindex%)
 if stxt$(sidex%)<>"" then goto GSFC_IN_CACHE
@@ -129,13 +130,19 @@ if db>=4 then print "SMS";sidex%;": in-cache"
 goto GSFC_STEP 'this SMS is already in cache, go to next step
 '--- Query next SMS ---
 GSFC_QUERY rem
-if db>=4 then print "SMS";sidex%;": query"
-jt%(100)= GSFC_CALLBACK: k=sidex%: gosub SEND_AT+CMGR 'set callback and send message
+'We used to query it from SIM storage
+'Now that SMS are getting deleted when received, we don't query it
+'In the future, query it from SD storage
+'    gosub SD_CARD_GET_SMS
+'If sd=1, SMS are Deleted upon reception, no need to query them
+if sd=1 then goto GSFC_STEP 'go directly to next step
+'We keep the following for testing
+if sd=0 then if db>=4 then print "SMS";sidex%;": query"
+if sd=0 then jt%(100)= GSFC_CALLBACK: k=sidex%: gosub SEND_AT+CMGR 'set callback and send message
 GSFC_END return
 
 GSFC_CALLBACK rem
 ' modem sent a response to at+cmgr=<i>
-if db>=4 then print "Contact SMS";mpindex%;"/";mxindex%;"..."
 if merror=0 then gosub SMS_TO_SMS_CONTACT_PANE '1 SMS was successfully retrieved, update SMS Contact pane
 if merror=1 then merror=0: serror=serror+1 'error getting 1 SMS
 if db>=4 then gosub WAIT_FOR_KEY_PRESS 'debug
@@ -150,9 +157,7 @@ mq=2 'Current contact's SMS have been queried
 serror=0
 gosub SMS_TO_SMS_CONTACT_PANE 'update Contact SMS pane
 sr%=cselected%
-if db>=4 then gosub WAIT_FOR_KEY_PRESS
-poke 0,65
-'db=0: gosub SWITCH_TO_LAST_SCREEN
+if db>=4 then gosub WAIT_FOR_KEY_PRESS: db=0: gosub SWITCH_TO_LAST_SCREEN: poke 0,65
 return
 
 
@@ -160,6 +165,7 @@ return
 SMS_TO_SMS_PANE rem
 'Fill the SMS pane with in-RAM SMS entries (from highest index to lowest)
 'Only entries in cache (i.e. with their body in memory) are displayed
+if sused%<=0 then return 'no SMS were loaded from SIM
 kk=0
 for ii=sused%-1 to 0 step -1
 if kk>smaxpane% then return 'don't fill more than smaxpane% (18) lines
@@ -176,6 +182,7 @@ return
 
 SMS_TO_SMS_CONTACT_PANE rem
 'Fill the SMS Contact pane with in-RAM SMS entries, iterating on the array of SMS belonging to the current contact
+if mxindex%<=-1 then return 'no SMS were loaded from SIM
 kk=0
 for ii=0 to mxindex% 'no more than mxindex% SMS for this contact
 if kk>mmaxpane% then return 'don't fill more than mmaxpane% (12) lines

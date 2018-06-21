@@ -54,3 +54,10 @@ SEND_AT+CMGS_1 rem
 '  sn$: the phone number to send to
 s$="AT+CMGS="+chr$(34)+sn$+chr$(34)+chr$(13): gosub WRITE_STRING_TO_MODEM
 return
+
+SEND_AT+CMGD rem
+'send AT+CMGD (delete SMS)
+'Argument:
+'  k: index of the SMS (on modem storage) to delete
+s$="AT+CMGD="+str(k)+chr$(13): gosub WRITE_STRING_TO_MODEM
+return
