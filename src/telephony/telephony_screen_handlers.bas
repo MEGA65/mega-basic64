@@ -81,7 +81,7 @@ HS_C_BEGIN_WRITING wsms=1: ul%=len(wsms$)+1: return
 
 HS_C_SEND_SMS rem
 if len(wsms$)<=0 then watus$="{red}empty message": return
-'db=5: gosub SWITCH_TO_SCREEN_DEBUG
+if dd=1 then db=4: gosub SWITCH_TO_SCREEN_DEBUG
 ni=1 'disable user-interaction
 if db>=4 then poke 0,64
 'Send the message

@@ -32,8 +32,31 @@ MESSAGE_HANDLER_5 rem
 MESSAGE_HANDLER_6 rem
 10699 return
 
-'Message handler: message type 7
-MESSAGE_HANDLER_7 rem
+'Message handler: +CMTI (new SMS message)
+MESSAGE_HANDLER_+CMTI rem
+'+CMT is an URC indicating a new message
+'--- Structure ---
+'  +CMT: "ME",0
+'       <mem>,<index>
+'When receiving +CMTI, we have to query the message
+if dd=1 then db=4: gosub SWITCH_TO_SCREEN_DEBUG
+if db>=4 then print "Received: ";ml$
+'Set the callback and query SMS
+k=val(mf$(2)) 'index of SMS text in SIM storage
+jt%(100)= CMTI_CALLBACK: sidex%=k: gosub SEND_AT+CMGR 'set callback and send message
+return
+
+CMTI_CALLBACK rem
+sused%=sused%+1 'one more message in memory
+mq=0 'set the Message Queried flag to 0, to force update of Contact SMS
+'Modem sent a response to at+cmgr=<i>
+if db>=4 then print "New SMS received and saved to cache"
+'For now we don't take into account the result
+if merror=0 then rem '1 SMS was successfully retrieved, update SMS Contact pane
+if merror=1 then merror=0 'error getting  SMS
+if db>=4 then gosub WAIT_FOR_KEY_PRESS: db=0: gosub SWITCH_TO_LAST_SCREEN
+return
+
 10799 return
 
 'Message handler: +CMT (new SMS message)
@@ -46,37 +69,36 @@ MESSAGE_HANDLER_+CMT rem
 '         mf$(1)  mf$(2) mf$(3)  mf$(4)  mf$(5)  mf$(6) mf$(7) mf$(8) mf$(9) mf$(10)
 '  <CR><LF><data>
 'db=4: gosub SWITCH_TO_SCREEN_DEBUG
-if db>=4 then print "Received: ";ml$
+'if db>=4 then print "Received: ";ml$
 'When receiving +CMT, we have to get the body of the message
-k=val(mf$(10)) 'length of sms text
-gosub RECEIVE_CHARS_FROM_MODEM 'body of the message in variable r$
+'k=val(mf$(10)) 'length of sms text
+'gosub RECEIVE_CHARS_FROM_MODEM 'body of the message in variable r$
 'Store the message (metadata and maybe data) in memory
-gosub CMT_ADD_SMS 'we use the same method
-10899 return
+'gosub CMT_ADD_SMS 'we use the same method
 
-CMT_ADD_SMS rem
+'CMT_ADD_SMS rem
 'TODO: share the code between CMT and CMGR, as only one field differs
 'Add the SMS to memory/cache, store it on SD card and delete it from SIM storage
 '--- Store SMS on SD CARD ---
-gosub SD_CARD_STORE_SMS 'dummy subroutine
+'gosub SD_CARD_STORE_SMS 'dummy subroutine
 '--- Add SMS to memory/cache ---
 'We get the next free index in memory. In the future, get the next free index in SD card.
-gosub SMS_GET_FIRST_EMPTY_INDEX: sindex%=k
-sidex%(sidex%)=sidex% 'SMS index
-s$=mf$(1): gosub REMOVE_QUOTES_STRING: snumber$(sidex%)=s$ 'SMS originating/destination number
-satus%(sidex%)=0 'SMS status
+'gosub SMS_GET_FIRST_EMPTY_INDEX: sindex%=k
+'sidex%(sidex%)=sidex% 'SMS index
+'s$=mf$(1): gosub REMOVE_QUOTES_STRING: snumber$(sidex%)=s$ 'SMS originating/destination number
+'satus%(sidex%)=0 'SMS status
 's$=mf$(3): gosub REMOVE_QUOTES_STRING: sd$(sidex%)=s$ 'SMS timestamp
 'SMS body and timestamp: if caching is enabled, we store it only if the current queried SMS (sidex%) is among the last SMS
-if sx=1 then if (sused%-sidex% <= smaxcache) then stxt$(sidex%)=r$:  'If true, SMS body is stored
-if sx=0 then stxt$(sidex%)=r$ 'if caching is deactivated, we store it in any case
+'if sx=1 then if (sused%-sidex% <= smaxcache) then stxt$(sidex%)=r$:  'If true, SMS body is stored
+'if sx=0 then stxt$(sidex%)=r$ 'if caching is deactivated, we store it in any case
 '--- Delete SMS from SIM/modem storage ---
 'if sd=1 then k=sidex%: gosub SEND_AT+CMGD 'delete if SMS Delete flag is set to 1
 'Note: we should set-up a callback to make sure the SMS was deleted
 '--- Debugging ---
-if db>=4 then print "New message incoming: ";sidex%(sidex%); " "; snumber$(sidex%); " "; stxt$(sidex%)
-if db>=4 then WAIT_FOR_KEY_PRESS: db=0: gosub SWITCH_TO_SCREEN_CONTACT
-return
-
+'if db>=4 then print "New message incoming: ";sidex%(sidex%); " "; snumber$(sidex%); " "; stxt$(sidex%)
+'if db>=4 then WAIT_FOR_KEY_PRESS: db=0: gosub SWITCH_TO_SCREEN_CONTACT
+'return
+10899 return
 
 'Message handler: message type 9
 MESSAGE_HANDLER_9 rem

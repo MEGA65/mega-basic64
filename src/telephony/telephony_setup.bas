@@ -13,7 +13,7 @@ return
 
 '=== program flags and variables setup ===
 SETUP_PROGRAM rem
-cc$="+61" 'Country Code to use in the program
+dd=0 'If set to true, this will activate debug in some places of the code (namely SMS querying)
 db=db 'flag db (debug): print debugging information
 '  0: no logging
 '  1: critical
@@ -32,6 +32,7 @@ su=0 'flag su (screen update): a change in the program requires a screen update
 us=0 'flag us (updated screen): is set to 1 when the screen if actually updated
 ml=0 'last call to POLL_MODEM resulted in a call to HANDLE_MODEM_LINE
 cnt=0 'loop counter
+cc$="+61" 'Country Code to use in the program
 
 '=== various indicators ===
 rssi=99 'rssi: received signal strength indicator
@@ -261,7 +262,7 @@ if gf%=1 then sus$(0)=chr$(34)+"REC UNREAD"+chr$(34): sus$(1)=chr$(34)+"REC READ
 serror=0 'the number of error when getting SMS
 smaxcache=10 'the size of cache: number of messages that will see their body stored in memory
 sx=0 'flag to indicate if received SMS should follow the cache mechanism or not
-sd=1 'SMS Delete flag: delete SMS upon reception flag
+sd=0 'SMS Delete flag: delete SMS upon reception flag
 '--- SMS pane ---
 smaxpane%=18 'dim of SMS pane array
 dim spt$(smaxpane%-1) 'SMS Pane Text array:

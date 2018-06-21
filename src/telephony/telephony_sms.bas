@@ -27,7 +27,7 @@ return
 
 QUERY_ALL_SMS rem
 'poke 0,64 'for debugging only, far too slow!
-'db=4: gosub SWITCH_TO_SCREEN_DEBUG
+if dd=1 then db=4: gosub SWITCH_TO_SCREEN_DEBUG
 gosub EMPTY_SMS
 sq=1: satus$="{yel}fetching SMS{elipsis}"
 sx=1 'enable cache mechanism for further SMS
@@ -86,7 +86,7 @@ GET_SMS_FROM_CONTACT rem
 'Returns:
 '  no return (fills the mpindex() array and query SMS missing from cache
 if sused%=0 then return 'no SMS were loaded from SIM
-'db=4: gosub SWITCH_TO_SCREEN_DEBUG: poke 0,64 'for debugging only
+if dd=1 then db=4: gosub SWITCH_TO_SCREEN_DEBUG: poke 0,64 'for debugging only
 if db>=4 then print "Get SMS from contact "+r$
 '--- Get Contact's SMS indices ---
 'We first get all the indices of the contact's SMS to fill pindex()
@@ -119,8 +119,8 @@ return
 
 GSFC_STEP rem
 mpindex%=mpindex%+1 'increment mpindex% at the beginning of STEP --> start at mpindex%=0
-if db>=4 then print "Contact SMS";mpindex%;"/";mxindex%;"..."
 if mpindex%>mxindex% then jt%(100)=0: gosub GSFC_ALL_SMS_LOADED: goto GSFC_END 'we handled all SMS
+if db>=4 then print "Contact SMS";mpindex%;"/";mxindex%;"..."
 sidex%=mpindex(mpindex%)
 if stxt$(sidex%)<>"" then goto GSFC_IN_CACHE
 goto GSFC_QUERY 'the SMS is not in cache, we need to query it
