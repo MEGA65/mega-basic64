@@ -5,7 +5,7 @@ tx=peek(54969) or ((peek(54971) and 3)*256)
 ty=peek(54970) or ((peek(54971) and 240)*16)
 ' convert to approximate row, column
 c1=int((tx-54)/16)
-r1=int((ty-80)/16)
+r1=int((ty-120)/16)
 
 ' Debug display of touch info
 'print "{home}";c1;",";r1;"   "
