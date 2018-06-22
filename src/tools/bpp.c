@@ -33,6 +33,8 @@ char *variable_names[MAX_VARIABLES];
 char *short_names[MAX_VARIABLES];
 int variable_count=0;
 
+char *current_file="(none)";
+int line_number=0;
 int errors=0;
 
 int check_variable(char *sv,char *v)
@@ -45,8 +47,8 @@ int check_variable(char *sv,char *v)
     // Do we have one that has the same first two characters?
     if (!strcmp(sv,short_names[i])) {
       if (strcmp(v,variable_names[i])) {
-	fprintf(stderr,"ERROR: Conflicting variable names '%s' and '%s' both resolve to '%s'\n",
-		v,variable_names[i],sv);
+	fprintf(stderr,"%s:%d:ERROR Conflicting variable names '%s' and '%s' both resolve to '%s'\n",
+		current_file,line_number,v,variable_names[i],sv);
 	errors++;
 	return -1;
       }
@@ -221,10 +223,10 @@ int main(int argc,char **argv)
 	char line[1024];
 
 	// Pass 1 - find all labels
-	int line_number=0;
 	fprintf(stderr,"Pass 1: Find and resolve labels\n");
 	for(i=1;i<argc;i++) {
 		fprintf(stderr,"  Reading %s\n",argv[i]);
+		current_file=argv[i];
 		FILE *f=fopen(argv[i],"r");
 		if (!f) {
 			fprintf(stderr,"Could not open '%s'\n",argv[1]);
@@ -278,6 +280,7 @@ int main(int argc,char **argv)
 	fprintf(stderr,"Pass 2: Resolve line numbers.\n");
 	line_number=0;
 	for(i=1;i<argc;i++) {
+		current_file=argv[i];
 		fprintf(stderr,"  Reading %s\n",argv[i]);
 		FILE *f=fopen(argv[i],"r");
 		if (!f) {
