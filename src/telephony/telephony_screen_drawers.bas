@@ -215,7 +215,9 @@ gosub DRAW_BOX
 if wsms=0 then yy=21 'globe and message buttons height
 if wsms=1 then yy=9 'globe and message buttons height
 xx=5: p=0: gosub STAMP_GLOBE 'globe
-xx=35: p=0: gosub STAMP_MESSAGE 'message
+xx=35: p=0 'write or send message button
+if wsms=0 then gosub STAMP_MESSAGE 'write message button
+if wsms=1 then gosub STAMP_SEND 'send message button
 'SMS box heading w/ status message
 xx=5: yy=6: gosub MOVE_CURSOR_XX_YY: l=34
 if wsms=0 then s$="SMS conversation": if matus$<>"" then s$=s$+" ("+matus$+"{wht})"
