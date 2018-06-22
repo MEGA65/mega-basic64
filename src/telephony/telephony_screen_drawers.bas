@@ -442,6 +442,7 @@ STAMP_BUTTON_CANVAS rem
 'canvas k+p*gffset stamp on canvas 0 at xx,yy
 canvas k stamp on canvas 0 at xx,yy
 'TODO: change the appearance of the sprite depending on p
+if p then gosub MOVE_SPRITE_TO_ROW_COLUMN
 return
 
 STAMP_0 k=gd%: gosub STAMP_BUTTON_CANVAS: return

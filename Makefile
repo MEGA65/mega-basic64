@@ -90,6 +90,7 @@ TELEPHONY_SRCS=	\
 		$(TELEPHONY)/telephony_parser.bas \
 		$(TELEPHONY)/telephony_screen_handlers.bas \
 		$(TELEPHONY)/telephony_message_handlers.bas \
+		$(TELEPHONY)/telephony_sprites.bas \
 		$(TELEPHONY)/telephony_autopsy.bas
 
 BINARIES=	\

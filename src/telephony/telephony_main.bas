@@ -23,6 +23,7 @@ if db>=4 then print "modem setup is complete"
 'GUI-related setup
 gosub SETUP_GUI
 gosub SETUP_DRAWING
+gosub SETUP_PRESS_SPRITE
 'phonebook setup
 gosub SETUP_PHONEBOOK
 'SMS setup
