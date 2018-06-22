@@ -78,13 +78,12 @@ if u$=chr$(20) and ul%>1 then s$=wsms$: s$=left$(s$, ul%-2)+right$(s$, len(s$)+1
 l=26*3-1: if u$<>"" and ((asc(u$)>=32 and asc(u$)<=95) or (asc(u$)>=193 and asc(u$)<=218)) then s$=wsms$: gosub STRING_INSERT_CHAR: wsms$=s$
 return
 
-HS_C_BEGIN_WRITING wsms=1: ul%=len(wsms$)+1: return
+HS_C_BEGIN_WRITING wsms=1: ul%=len(wsms$)+1: return 'called when going into "write SMS mode"
 
 HS_C_SEND_SMS rem
-if len(wsms$)<=0 then watus$="{red}empty message": return
-if dd=1 then db=4: gosub SWITCH_TO_SCREEN_DEBUG
+if len(wsms$)<=0 then watus$="{red}empty message": return 'the message is empty, don't send it
+if dd=1 then db=4: gosub SWITCH_TO_SCREEN_DEBUG : poke 0,64 'enable debugging
 ni=1 'disable user-interaction
-if db>=4 then poke 0,64
 'Send the message
 sm$=wsms$ 'text of the message
 sn$=pnumber$(cselected%) 'destination number for the message
