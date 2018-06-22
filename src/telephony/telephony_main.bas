@@ -10,11 +10,11 @@ goto INIT
 
 '### initialization ###
 INIT rem
-db=4 'turn on debugging information
 'one-time only lookup patch address
 gosub LOOKUP_GOTO_LN_PATCH_ADDRESS
 'program state setup
 gosub SETUP_PROGRAM
+if dd=1 then db=4 'turn on debugging information
 'modem parser and modem setup
 gosub SETUP_PARSER
 gosub SETUP_MODEM
@@ -31,18 +31,16 @@ gosub SETUP_PHONEBOOK
 gosub SETUP_SMS
 'define functions (e.g. modulo)
 gosub DEFINE_FUNCTIONS
-'gosub WAIT_FOR_KEY_PRESS
 db=0 'turn off debugging information
 '--- switch to correct screen ---
-'if db=1, sc=0 (debug screen)
-if db>0 then gosub SWITCH_TO_SCREEN_DEBUG: goto INIT_END
+'if db>0 then gosub SWITCH_TO_SCREEN_DEBUG: goto INIT_END
 'by defaults, start the program on DIALLER screen
 gosub SWITCH_TO_SCREEN_DIALLER
 
 INIT_END t0=time
 
 'Ask for all elements to be drawn first time around
-up=1:uc=1:ud=1
+'up=1:uc=1:ud=1
 
 'goto MAIN_LOOP
 
@@ -82,20 +80,20 @@ ttmr(3)=ttmr(3)+(t-t1)
 t1=time
 '--- perform regular tasks ---
 'request signal quality report every 500 loops
-mdv=100: if fn mod(cnt)=0 then s$="at+csq"+chr$(13): gosub WRITE_STRING_TO_MODEM
+mdv=100: if fn mod(cnt-5)=0 then s$="at+csq"+chr$(13): gosub WRITE_STRING_TO_MODEM
 '[test] decrease battery level
 mdv=1000: if fn mod(cnt)=0 then mdv=100: btp=fn mod(btp-1): gosub BATTERY_UPDATE
-'request network info report every 1000 loops
-mdv=500: if fn mod(cnt+250)=0 then s$="at+qnwinfo"+chr$(13): gosub WRITE_STRING_TO_MODEM
+'request network info report every 500 loops
+mdv=500: if fn mod(cnt-10)=0 then s$="at+qnwinfo"+chr$(13): gosub WRITE_STRING_TO_MODEM
 'request network name every 1000 loops
-mdv=500: if fn mod(cnt+500)=0 then s$="at+qspn"+chr$(13): gosub WRITE_STRING_TO_MODEM
+mdv=1000: if fn mod(cnt-15)=0 then s$="at+qspn"+chr$(13): gosub WRITE_STRING_TO_MODEM
 'request network time every 10000 loops
-mdv=10000: if fn mod(cnt-50)=0 then s$="at+qlts=2"+chr$(13): gosub WRITE_STRING_TO_MODEM
+mdv=10000: if fn mod(cnt-20)=0 then s$="at+qlts=2"+chr$(13): gosub WRITE_STRING_TO_MODEM
 'fix charset bug
 if (peek(53272)and 7)=0 then poke 53272,20
 ttmr(4)=ttmr(4)+(time-t1)
-'update the contact pane
-mdv=1000: if fn mod(cnt+50)=0 then gosub PHONEBOOK_TO_CONTACT_PANE: gosub TRIM_CONTACT_PANE
+'update the contact pane (disable for better performances)
+'mdv=1000: if fn mod(cnt+500)=0 then gosub PHONEBOOK_TO_CONTACT_PANE: gosub TRIM_CONTACT_PANE
 
 '--- timing related operation ---
 ttmr(0)=ttmr(0)+(time-tl)
@@ -107,4 +105,4 @@ if c7<>0 then tavg(7)=ttmr(7)/c7
 if cnt<>c8 then tavg(8)=ttmr(8)/(cnt-c8)
 
 goto MAIN_LOOP
-'### main loop ###
+'### end of main loop ###
