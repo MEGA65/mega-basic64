@@ -262,7 +262,7 @@ return
 
 PREP_CONTACT rem
 watus$="" 'reinit SMS write status
-if sr%=cslected% then return
+if sr%=cselected% then return
 gosub EMPTY_CONTACT_SMS
 mq=0: sr%=0
 matus$="" 'reinit SMS Contact status if change of contact

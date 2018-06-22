@@ -184,7 +184,7 @@ nb$="" 'phone number dialled on the dialler screen
 sl=0 'Signal Level integer [0:5]
 ber$="?" 'Bit Error Rate string to be displayed
 bl%=10 'Battery Level integer [0:10]
-tmr=1000 'timer for keystrokes
+ktmr=1000 'timer for keystrokes
 hl%=0 'highlighted line (for example in contact pane)
 ul%=0 'underlined column (when editing a field for example)
 dim r(24) 'rows to be printed in a box

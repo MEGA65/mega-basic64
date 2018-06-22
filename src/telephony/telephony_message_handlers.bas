@@ -355,23 +355,23 @@ su=1
 'get nwact, without quotes
 nact$=right$(left$(mf$(1),len(mf$(1))-1),len(mf$(1))-2)
 'initialize to unknown, in case nwact is not in the following list (should not happen)
-nt$="?"
-if nact$="NONE" then nt$="x" '3g? abbreviation to check
-if nact$="CDMA1X" then nt$="3G" '3g? abbreviation to check
-if nact$="CDMA1X AND HDR" then nt$="3G" '3g? abbreviation to check
-if nact$="CDMA1X AND EHRPD" then nt$="3G" '2g? abbreviation to check
-if nact$="HDR" then nt$="2G" '3g? abbreviation to check
-if nact$="HDR-EHRPD" then nt$="3G"
-if nact$="GSM" then nt$="2G"
-if nact$="GPRS" then nt$="G"
-if nact$="EDGE" then nt$="E"
-if nact$="WCDMA" then nt$="3G"
-if nact$="HSDPA" then nt$="H"
-if nact$="HSUPA" then nt$="H"
-if nact$="HSPA+" then nt$="H+"
-if nact$="TDSCDMA" then nt$="3G"
-if nact$="TDD LTE" then nt$="LTE"
-if nact$="FDD LTE" then nt$="LTE"
+ntype$="?"
+if nact$="NONE" then ntype$="x" '3g? abbreviation to check
+if nact$="CDMA1X" then ntype$="3G" '3g? abbreviation to check
+if nact$="CDMA1X AND HDR" then ntype$="3G" '3g? abbreviation to check
+if nact$="CDMA1X AND EHRPD" then ntype$="3G" '2g? abbreviation to check
+if nact$="HDR" then ntype$="2G" '3g? abbreviation to check
+if nact$="HDR-EHRPD" then ntype$="3G"
+if nact$="GSM" then ntype$="2G"
+if nact$="GPRS" then ntype$="G"
+if nact$="EDGE" then ntype$="E"
+if nact$="WCDMA" then ntype$="3G"
+if nact$="HSDPA" then ntype$="H"
+if nact$="HSUPA" then ntype$="H"
+if nact$="HSPA+" then ntype$="H+"
+if nact$="TDSCDMA" then ntype$="3G"
+if nact$="TDD LTE" then ntype$="LTE"
+if nact$="FDD LTE" then ntype$="LTE"
 15399 return
 
 
@@ -482,7 +482,7 @@ MESSAGE_HANDLER_+CPMS rem
 'Update SMS used and total
 sused%=val(mf$(1))
 stotal%=val(mf$(2))
-if db>=4 then print "SMS storage:";sused%"used,";stotal%;"total"
+if db>=4 then print "SMS storage:";sused%;"used,";stotal%;"total"
 15999 return
 
 'Message handler: message prompt (">")

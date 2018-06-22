@@ -15,8 +15,9 @@ HANDLER_SCREEN_DIALLER rem
 u$="": get u$
 gosub POLL_TOUCH_DIALER
 
-'we trigger a dial tiles update every 1000 loops since last
-tmr=tmr-1: if tmr=0 then up=1: su=1 'Request redrawing of dialpad (up), and mark screen as needing redrawing (su)
+'We wait for a short timer to expire after pressing a button, then we hide the sprite that makes
+' the button look pressed.
+ktmr=ktmr-1: print "{home}{down}";ktmr;"   ": if ktmr<1 then gosub HIDE_SPRITE
 if u$="" then return
 ' Run terminal program for debugging modem communications
 if u$="t" or u$="T" then up=1: su=1: gosub TERMINAL_PROGRAM: gosub SWITCH_TO_SCREEN_DIALLER
@@ -39,7 +40,7 @@ if u$=chr$(20) and len(nb$)>=1 then nb$=left$(nb$,len(nb$)-1): u0$=u$: su=1: up=
 'enter: call the dialled number
 if u$=chr$(13) then  u0$=u$: su=1: dnumber$=nb$: gosub CALL_DIAL: gosub SWITCH_TO_SCREEN_CALL
 ' XXX - Debug display dialer interface
-if u$="z" or u$="Z" then su=1: dsata=val(nb$): gosub SWITCH_TO_SCREEN_CALL
+if u$="z" or u$="Z" then su=1: dsta=val(nb$): gosub SWITCH_TO_SCREEN_CALL
 return
 
 

@@ -20,14 +20,14 @@ return
 '=== screen signal icon update ===
 STAMP_SIGNAL_ICON rem
 shi=0
-if len(nt$)=3 then shi=0
-if len(nt$)=2 then shi=1
-if len(nt$)=1 then shi=2
+if len(ntype$)=3 then shi=0
+if len(ntype$)=2 then shi=1
+if len(ntype$)=1 then shi=2
 xx=30: yy=0: gosub MOVE_CURSOR_XX_YY
 'print shi spaces
 for i=1 to shi: if shi<>0 then print " ";: next i
 'print the network type (abbreviation)
-print nt$;
+print ntype$;
 'print the signal level canvas in the status bar
 canvas gs%+sl stamp on canvas 0 at 32,0
 'print the BER under signal strength
@@ -125,7 +125,7 @@ return
 
 '=== draw dialpad ===
 DS_DIALLER_DIALPAD rem 'reinitialize timer
-tmr=20
+ktmr=20
 '1-9
 for x=1 to 3: for y=1 to 3
 xx=x*5-4: yy=y*4+1
@@ -253,7 +253,7 @@ DS_C_PRINT_SMS rem
 'Displays the Contact's SMS preformatted and stored in the Contact SMS pane array
 print"{wht}";
 xx=5: yy=8: gosub MOVE_CURSOR_XX_YY
-for ii=0 to mmaxepane%-1
+for ii=0 to mmaxpane%-1
 print mpt$(ii);
 print left$(ll$,34);"{down}";
 next ii
@@ -356,7 +356,7 @@ return
 
 DS_CALL_DIALING rem
 '=== Call state: dialing ===
-ddsiplay$="Dialling "+dnumber$
+ddisplay$="Dialling "+dnumber$
 if dr$<>"" then ddisplay$=ddisplay$+" ("+dr$+")"
 gosub DS_CALL_DDISPLAY
 gosub DS_CALL_ERASE_TMR
@@ -427,7 +427,7 @@ DS_S_PRINT_SMS rem
 'Displays the SMS preformatted and stored in the SMS pane array
 print"{wht}";
 xx=1: yy=6: gosub MOVE_CURSOR_XX_YY
-for ii=0 to smaxepane%-1
+for ii=0 to smaxpane%-1
 print spt$(ii);
 print left$(ll$,38);"{down}";
 next ii
