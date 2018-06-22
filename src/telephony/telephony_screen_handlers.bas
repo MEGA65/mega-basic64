@@ -17,7 +17,7 @@ gosub POLL_TOUCH_DIALER
 
 'We wait for a short timer to expire after pressing a button, then we hide the sprite that makes
 ' the button look pressed.
-ktmr=ktmr-1: print "{home}{down}";ktmr;"   ": if ktmr<1 then gosub HIDE_SPRITE
+ktmr=ktmr-1: if ktmr<1 then gosub HIDE_SPRITE
 if u$="" then return
 ' Run terminal program for debugging modem communications
 if u$="t" or u$="T" then up=1: su=1: gosub TERMINAL_PROGRAM: gosub SWITCH_TO_SCREEN_DIALLER

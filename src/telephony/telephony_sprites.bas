@@ -35,5 +35,4 @@ poke 53264,0: if (xx*8+24) > 255 then poke 53264,128
 poke 53269,128
 return
 
-HIDE_SPRITE poke 53280,(peek(53280)+1 ) and 15
-poke 53269,0: return
+HIDE_SPRITE poke 53269,0: return
