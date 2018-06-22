@@ -28,6 +28,41 @@ char *label_names[MAX_LABELS];
 int label_lines[MAX_LABELS];
 int label_count=0;
 
+#define MAX_VARIABLES 16384
+char *variable_names[MAX_VARIABLES];
+char *short_names[MAX_VARIABLES];
+int variable_count=0;
+
+int errors=0;
+
+int check_variable(char *sv,char *v)
+{
+  int i;
+  for(i=0;i<variable_count;i++) {
+    // We already have this variable? If so, nothing to do
+    if (!strcmp(v,variable_names[i])) return 0;
+
+    // Do we have one that has the same first two characters?
+    if (!strcmp(sv,short_names[i])) {
+      if (strcmp(v,variable_names[i])) {
+	fprintf(stderr,"ERROR: Conflicting variable names '%s' and '%s' both resolve to '%s'\n",
+		v,variable_names[i],sv);
+	errors++;
+	return -1;
+      }
+    }
+  }
+
+  if (variable_count>MAX_VARIABLES) {
+    fprintf(stderr,"Too many variables.\n");
+    exit(-3);
+  }
+  short_names[variable_count]=strdup(sv);
+  variable_names[variable_count++]=strdup(v);
+  return 0;
+  
+}
+
 int resolve_symbol(char *s,char *o,int *olen)
 {
 	for(int i=0;i<label_count;i++) {
@@ -113,6 +148,21 @@ void compact_line(char *l)
 				s[0]=l[i];
 				for(j=i+1;isalnum(l[j]);j++) { s[j-i]=l[j]; continue; }
 				s[j-i]=0;
+				if (notKeyword(s)) {
+				  // If the next character is %, $, ( or %( or $(, then we need to attach
+				  // that tag to the variable name, as each of those has a unique name space.
+				  char v[255];
+				  char sv[255];
+				  for(int i=0;i<=strlen(s);i++) v[i]=s[i];
+				  for(int i=0;i<=strlen(s);i++) sv[i]=s[i]; sv[2]=0;
+				  int svlen=strlen(sv);
+				  while (l[j]=='%'||l[j]=='$'||l[j]=='(') {
+				    v[j-i]=l[j]; v[j-i+1]=0;
+				    sv[svlen]=l[j]; sv[++svlen]=0;
+				    j++;
+				  }
+				  check_variable(sv,v);
+				}
 				if (strlen(s)>2) {
 					// Candidate for shortening
 
@@ -169,8 +219,6 @@ int main(int argc,char **argv)
 {
 	int i;
 	char line[1024];
-
-	int errors=0;
 
 	// Pass 1 - find all labels
 	int line_number=0;
