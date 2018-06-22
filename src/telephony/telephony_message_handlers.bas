@@ -49,6 +49,7 @@ return
 CMTI_CALLBACK rem
 sused%=sused%+1 'one more message in memory
 mq=0 'set the Message Queried flag to 0, to force update of Contact SMS
+if sc=5 then gosub SMS_TO_SMS_PANE 'update the SMS pane if we're on SMS screen
 'Modem sent a response to at+cmgr=<i>
 if db>=4 then print "New SMS received and saved to cache"
 'For now we don't take into account the result
@@ -83,7 +84,7 @@ MESSAGE_HANDLER_+CMT rem
 'gosub SD_CARD_STORE_SMS 'dummy subroutine
 '--- Add SMS to memory/cache ---
 'We get the next free index in memory. In the future, get the next free index in SD card.
-'gosub SMS_GET_FIRST_EMPTY_INDEX: sindex%=k
+'gosub SMS_GET_FIRST_EMPTY_INDEX: sidex%=k
 'sidex%(sidex%)=sidex% 'SMS index
 's$=mf$(1): gosub REMOVE_QUOTES_STRING: snumber$(sidex%)=s$ 'SMS originating/destination number
 'satus%(sidex%)=0 'SMS status
@@ -460,14 +461,19 @@ CMGR_ADD_SMS rem
 '--- Store SMS on SD CARD ---
 gosub SD_CARD_STORE_SMS 'dummy subroutine
 '--- Add SMS to memory/cache ---
-'We use sidex%, the index in SIM storage. In the future, replace with the index given by SD_CARD_STORE_SMS subroutine
-sidex%(sidex%)=sidex% 'SMS index
-s$=mf$(2): gosub REMOVE_QUOTES_STRING: snumber$(sidex%)=s$ 'SMS originating/destination number
-s$=mf$(1): gosub GET_STATUS_FROM_STRING: satus%(sidex%)=k 'SMS status
-'s$=mf$(4): gosub REMOVE_QUOTES_STRING: sd$(sidex%)=s$ 'SMS timestamp
-'SMS body and timestamp: if caching is enabled, we store it only if the current queried SMS (sidex%) is among the last SMS
-if sx=1 then if (sused%-sidex% <= smaxcache) then stxt$(sidex%)=r$:  'If true, SMS body is stored
-if sx=0 then stxt$(sidex%)=r$ 'if caching is deactivated, we store it in any case
+'Indices:
+'  We use sidex%, the index in SIM storage, to delete the SMS from SIM storage.
+'  We store at the first empty index. In the future, replace with the index given by SD_CARD_STORE_SMS subroutine
+if sd=1 then gosub SMS_GET_FIRST_EMPTY_INDEX: ii=k 'if we delete SMS, we get the index from RAM
+if sd=0 then ii=sidex% 'if we don't delete SMS, we get the index from SIM storage
+sidex%(ii)=ii 'SMS index
+s$=mf$(2): gosub REMOVE_QUOTES_STRING: snumber$(ii)=s$ 'SMS originating/destination number
+s$=mf$(1): gosub GET_STATUS_FROM_STRING: satus%(ii)=k 'SMS status
+'s$=mf$(4): gosub REMOVE_QUOTES_STRING: sd$(ii)=s$ 'SMS timestamp
+'SMS body and timestamp: if caching is enabled, we store it only if the current queried SMS (ii) is among the last SMS
+if sx=1 then if (sused%-ii <= smaxcache) then stxt$(ii)=r$:  'If true, SMS body is stored
+if sx=0 then stxt$(ii)=r$ 'if caching is deactivated, we store it in any case
+if db>=4 then print "SMS saved to index";ii
 '--- Delete SMS from SIM/modem storage ---
 if sd=1 then k=sidex%: gosub SEND_AT+CMGD 'delete if SMS Delete flag is set to 1
 'Note: we should set-up a callback to make sure the SMS was deleted

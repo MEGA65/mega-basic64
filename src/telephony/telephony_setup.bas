@@ -13,6 +13,7 @@ return
 
 '=== program flags and variables setup ===
 SETUP_PROGRAM rem
+sd=1 'SMS Delete flag: delete SMS upon reception flag
 dd=0 'If set to true, this will activate debug in some places of the code (namely SMS querying)
 db=db 'flag db (debug): print debugging information
 '  0: no logging
@@ -245,7 +246,7 @@ stotal%=stotal% 'the maximum number of SMS that can be stored in the selected st
 slngth%=255 'maximum number of SMS in the MEGA65 memory
 dim sidex%(slngth%) 'mapping between SMS in memory and in storage (SD)
 '   sidex%(1)=32: the SMS in memory with index 1 has index 32 in storage
-sidex%=-1 'the last SMS index that was filled in RAM
+sidex%=-1 'the last SMS index that was queried from SIM storage
 dim snumber$(slngth%) 'phone number of the sender of SMS
 dim stxt$(slngth%) 'text of the SMS
 dim sd$(slngth%) 'timestamp (date) of SMS
@@ -262,7 +263,6 @@ if gf%=1 then sus$(0)=chr$(34)+"REC UNREAD"+chr$(34): sus$(1)=chr$(34)+"REC READ
 serror=0 'the number of error when getting SMS
 smaxcache=10 'the size of cache: number of messages that will see their body stored in memory
 sx=0 'flag to indicate if received SMS should follow the cache mechanism or not
-sd=0 'SMS Delete flag: delete SMS upon reception flag
 '--- SMS pane ---
 smaxpane%=18 'dim of SMS pane array
 dim spt$(smaxpane%-1) 'SMS Pane Text array:
@@ -284,7 +284,7 @@ gosub EMPTY_SMS
 gosub EMPTY_CONTACT_SMS
 gosub EMPTY_SMS_PANE
 gosub EMPTY_SMS_CONTACT_PANE
-'gosub QUERY_ALL_SMS 'launch the asynchronous query of all the SMS
+gosub QUERY_ALL_SMS 'launch the asynchronous query of all the SMS
 '--- SMS writing and sending ---
 watus$="" 'status message when sending (Writing) a SMS
 sm$="" 'text of the message being sent

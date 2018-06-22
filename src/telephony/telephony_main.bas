@@ -4,6 +4,7 @@ poke 53248+111,128 'fix screen artifacts (60hz display)
 poke 53272,20 'uppercase charset
 
 print "{clr}";: canvas 0 clr: print "{wht}" 'clear screen
+gosub VIRTUAL_KEYBOARD_DISABLE
 
 goto INIT
 

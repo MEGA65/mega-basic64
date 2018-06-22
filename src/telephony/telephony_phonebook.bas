@@ -115,7 +115,7 @@ COMPARE_PHONE_NUMBERS rem
 '  cc$: the country code
 'Returns:
 '  b: boolean result (0: false, 1: true)
-if db>=4 then print "  Comparing ";r$;" and ";s$
+if db>=4 then print "  Compare ";r$;" and ";s$
 b=0
 k=0: l=0 'the number is international type (first char is +), for r$ and s$ respectively
 if r$=s$ then b=1: return '1st case: numbers are exactly equal

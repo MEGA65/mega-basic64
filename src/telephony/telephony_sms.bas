@@ -7,9 +7,18 @@ if sidex%(i)=-1 then k=i: return
 next i
 return
 
+SMS_GET_MAX_INDEX rem
+'Get the maximum index filled in the SMS storage in RAM
+'  if no index, return -1
+k=-1
+for i=0 to slngth%
+if sidex%(i)<>-1 then k=i
+next i
+return
+
 EMPTY_SMS rem
 ' Delete all SMS from RAM
-for i=1 to slngth%
+for i=0 to slngth%
 sidex%(i)=-1: stxt$(i)="": snumber$(i)="": sd$(i)="": satus%(i)=-1
 next i
 sidex%=-1
@@ -85,13 +94,13 @@ GET_SMS_FROM_CONTACT rem
 '  r$: the phone number of the contact from whom we want the SMS
 'Returns:
 '  no return (fills the mpindex() array and query SMS missing from cache
-if sused%=0 then return 'no SMS were loaded from SIM
+gosub SMS_GET_MAX_INDEX: if k=-1 then return 'no SMS in RAM
 if dd=1 then db=4: gosub SWITCH_TO_SCREEN_DEBUG: poke 0,64 'for debugging only
 if db>=4 then print "Get SMS from contact "+r$
 '--- Get Contact's SMS indices ---
 'We first get all the indices of the contact's SMS to fill pindex()
-kk=1
-for ii=sused%-1 to 0 step -1
+kk=0: gosub SMS_GET_MAX_INDEX 'get the maximum index that is used (-> variable k)
+for ii=k to 0 step -1
 if db>=4 then print "SMS";ii ';snumber$(ii);left$(stxt$(ii),5)
 if sidex%(ii)>=0 then goto GSFC_COMPARE
 if db>=4 then print " SMS";ii;"doesn't exist"
@@ -108,25 +117,26 @@ if db>=4 then gosub WAIT_FOR_KEY_PRESS 'debug
 next ii
 'Once here, we've gone through all the SMS
 mxindex%=kk-1 'kk counter is too high of 1 (incremented after filling an index)
-if db>=4 then print "SMS indices of selected contact ("+r$+"):";: for i=1 to mxindex%: print mpindex(i);",";: next i: print chr$(13);
+if db>=4 then print "SMS indices of selected contact ("+r$+"):";: for i=0 to mxindex%: print mpindex(i);",";: next i: print chr$(13);
 '--- Query not-cached Contact's SMS ---
 'We now need to go through the Contact's SMS and query those not in cache
 mq=1: matus$="{yel}fetching SMS{elipsis}"
 sx=0 'disable cache mechanism for further SMS
-mpindex%=0
+mpindex%=-1
 gosub GSFC_STEP
 return
 
 GSFC_STEP rem
 mpindex%=mpindex%+1 'increment mpindex% at the beginning of STEP --> start at mpindex%=0
 if mpindex%>mxindex% then jt%(100)=0: gosub GSFC_ALL_SMS_LOADED: goto GSFC_END 'we handled all SMS
-if db>=4 then print "Contact SMS";mpindex%;"/";mxindex%;"..."
+if db>=4 then print "Contact SMS";mpindex%+1;"/";mxindex%+1;"{elipsis}"
 sidex%=mpindex(mpindex%)
+if sidex%<0 then goto GSFC_STEP 'sindex%=-1 -> no SMS at this index
 if stxt$(sidex%)<>"" then goto GSFC_IN_CACHE
 goto GSFC_QUERY 'the SMS is not in cache, we need to query it
 '--- SMS already in cache ---
 GSFC_IN_CACHE rem
-if db>=4 then print "SMS";sidex%;": in-cache"
+if db>=4 then print " SMS";sidex%;": in-cache"
 goto GSFC_STEP 'this SMS is already in cache, go to next step
 '--- Query next SMS ---
 GSFC_QUERY rem
@@ -137,7 +147,7 @@ GSFC_QUERY rem
 'If sd=1, SMS are Deleted upon reception, no need to query them
 if sd=1 then goto GSFC_STEP 'go directly to next step
 'We keep the following for testing
-if sd=0 then if db>=4 then print "SMS";sidex%;": query"
+if sd=0 then if db>=4 then print " SMS";sidex%;": query"
 if sd=0 then jt%(100)= GSFC_CALLBACK: k=sidex%: gosub SEND_AT+CMGR 'set callback and send message
 GSFC_END return
 
@@ -166,8 +176,8 @@ SMS_TO_SMS_PANE rem
 'Fill the SMS pane with in-RAM SMS entries (from highest index to lowest)
 'Only entries in cache (i.e. with their body in memory) are displayed
 if sused%<=0 then return 'no SMS were loaded from SIM
-kk=0
-for ii=sused%-1 to 0 step -1
+kk=0: gosub SMS_GET_MAX_INDEX 'get the maximum index that is used (-> variable k)
+for ii=k to 0 step -1
 if kk>smaxpane% then return 'don't fill more than smaxpane% (18) lines
 if sidex%(ii)>=0 and stxt$(ii)<>"" then s$=snumber$(ii)+": "+stxt$(ii): l=38: gosub TRIM_STRING_SPACES: gosub RM_STRING_CRLF: spt$(kk)=s$: spi%(kk)=ii: kk=kk+1 'Remove <CR><LF> after having trimmed the string. It should speed up things a bit, since the RM_STRING_CRLF subroutine will go through 38 chars max instead of the whole string
 next ii
@@ -182,6 +192,7 @@ return
 
 SMS_TO_SMS_CONTACT_PANE rem
 'Fill the SMS Contact pane with in-RAM SMS entries, iterating on the array of SMS belonging to the current contact
+'This subroutine is horribly slow!
 if mxindex%<=-1 then return 'no SMS were loaded from SIM
 kk=0
 for ii=0 to mxindex% 'no more than mxindex% SMS for this contact
