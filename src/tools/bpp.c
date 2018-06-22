@@ -158,12 +158,14 @@ void compact_line(char *l)
 				  for(int i=0;i<=strlen(s);i++) v[i]=s[i];
 				  for(int i=0;i<=strlen(s);i++) sv[i]=s[i]; sv[2]=0;
 				  int svlen=strlen(sv);
+				  int old_j=j;
 				  while (l[j]=='%'||l[j]=='$'||l[j]=='(') {
 				    v[j-i]=l[j]; v[j-i+1]=0;
 				    sv[svlen]=l[j]; sv[++svlen]=0;
 				    j++;
 				  }
 				  check_variable(sv,v);
+				  j=old_j;
 				}
 				if (strlen(s)>2) {
 					// Candidate for shortening
