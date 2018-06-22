@@ -37,6 +37,7 @@ return
 QUERY_ALL_SMS rem
 'poke 0,64 'for debugging only, far too slow!
 if dd=1 then db=4: gosub SWITCH_TO_SCREEN_DEBUG
+if dd=0 then db=0
 gosub EMPTY_SMS
 sq=1: satus$="{yel}fetching SMS{elipsis}"
 sx=1 'enable cache mechanism for further SMS

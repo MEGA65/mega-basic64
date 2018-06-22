@@ -81,7 +81,6 @@ TELEPHONY_SRCS=	\
 		$(TELEPHONY)/telephony_main.bas \
 		$(TELEPHONY)/telephony_phonebook.bas \
 		$(TELEPHONY)/telephony_sms.bas \
-		$(TELEPHONY)/phonebook_entries.bas \
 		$(TELEPHONY)/telephony_setup.bas \
 		$(TELEPHONY)/telephony_touch.bas \
 		$(TELEPHONY)/telephony_helpers.bas \
@@ -91,7 +90,9 @@ TELEPHONY_SRCS=	\
 		$(TELEPHONY)/telephony_screen_handlers.bas \
 		$(TELEPHONY)/telephony_message_handlers.bas \
 		$(TELEPHONY)/telephony_sprites.bas \
-		$(TELEPHONY)/telephony_autopsy.bas
+		$(TELEPHONY)/telephony_autopsy.bas \
+		#$(TELEPHONY)/phonebook_entries.bas \
+
 
 BINARIES=	\
 		$(BINDIR)/megabasic64.prg \
