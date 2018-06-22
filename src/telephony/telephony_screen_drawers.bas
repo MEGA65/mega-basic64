@@ -124,8 +124,9 @@ xx=37:yy=22: p=0: gosub STAMP_SEARCH 'stamp search icon
 return
 
 '=== draw dialpad ===
-DS_DIALLER_DIALPAD rem 'reinitialize timer
-ktmr=20
+DS_DIALLER_DIALPAD rem
+'reinitialize timer for hiding key press
+ktmr=5
 '1-9
 for x=1 to 3: for y=1 to 3
 xx=x*5-4: yy=y*4+1
