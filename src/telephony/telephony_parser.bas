@@ -65,17 +65,6 @@ if db>=5 then print "" 'print empty line in debug
 return
 
 
-PRINT_STRING_CRLF rem
-'Prints a string, replacing CR and LF by text <CR> and <LF>
-'Arguments:
-'  s$: the string to be printed
-for i=1 to len(s$): b$=right$(left$(s$,i),1)
-if b$<>"" and b$<>chr$(13) and b$<>chr$(10) then print b$;
-if b$=chr$(13) then print chr$(13)+"<cr>";
-if b$=chr$(10) then print "<lf>"+chr$(13);
-next i
-return
-
 '=== Jump to handler ===
 JUMP_TO_HANDLER rem
 if db>=5 then print "  message is type";mn
@@ -171,8 +160,9 @@ return
 RECEIVE_CHARS_FROM_MODEM rem
 'Receive k characters from modem.
 'Timeout after 5*k characters polled.
-'It ignores the first <cr><lf> or <lf> encountered
-'Note: the modem considers <cr><lf> to be a single char (in a SMS at least), but when polling the buffered UART it is most definitely 2 chars. When encountering further <cr><lf>, we decrement the char counter by one.
+'Notes:
+'  It ignores the first <cr><lf> or <lf> encountered
+'  The modem considers <cr><lf> to be a single char (in a SMS at least), but when polling the buffered UART it is most definitely 2 chars. When encountering further <cr><lf>, we decrement the char counter by one.
 'Arguments:
 '  k: the number of chars to get from modem
 'Returns:

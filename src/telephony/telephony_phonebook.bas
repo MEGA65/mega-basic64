@@ -16,7 +16,7 @@ if db>=4 then print "+CPBS received, pused%=",pused%
 s$="at+cpbr=1,"+right$(str$(pused%),len(str$(pused%))-1)+chr$(13): gosub WRITE_STRING_TO_MODEM_READY: jt%(100)= MODEM_READY
 gosub WAIT_MODEM_READY
 if db>=4 then print "+CPBR received"
-'The memory phonebook should be filled with entries from the SIM phonebook
+'At this point, the memory phonebook is filled with entries from the SIM phonebook
 if db>=4 then print "+CPBR: phonebook entries received": goto LP_SIM_1
 goto LP_SIM_2
 LP_SIM_1 for i=1 to pused%
@@ -102,14 +102,15 @@ next i
 return
 
 COMPARE_PHONE_NUMBERS rem
-'Compares to phone numbers
+'Compares two phone numbers
 'This method will use the country code.
 'Example (given cc$="+61")
 '  0412345678 = 0412345678
-'  +6141234567 = +6141234567
-'  0412345678 = +6141234567
-'  +6141234567 <> +3341234567
-'  +3341234567 <> 0412345678
+'  +61412345678 = +61412345678
+'  0412345678 = +61412345678
+'  +61412345678 <> +33412345678
+'  +33412345678 <> 0412345678
+'Note: the order of the two phone numbers doesn't matter
 'Arguments:
 '  r$: the first number
 '  s$: the second number

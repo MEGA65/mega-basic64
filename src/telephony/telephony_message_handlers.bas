@@ -399,8 +399,8 @@ ptotal%=val(mf$(3))
 MESSAGE_HANDLER_+CPBR rem
 'Phonebook entry: +CPBR: <index>,<number>,<type>,<text>
 ' Example: +CPBR: 1,"000",129,"emergency"
-pindex%=val(mf$(1))
-pindex%(pindex%)=1 'entry i is now used
+pindex%=val(mf$(1)) 'SIM index of the entry
+pindex%(pindex%)=1 'entry at index i is now used
 'psim%(i)=val(mf$(1)) 'SIM index of the entry
 s$=mf$(2): gosub REMOVE_QUOTES_STRING: pnumber$(pindex%)=s$ 'phone number
 ptype%(pindex%)=val(mf$(3)) 'type of phone number
@@ -448,11 +448,11 @@ MESSAGE_HANDLER_+CMGR rem
 '         mf$(1)  mf$(2) mf$(3)  mf$(4)  mf$(5)  mf$(6) mf$(7) mf$(8) mf$(9) mf$(10)  mf$(11)
 
 'When receiving +CMGR, we have to get the body of the message
-k=val(mf$(11)) 'length of sms text
+k=val(mf$(11)) 'length of SMS text body
 gosub RECEIVE_CHARS_FROM_MODEM 'body of the message in variable r$
 'debugging
 'if db>=4 then print ">";: s$=r$: gosub PRINT_STRING_CRLF: print chr$(13);
-'Store the message (metadata and maybe data) in memory
+'Store the message (metadata and maybe text body) in memory and on storage
 gosub CMGR_ADD_SMS
 return
 

@@ -38,7 +38,7 @@ QUERY_ALL_SMS rem
 'poke 0,64 'for debugging only, far too slow!
 if dd=1 then db=4: gosub SWITCH_TO_SCREEN_DEBUG
 if dd=0 then db=0
-gosub EMPTY_SMS
+gosub EMPTY_SMS 'empty SMS arrays in memory
 sq=1: satus$="{yel}fetching SMS{elipsis}"
 sx=1 'enable cache mechanism for further SMS
 sidex%=-1 'begin at SIM index 0
@@ -99,7 +99,7 @@ gosub SMS_GET_MAX_INDEX: if k=-1 then return 'no SMS in RAM
 if dd=1 then db=4: gosub SWITCH_TO_SCREEN_DEBUG: poke 0,64 'for debugging only
 if db>=4 then print "Get SMS from contact "+r$
 '--- Get Contact's SMS indices ---
-'We first get all the indices of the contact's SMS to fill pindex()
+'We first get all the indices of the contact's SMS to fill mpindex()
 kk=0: gosub SMS_GET_MAX_INDEX 'get the maximum index that is used (-> variable k)
 for ii=k to 0 step -1
 if db>=4 then print "SMS";ii ';snumber$(ii);left$(stxt$(ii),5)
@@ -109,7 +109,7 @@ goto GSFC_NEXT 'SMS doesn't exist --> next
 GSFC_COMPARE s$=snumber$(ii) 'get the number of current SMS
 gosub COMPARE_PHONE_NUMBERS: if b=1 then goto GSFC_CONTACT 'SMS exists and its number is the same as selected contact
 if db>=4 then print " Not the same number"
-goto GSFC_NEXT 'SMS doesn't exist or its number is not the same --> next
+goto GSFC_NEXT 'phone number of SMS sender is not the same as contact --> next
 GSFC_CONTACT mpindex(kk)=ii 'add the SMS index to the array of the current contact's SMS
 if db>=4 then print " Same number, add SMS to mpindex!"
 kk=kk+1 'increment the counter

@@ -159,6 +159,17 @@ RMSCRLF_NEXT next i
 s$=ww$ 'set s$ to the new string
 return
 
+PRINT_STRING_CRLF rem
+'Prints a string, replacing CR and LF by text <CR> and <LF>
+'Arguments:
+'  s$: the string to be printed
+for i=1 to len(s$): b$=right$(left$(s$,i),1)
+if b$<>"" and b$<>chr$(13) and b$<>chr$(10) then print b$;
+if b$=chr$(13) then print chr$(13)+"<cr>";
+if b$=chr$(10) then print "<lf>"+chr$(13);
+next i
+return
+
 SPACES rem
 'SPACES
 '   Returns a string with l spaces'

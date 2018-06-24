@@ -194,7 +194,7 @@ return
 
 '=== phonebook setup ===
 SETUP_PHONEBOOK rem
-psource$="sim" 'source of the contacts to load
+psource$="sim" 'source storage of the contacts to load
 '   "sim"
 '   "code"
 '   "sd"
@@ -248,9 +248,9 @@ dim sidex%(slngth%) 'mapping between SMS in memory and in storage (SD)
 '   sidex%(1)=32: the SMS in memory with index 1 has index 32 in storage
 sidex%=-1 'the last SMS index that was queried from SIM storage
 dim snumber$(slngth%) 'phone number of the sender of SMS
-dim stxt$(slngth%) 'text of the SMS
+dim stxt$(slngth%) 'text (body) of SMS
 dim sd$(slngth%) 'timestamp (date) of SMS
-dim satus%(slngth%) 's(t)atus of SMS (integer [0-4], corresponding to "READ", "UNREAD", etc.; see sus$)
+dim satus%(slngth%) 's(t)atus of SMS (integer [0-4], corresponding to "REC UNREAD", " REC READ", etc.; see sus$)
 sq=0 'SMS Queried. Flag to indicate if the SMS have been queried.'
 '  0: not queried
 '  1: queried, not received
