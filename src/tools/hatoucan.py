@@ -7,6 +7,9 @@ import sys
 # see the file UNLICENSE in the root directory of this distribution,
 # or http://www.unlicense.org/ for full details.
 
+# Known bugs:
+#  - if a line only has a line number, the output tokenized program will be corrupted
+
 # references:
 #   http://justsolve.archiveteam.org/wiki/Commodore_BASIC_tokenized_file
 #   http://www.c64-wiki.com/index.php/BASIC_token
