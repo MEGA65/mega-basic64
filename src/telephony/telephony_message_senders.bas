@@ -1,4 +1,35 @@
-'=== subroutines: send messages to modem ===
+'=== Utility subroutines ===
+
+WRITE_STRING_TO_MODEM rem
+'Send string s$ to modem
+'Argument:
+'  s$: the string to send to modem
+if db>=4 then print "Sent to modem: "+left$(s$, len(s$)-1)
+for i=1 to len(s$): c$=right$(left$(s$,i),1): print#1,c$;: next i
+return
+
+WAIT_MODEM_READY rem
+'Wait for the modem to be ready
+'  This subroutine only returns once the modem is ready,
+'  i.e. the call-back routine jt%(100) is set to 0
+if db>=5 then print "wait modem ready"
+WMR if db>=6 then print "  jt%(100)=",jt%(100)
+if jt%(100)<>0 then gosub POLL_MODEM: goto WMR
+if db>=5 then print "modem ready"
+return
+
+WRITE_STRING_TO_MODEM_READY rem
+'Wait for the modem to be ready and send string s$ to modem
+'Argument:
+'  s$: the string to send to modem
+gosub WAIT_MODEM_READY
+gosub WRITE_STRING_TO_MODEM
+return
+
+MODEM_READY jt%(100)=0: return 'Call-back subroutine used with WAIT_MODEM_READY
+
+
+'=== SEND subroutines: send messages to modem ===
 
 SEND_ATD rem
 'place a call by sending ATD (dial)

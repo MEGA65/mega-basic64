@@ -29,28 +29,6 @@ ss$="                                         "
 return
 
 
-WRITE_STRING_TO_MODEM rem
-'=== send to modem ===
-'send string in s$ to modem
-if db>=4 then print "Sent to modem: "+left$(s$, len(s$)-1)
-for i=1 to len(s$): c$=right$(left$(s$,i),1): print#1,c$;: next i
-return
-
-WAIT_MODEM_READY rem
-if db>=5 then print "wait modem ready"
-WMR if db>=6 then print "  jt%(100)=",jt%(100)
-if jt%(100)<>0 then gosub POLL_MODEM: goto WMR
-if db>=5 then print "modem ready"
-return
-
-WRITE_STRING_TO_MODEM_READY rem
-gosub WAIT_MODEM_READY
-gosub WRITE_STRING_TO_MODEM
-return
-
-MODEM_READY jt%(100)=0: return
-
-
 REMOVE_QUOTES_STRING rem
 '=== remove quotes from string ===
 ' remove the leading and trailing quotes (") from string s$
