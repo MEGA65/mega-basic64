@@ -1,13 +1,16 @@
-GOTO_LN rem
-'=== gosub X subroutine ===
-'goes to line ln, if ln>0
+GOSUB_LN rem
+'=== GOSUB LN subroutine ===
+'Goes to line ln using gosub, if ln>0
+'Argument:
+'  ln: the line number to gosub to
 ln$=str$(ln): if ln<=0 then return
-'first rub out with spaces in case line number is short
+'First, write 6 spaces (to overwrite ",00000"), in case line number is short
 for i=0 to 5: poke ja+i,32:next
+'Then, write the line number (right after the gosub token)
 for i=0 to len(ln$)-1: poke ja+i,asc(right$(left$(ln$,i+1),1)):next
 'gosub to line ln
-if ln>0 then gosub,00000
-'put the comma back in case we want to run again
+if ln>0 then gosub,00000 'This is the instruction that will be overwritten in memory
+'Put the comma back for the next time we use this routine
 poke ja,44
 return
 

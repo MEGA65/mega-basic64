@@ -11,7 +11,7 @@ goto INIT
 '### initialization ###
 INIT rem
 'one-time only lookup patch address
-gosub LOOKUP_GOTO_LN_PATCH_ADDRESS
+gosub LOOKUP_GOSUB_LN_PATCH_ADDRESS
 'program state setup
 gosub SETUP_PROGRAM
 if dd=1 then db=4 'turn on debugging information
@@ -19,7 +19,7 @@ if dd=1 then db=4 'turn on debugging information
 gosub SETUP_PARSER
 gosub SETUP_MODEM
 if db>=4 then print "waiting for modem setup{elipsis}"
-gosub WAIT_MODEM_READY
+gosub WAIT_MODEM_READY 'wait for the modem to be ready (all call-backs have been handled)
 if db>=4 then print "modem setup is complete"
 'GUI-related setup
 gosub SETUP_GUI
@@ -59,8 +59,8 @@ t1=time
 '--- screen update ---
 'if the clock gain 0.1s over last timed update, we trigger an update
 if time-tu>=6 then su=1
-'we trigger a screen update every sr loops, and only if needed (su=1)
-mdv=sr: if su=1 then gosub SCREEN_DRAWER: tu=time: su=0: us=1
+'we trigger a screen update only if needed (su=1)
+if su=1 then gosub SCREEN_DRAWER: tu=time: su=0: us=1
 
 t=time
 if us=1 then ttmr(5)=ttmr(5)+(t-t1): c5=c5+1

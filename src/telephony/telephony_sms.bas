@@ -242,5 +242,5 @@ SEND_SMS_CALLBACK rem
 'Response to AT+CMGS received
 jt%(100)=0
 if db>=4 then gosub WAIT_FOR_KEY_PRESS
-ln=mc: gosub GOTO_LN 'jump to Message sent callback
+ln=mc: gosub GOSUB_LN 'jump to Message sent callback
 return

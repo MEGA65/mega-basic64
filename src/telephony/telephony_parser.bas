@@ -46,17 +46,7 @@ mn=0
 gosub GET_MESSAGE_TYPE: gosub JUMP_TO_HANDLER
 ml=1 'a non-empty modem line has been handled
 '--- Callback handling ---
-'Check if we got an acceptable result code:
-'  ok, error, +cme error, +cms error'
-'  If so, then we will try and jump to a common callback
-rc=0
-if mn=40 or mn=44 or mn=49 or mn=50 then rc=1
-if mn=60 then rc=2 'received message prompt ">"
-if mn=58 then rc=3
-'Check if we have a common callback registered
-if rc=1 then mn=100: gosub JUMP_TO_HANDLER
-if rc=2 then mn=99: gosub JUMP_TO_HANDLER
-if rc=3 then mn=98: gosub JUMP_TO_HANDLER
+gosub HANDLE_CALLBACK
 '--- Reinit variables ---
 ml$="": fc=0: mf$=""
 qm=0 'reinit the quote mode, just to make sure the next line will start with quote mode off
@@ -64,17 +54,34 @@ qm=0 'reinit the quote mode, just to make sure the next line will start with quo
 if db>=5 then print "" 'print empty line in debug
 return
 
+'=== Callback handler ===
+HANDLE_CALLBACK rem
+'Check if we got one of the following messages:
+'  - Result Code: OK, ERROR, +CME ERROR, +CMS ERROR
+'  - Message Prompt: ">"
+'  - +CMGR response
+'If so, then we will try and jump to the corresponding callback subroutine:
+'  - Result Code:     jt%(100)
+'  - Message Prompt:  jt%(99)
+'  - +CMGR:           jt%(98)
+'Call-back for Result Codes: OK, ERROR, +CME ERROR, +CMS ERROR
+if mn=40 or mn=44 or mn=49 or mn=50 then mn=100: gosub JUMP_TO_HANDLER
+'Call-back for message prompt (">") when sending SMS
+if mn=60 then mn=99: gosub JUMP_TO_HANDLER
+'Call-back for +CMGR response
+if mn=58 then mn=98: gosub JUMP_TO_HANDLER
+return
 
 '=== Jump to handler ===
 JUMP_TO_HANDLER rem
 if db>=5 then print "  message is type";mn
 'Check if jumptable is set for this message type, if so, call handler
-ln=jt%(mn): if ln>0 then gosub GOTO_LN
+ln=jt%(mn): if ln>0 then gosub GOSUB_LN
 return
 
 '=== List of all messages ===
 GET_MESSAGE_TYPE rem
-'--- URC (Unsollicited Result Codes) ---
+'--- URC (Unsolicited Result Codes) ---
 if mf$(0)="+CREG" then mn=1: return
 if mf$(0)="+CGREG" then mn=3: return
 if mf$(0)="+CTZV" then mn=5: return
@@ -122,7 +129,10 @@ if mf$(0)="+CMGR" then mn=58: return
 if mf$(0)="+CPMS" then mn=59: return
 if mf$(0)=chr$(62) then mn=60: return '">"
 if mf$(0)="+CMGS" then mn=61: return
-
+'--- Reserved for call-backs ---
+'mn=98
+'mn=99
+'mn=100
 return
 
 '=== read one line from modem ===
@@ -186,7 +196,8 @@ return
 '=== purge modem buffer ===
 PURGE_MODEM_BUFFER rem
 'Purge the modem buffer, more specifically it purges the buffered UART.
-'The size of the UART buffer is 2000 bytes (will be reduced in the future).
-for i=1 to 2000: get#1,c$: next i
+'The size of the UART buffer is 1024 bytes (will be reduced in the future).
+'We purge 2*1024 to be sure.
+for i=1 to 2048: get#1,c$: next i
 if db>=4 then print "Buffered UART purged"
 c$="": return

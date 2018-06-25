@@ -1,6 +1,10 @@
-'=== goto,X lookup of patch address
-LOOKUP_GOTO_LN_PATCH_ADDRESS rem
-for ja=2048 to 40959: if peek(ja-1)<>141 or peek(ja)<>44 then next
+'=== gosub,X lookup of patch address
+LOOKUP_GOSUB_LN_PATCH_ADDRESS rem
+'Retrieves the memory address of the gosub,00000 instruction
+'More specifically, retrieves the memory location ja of the comma
+'Returns:
+'  ja: the "patch address" (i.e. memory location of the comma in gosub,00000)
+for ja=2048 to 40959: if peek(ja-1)<>141 or peek(ja)<>44 then next '141 is the token for gosub, 44 is the value of comma
 return
 
 '=== functions definition ===
@@ -106,7 +110,9 @@ return
 
 '=== setup for modem parser ===
 SETUP_PARSER rem
-dim mf$(20) 'fields from colon-comma formatted messages
+dim mf$(20) 'Message Fields: fields from colon-comma formatted messages
+fc=0 'Field Counter: number of fields in the mf$ array
+ml$="" 'Message Line: whole line received from modem
 dim ol$(20) 'lines from modem that don't conform to any normal message format
 dim jt%(100) 'jump table for message handling
 for i=0 to 99: jt%(i)=10000+100*i: next i
