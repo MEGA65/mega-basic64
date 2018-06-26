@@ -329,7 +329,7 @@ goto MH_CLCC_END
 
 MH_CLCC_END rem
 'send again the AT+CLCC command (if call state is not active)
-if dsta <> 0 then gosub SEND_AT+CLCC
+if dsta<>0 then gosub SEND_AT+CLCC
 15199 return
 
 

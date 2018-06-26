@@ -46,7 +46,7 @@ if u$="-" or u$="/" or u$="=" or u$="<" or u$=">" then  u0$=u$: su=1
 if u$=chr$(20) and len(nb$)>=1 then nb$=left$(nb$,len(nb$)-1): u0$=u$: su=1: up=1: ud=1
 'delete char from dialed number. Update dial pad and number display
 'enter: call the dialled number
-if u$=chr$(13) then  u0$=u$: su=1: dnumber$=nb$: gosub SWITCH_TO_SCREEN_CALL: gosub CALL_DIAL 
+if u$=chr$(13) then  u0$=u$: su=1: dnumber$=nb$: gosub SWITCH_TO_SCREEN_CALL: gosub CALL_DIAL
 ' XXX - Debug display dialer interface
 if u$="z" or u$="Z" then su=1: dsta=val(nb$): gosub SWITCH_TO_SCREEN_CALL
 return
@@ -65,18 +65,18 @@ if wsms=1 then goto HS_C_WRITE_SMS
 goto HS_C_NORMAL
 
 HS_C_NORMAL rem 'normal interaction when not writing SMS
-if u$=chr$(20) then u0$=u$: gosub SWITCH_TO_SCREEN_DIALLER 'BACKSPACE: go back to dialler
+if u$=chr$(19) then u0$=u$: gosub SWITCH_TO_SCREEN_DIALLER 'HOME: go back to dialler
 if u$=chr$(13) then u0$=u$: dnumber$=pnumber$(cselected%): gosub SWITCH_TO_SCREEN_CALL: gosub CALL_DIAL 'ENTER: call contact
 if u$=chr$(135) and sq=2 then r$=pnumber$(cselected%): gosub GET_SMS_FROM_CONTACT 'F5: refresh SMS from contact
-if u$="e" or u$="E" then u0$=u$: ctrigger=1: gosub SWITCH_TO_SCREEN_CONTACT_EDIT
-if u$="m" or u$="M" then u0$=u$: gosub HS_C_BEGIN_WRITING: gosub ERASE_SCREEN: gosub VIRTUAL_KEYBOARD_ENABLE
+if u$="e" or u$="E" then u0$=u$: ctrigger=1: gosub SWITCH_TO_SCREEN_CONTACT_EDIT 'E: edit contact
+if u$="m" or u$="M" then u0$=u$: gosub HS_C_BEGIN_WRITING: gosub ERASE_SCREEN: gosub VIRTUAL_KEYBOARD_ENABLE 'M: begin writing SMS
 return
 
 HS_C_WRITE_SMS rem 'interaction when writing SMS
 'Stop writing SMS: HOME
-if u$=chr$(19) then wsms=0: watus$="": gosub ERASE_SCREEN: gosub VIRTUAL_KEYBOARD_DISABLE: return
+if u$=chr$(19) then wsms=0: watus$="": gosub ERASE_SCREEN: gosub VIRTUAL_KEYBOARD_DISABLE: return 'HOME: stop writing SMS
 'Send SMS: ENTER / RETURN
-if u$=chr$(13) then gosub HS_C_SEND_SMS: return
+if u$=chr$(13) then gosub HS_C_SEND_SMS: return 'ENTER: send SMS
 'Move cursor left and right
 if u$="{left}" then mdv=len(wsms$)+1: ul%=fn mod(ul%-2)+1 'move cursor left
 if u$="{rght}" then mdv=len(wsms$)+1: ul%=fn mod(ul%)+1 'move cursor right
@@ -119,7 +119,7 @@ gosub VIRTUAL_KEYBOARD_IS_ENABLED: if hl%<> 0 and b=0 then gosub VIRTUAL_KEYBOAR
 u$="": get u$
 gosub POLL_TOUCH_CONTACT_EDIT
 if u$="" then return
-if u$=chr$(19) then u0$=u$: gosub HS_CE_CLEANUP: gosub SWITCH_TO_LAST_SCREEN: return
+if u$=chr$(19) then u0$=u$: gosub HS_CE_CLEANUP: gosub SWITCH_TO_LAST_SCREEN: return 'HOME: go back to screen CONTACT
 if u$=chr$(13) then u0$=u$: gosub HS_CE_SAVE_CONTACT: return
 if u$=chr$(133) and cselected%>0 then u0$=u$: gosub HS_CE_DELETE_CONTACT: return 'delete on F1 (only if existing contact, not for new contacts!
 if u$="{up}" then mdv=2: hl%=fn mod(hl%-2)+1: gosub HS_CE_ACTIVE_STRING: su=1 'Redraw field list
@@ -316,5 +316,5 @@ if sq=0 then gosub QUERY_ALL_SMS 'launch the asynchronous query of all the SMS
 'user actions
 u$="": get u$
 if u$="" then return
-if u$=chr$(20) then u0$=u$: gosub SWITCH_TO_LAST_SCREEN
+if u$=chr$(19) then u0$=u$: gosub SWITCH_TO_LAST_SCREEN 'HOME: go back to last screen (dialler)
 return
