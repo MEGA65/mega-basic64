@@ -314,7 +314,7 @@ x=0: y=2: w=40: h=3: gosub DRAW_BOX
 'common buttons
 xx=0: yy=10: p=0: gosub STAMP_REDPHONE 'redphone
 xx=0: yy=14: p=0: gosub STAMP_COG 'cog
-'xx=0: yy=18: p=0: gosub STAMP_COG 'cog
+'TODO: mute, speakers...
 
 'SMS box
 print "{wht}";
@@ -322,21 +322,20 @@ x=4: y=5: w=36: h=20: r(15)=1: gosub DRAW_BOX
 xx=5: yy=21: p=0: gosub STAMP_GLOBE 'globe
 xx=35: yy=21: p=0: gosub STAMP_MESSAGE 'message
 
-'TODO: use another flag for debugging and logging
 if db=1 then goto DS_CALL_DEBUG
 goto DS_CALL_DSTA
 DS_CALL_DEBUG rem
-xx=1: yy=5: gosub MOVE_CURSOR_XX_YY
+xx=5: yy=7: gosub MOVE_CURSOR_XX_YY
 print "Call active=";dactive;"          ";
-xx=1: yy=6: gosub MOVE_CURSOR_XX_YY
+xx=5: yy=8: gosub MOVE_CURSOR_XX_YY
 print "Call state=";dsta;"          ";
-xx=1: yy=7: gosub MOVE_CURSOR_XX_YY
+xx=5: yy=9: gosub MOVE_CURSOR_XX_YY
 print "Dialing=";dia;"          ";
-xx=1: yy=8: gosub MOVE_CURSOR_XX_YY
+xx=5: yy=10: gosub MOVE_CURSOR_XX_YY
 print "cid$=";cid$;"          ";
-xx=1: yy=9: gosub MOVE_CURSOR_XX_YY
+xx=5: yy=11: gosub MOVE_CURSOR_XX_YY
 print "dnumber$=";dnumber$;"          ";
-xx=1: yy=10: gosub MOVE_CURSOR_XX_YY
+xx=5: yy=12: gosub MOVE_CURSOR_XX_YY
 print "u$=";u$;"          ";
 
 DS_CALL_DSTA rem
@@ -346,6 +345,20 @@ if dsta=4 or dsta=5 goto DS_CALL_RINGING
 ddisplay$="Unknown status ("+str$(dsta)+")": gosub DS_CALL_DDISPLAY
 
 return
+
+DS_CALL_DB_CLR rem
+xx=5: yy=7: gosub MOVE_CURSOR_XX_YY
+print left$(ss$,34)
+xx=5: yy=8: gosub MOVE_CURSOR_XX_YY
+print left$(ss$,34)
+xx=5: yy=9: gosub MOVE_CURSOR_XX_YY
+print left$(ss$,34)
+xx=5: yy=10: gosub MOVE_CURSOR_XX_YY
+print left$(ss$,34)
+xx=5: yy=11: gosub MOVE_CURSOR_XX_YY
+print left$(ss$,34)
+xx=5: yy=12: gosub MOVE_CURSOR_XX_YY
+print left$(ss$,34)
 '### end DRAW_SCREEN_CALL ###
 
 

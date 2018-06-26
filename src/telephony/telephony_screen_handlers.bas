@@ -1,5 +1,5 @@
 SCREEN_HANDLER rem
-if sc=0 then gosub DRAW_SCREEN_DEBUG
+if sc=0 then gosub HANDLER_SCREEN_DEBUG
 if sc=1 then gosub HANDLER_SCREEN_DIALLER
 if sc=2 then gosub HANDLER_SCREEN_CONTACT
 if sc=3 then gosub HANDLER_SCREEN_CALL
@@ -7,6 +7,14 @@ if sc=4 then gosub HANDLER_SCREEN_CONTACT_EDIT
 if sc=5 then gosub HANDLER_SCREEN_SMS
 return
 
+
+HANDLER_SCREEN_DEBUG rem
+'keep the ability to hang-up
+u$="": get u$
+if u$="" then return
+if u$="h" or u$="H" then gosub CALL_HANGUP_ALL: return
+if u$=chr$(19) then db=0: gosub SWITCH_TO_LAST_SCREEN: return
+return
 
 
 '### DIALLER screen handler ###
@@ -38,7 +46,7 @@ if u$="-" or u$="/" or u$="=" or u$="<" or u$=">" then  u0$=u$: su=1
 if u$=chr$(20) and len(nb$)>=1 then nb$=left$(nb$,len(nb$)-1): u0$=u$: su=1: up=1: ud=1
 'delete char from dialed number. Update dial pad and number display
 'enter: call the dialled number
-if u$=chr$(13) then  u0$=u$: su=1: dnumber$=nb$: gosub CALL_DIAL: gosub SWITCH_TO_SCREEN_CALL
+if u$=chr$(13) then  u0$=u$: su=1: dnumber$=nb$: gosub SWITCH_TO_SCREEN_CALL: gosub CALL_DIAL 
 ' XXX - Debug display dialer interface
 if u$="z" or u$="Z" then su=1: dsta=val(nb$): gosub SWITCH_TO_SCREEN_CALL
 return
@@ -58,7 +66,7 @@ goto HS_C_NORMAL
 
 HS_C_NORMAL rem 'normal interaction when not writing SMS
 if u$=chr$(20) then u0$=u$: gosub SWITCH_TO_SCREEN_DIALLER 'BACKSPACE: go back to dialler
-if u$=chr$(13) then u0$=u$: dnumber$=pnumber$(cselected%): gosub CALL_DIAL: gosub SWITCH_TO_SCREEN_CALL 'ENTER: call contact
+if u$=chr$(13) then u0$=u$: dnumber$=pnumber$(cselected%): gosub SWITCH_TO_SCREEN_CALL: gosub CALL_DIAL 'ENTER: call contact
 if u$=chr$(135) and sq=2 then r$=pnumber$(cselected%): gosub GET_SMS_FROM_CONTACT 'F5: refresh SMS from contact
 if u$="e" or u$="E" then u0$=u$: ctrigger=1: gosub SWITCH_TO_SCREEN_CONTACT_EDIT
 if u$="m" or u$="M" then u0$=u$: gosub HS_C_BEGIN_WRITING: gosub ERASE_SCREEN: gosub VIRTUAL_KEYBOARD_ENABLE
@@ -224,6 +232,7 @@ dtmr$=s$
 
 'handle user actions
 u$="": get u$
+if u$="d" or u$="D" then db=1-db: gosub DS_CALL_DB_CLR 'enable call debugging information (appear where SMS should be)
 if dsta=0 goto HS_CALL_ACTIVE
 if dsta=2 or dsta=3 goto HS_CALL_DIALING
 if dsta=4 or dsta=5 goto HS_CALL_RINGING
@@ -267,12 +276,14 @@ return
 
 CALL_DIAL rem
 'Dial the number in dnumber$
+if dd=1 then db=4: gosub SWITCH_TO_SCREEN_DEBUG 'enable debugging
 dactive=1: dia=1
 gosub SEND_ATD
 return
 
 CALL_ANSWER rem
 'Answer an incoming call
+if dd=1 then db=4: gosub SWITCH_TO_SCREEN_DEBUG 'enable debugging
 gosub SEND_ATA
 tc=time
 return
@@ -290,6 +301,7 @@ gosub CALL_HANGUP_CLEANUP
 return
 
 CALL_HANGUP_CLEANUP rem 'clean up
+if db>=4 then db=0: gosub SWITCH_TO_LAST_SCREEN
 dactive=0
 dsta=-1
 cid$=""

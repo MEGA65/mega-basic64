@@ -300,44 +300,36 @@ merror$=mf$(1)
 15099 return
 
 
-'Message handler: +clcc (list current calls)
+'Message handler: +CLCC (list current calls)
 MESSAGE_HANDLER_+CLCC rem
 'Format:
-'  +CLCC: 1,0,0,0,0,"+61401020304",145
-'     <id1>,<dir>,<stat>,<mode>,<mpty>,<number>,<type>
+'  +CLCC: 1,0,0,0,0,"+61401020304",145[,"Contact Name"]
+'     <id1>,<dir>,<stat>,<mode>,<mpty>,<number>,<type>[,<alpha>]
 'update state and caller id only if voice call, and call active
 if mf$(4)="0" and dactive=1 then goto MH_CLCC_VOICE
 return
 
 MH_CLCC_VOICE rem
 '--- voice call ---
-'set caller id (cid$)
 su=1
-s$=mf$(6): gosub REMOVE_QUOTES_STRING: cid$=s$
-'update call state (dsta)
-dsta=-1
-dsta=val(mf$(3))
-'if mf$(3)="0" then dsta=0
-'if mf$(3)="1" then dsta=1
-'if mf$(3)="2" then dsta=2
-'if mf$(3)="3" then dsta=3
-'if mf$(3)="4" then dsta=4
-'if mf$(3)="5" then dsta=5
+s$=mf$(6): if mf$(8)<>"" then s$=mf$(8) 'caller id: if contact name is present, use contact name; otherwise, use phone number
+gosub REMOVE_QUOTES_STRING: cid$=s$ 'set caller id (cid$)
+dsta=-1: dsta=val(mf$(3)) 'update call state (dsta)
 
-if dia=1 then goto MH_CLCC_DIALLING
+if dia=1 then goto MH_CLCC_DIALLING 'check if dialling
 goto MH_CLCC_END
 
 MH_CLCC_DIALLING rem
 '--- dialling ---
 if dsta=2 then dr$="dialling..."
 if dsta=3 then dr$="alerting..."
-'0: the call has been established
-if dsta=0 then dr$="": dia=0: cid$=dnumber$: tc=time
+'call state 0: the call has been established
+if dsta=0 then dr$="": dia=0: tc=time
 goto MH_CLCC_END
 
 MH_CLCC_END rem
-'send again the at+clcc command
-gosub SEND_AT+CLCC
+'send again the AT+CLCC command (if call state is not active)
+if dsta <> 0 then gosub SEND_AT+CLCC
 15199 return
 
 
