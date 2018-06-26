@@ -1,0 +1,285 @@
+
+	.word $0801
+         .org $0801
+
+         .scope
+         .word _next, 10                       ; Next line and current line number
+         .byte $97, "2,0:", $9e, " 2014", $AA, "65",0      ; POKE 2,0 : SYS 2014+65
+_next:   .word 0
+
+iter1:   .byte 0
+
+         .checkpc 2079
+         .advance 2079
+
+         ; mega65 knock
+         lda #$47
+         sta $d02f
+         lda #$53
+         sta $d02f
+
+	 lda #0
+	 sta $d021
+	 sta $d020
+	 
+	 ; 50MHz
+	 lda #65
+	 sta $0
+
+entry:
+
+         jsr bitmapmode
+         jsr clearscreen
+
+         ldx #0
+loop:
+
+	lda previoussamples,x
+	tay
+	jsr unplotpixel
+	lda previoussamples2,x
+	tay
+	jsr unplotpixel
+
+
+         ; select cell modem1 audio in
+         lda #$02
+         sta $d6f4
+         ; get msb of audio sample
+         lda $d6fd
+         lsr
+         tay
+	 sta previoussamples,x
+         jsr plotpixel
+
+         ; select microphone audio
+         lda #$0a
+         sta $d6f4
+
+	 ; shift it left a few bits
+         lda $d6fc
+	 sta samplelo
+	 lda $d6fd
+	 sta samplehi
+
+	 asl samplelo
+	 rol samplehi
+
+	 asl samplelo
+	 rol samplehi
+
+	 lda samplehi
+	 clc
+	 adc #$80
+
+	 sta previoussamples,x
+	 tay
+	 
+         jsr plotpixel
+
+         ; small delay
+q:       cmp $d012
+         beq q
+	 dey
+
+         inx
+         bne loop
+
+         jmp loop
+
+plotpixel:
+         ; use $fd and $fe as 16-bit
+         ; pointer.
+
+         stx savex
+         sty savey
+
+	 jsr calculatepixeladdr
+
+         ; work out bit of byte to set
+         lda savex
+         and #7
+         tax
+         lda bits,x
+         ldy #0
+         ora ($fd),y
+         sta ($fd),y
+
+         ; set bit in byte
+
+         ldx savex
+         ldy savey
+
+         rts
+
+
+
+calculatepixeladdr:
+         ; reset our pointer to $0020, to centre in the frame
+         lda #<$0020
+         sta $fd
+         lda #>$0020
+         sta $fe
+
+
+         ; calculate address of pixel
+
+         ; work out 256*int(y/8)
+         lda savey
+         lsr
+         lsr
+         lsr
+         sta $fe
+
+         ; work out 64*int(y/8), and add
+         ; it.
+         lda savey
+         asl
+         asl
+         asl
+         and #%11000000
+	 clc
+	 adc $fd
+         sta $fd
+	 lda $fe
+	 adc #0
+	 sta $fe
+
+         lda savey
+         lsr
+         lsr
+         lsr
+         lsr
+         lsr
+         and #%00000111
+         clc
+         adc $fe
+         sta $fe
+
+         ; work out int (x/8)*8
+         lda savex
+         and #%11111000
+         clc
+         adc $fd
+         sta $fd
+         lda $fe
+         adc #0
+         sta $fe
+
+         ; storing (y and 7)
+         lda savey
+         and #7
+         clc
+         adc $fd
+         sta $fd
+         lda $fe
+         adc #0
+         sta $fe
+
+         ; add base of screen to address
+         lda $fe
+         ora #%00100000
+         and #%00111111
+         sta $fe
+
+	 rts
+
+unplotpixel:
+         ; use $fd and $fe as 16-bit
+         ; pointer.
+
+         stx savex
+         sty savey
+
+	 jsr calculatepixeladdr
+
+         ; work out bit of byte to unset
+         lda savex
+         and #7
+         tax
+         lda bits,x
+	 eor #$ff
+         ldy #0
+         and ($fd),y
+         sta ($fd),y
+
+         ; set bit in byte
+
+         ldx savex
+         ldy savey
+
+         rts
+
+
+
+savea:   .byte $00
+savex:   .byte $00
+savey:   .byte $00
+
+bits:
+         .byte %10000000
+         .byte %01000000
+         .byte %00100000
+         .byte %00010000
+         .byte %00001000
+         .byte %00000100
+         .byte %00000010
+         .byte %00000001
+
+
+bitmapmode:
+         lda #$3b
+         sta $d011
+         lda #25
+         sta $d018
+         rts
+
+clearscreen:
+
+         ; clear colour memory
+         lda #<$0400
+         sta $fd
+         lda #>$0400
+         sta $fe
+         ldy #0
+         ; white pixels, black backgnd
+cl4:      lda #$10
+cl3:      sta ($fd),y
+         iny
+         bne cl3
+         inc $fe
+         lda $fe
+         cmp #>$0800
+         bne cl4
+
+
+         ; clear bitmap display from
+         ; $2000 to $3fff
+         ldy #0
+         lda #<$2000
+         sta $fd
+         lda #>$2000
+         sta $fe
+cl2:     lda #$00
+cl:      sta ($fd),y
+         iny
+         bne cl
+         inc $fe
+         lda $fe
+         cmp #$40
+         bne cl2
+
+         rts
+
+
+samplelo:    .byte 0
+samplehi:    .byte 0
+
+.space previoussamples 256
+.space previoussamples2 256
+
+
+        .scend
+
+        .outfile "bin/plotter.prg"
+

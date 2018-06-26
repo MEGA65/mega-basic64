@@ -145,6 +145,9 @@ $(BINDIR)/telephony.prg:	$(BINDIR)/telephony.bas
 $(BINDIR)/vehicle-console.prg:	src/vehicle-console.a65 $(BINDIR)/vehicle_console.tiles
 	$(OPHIS) src/vehicle-console.a65
 
+$(BINDIR)/plotter.prg:	src/telephony/plotter.a65
+	$(OPHIS) src/telephony/plotter.a65
+
 $(TOOLDIR)/bpp:	$(TOOLDIR)/bpp.c Makefile
 	$(CC) $(COPT) -o $(TOOLDIR)/bpp $(TOOLDIR)/bpp.c
 
