@@ -59,11 +59,13 @@ nrtm=0 'current real time, based on network synchronized time
 '=== dialling-related variables ===
 cid$="" 'caller id (number)
 dr$="" 'dr (dialling result): user friendly information about dialling state
-dia=0 'flag dia (dialling): the modem is currently dialling
-dactive=0 'dactive
+dia=0 'dialling flag
+'   0: the modem is not currently dialling
+'   1: the modem is currently dialling
+dactive=0 'active call flag
 '   0: no call active
 '   1: call in progress
-dsta=-1 'call/dialing state
+dsta=-1 'call/dialling state
 '  -1: unknown/error/no call
 '   0: active
 '   1: held

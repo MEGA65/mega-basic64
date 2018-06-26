@@ -238,7 +238,7 @@ MESSAGE_HANDLER_41 rem
 'Message handler: incoming call (ring)
 MESSAGE_HANDLER_RING rem
 gosub SEND_AT+CLCC
-if dactive=0 then dactive=1: su=1: gosub SWITCH_TO_SCREEN_CALL
+if dactive=0 then dactive=1: gosub SWITCH_TO_SCREEN_CALL 'if not already in-call, we set the active call flag
 'else: already in-call
 14299 return
 
@@ -253,7 +253,6 @@ goto MH_NC_END
 MH_NC_ACTIVE rem
 'hang-up the active call
 gosub CALL_HANGUP
-su=1
 gosub SWITCH_TO_SCREEN_DIALLER
 goto MH_NC_END
 
@@ -303,6 +302,9 @@ merror$=mf$(1)
 
 'Message handler: +clcc (list current calls)
 MESSAGE_HANDLER_+CLCC rem
+'Format:
+'  +CLCC: 1,0,0,0,0,"+61401020304",145
+'     <id1>,<dir>,<stat>,<mode>,<mpty>,<number>,<type>
 'update state and caller id only if voice call, and call active
 if mf$(4)="0" and dactive=1 then goto MH_CLCC_VOICE
 return
@@ -311,15 +313,16 @@ MH_CLCC_VOICE rem
 '--- voice call ---
 'set caller id (cid$)
 su=1
-cid$=right$(left$(mf$(6),len(mf$(6))-1),len(mf$(6))-2)
+s$=mf$(6): gosub REMOVE_QUOTES_STRING: cid$=s$
 'update call state (dsta)
 dsta=-1
-if mf$(3)="0" then dsta=0
-if mf$(3)="1" then dsta=1
-if mf$(3)="2" then dsta=2
-if mf$(3)="3" then dsta=3
-if mf$(3)="4" then dsta=4
-if mf$(3)="5" then dsta=5
+dsta=val(mf$(3))
+'if mf$(3)="0" then dsta=0
+'if mf$(3)="1" then dsta=1
+'if mf$(3)="2" then dsta=2
+'if mf$(3)="3" then dsta=3
+'if mf$(3)="4" then dsta=4
+'if mf$(3)="5" then dsta=5
 
 if dia=1 then goto MH_CLCC_DIALLING
 goto MH_CLCC_END
