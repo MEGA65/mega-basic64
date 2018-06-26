@@ -29,63 +29,76 @@ iter1:   .byte 0
 entry:
 
          jsr bitmapmode
+	 jsr clearcolour
          jsr clearscreen
 
          ldx #0
 loop:
 
+waitingforflyback:
+	lda #$ff
+	cmp $d012
+	bne waitingforflyback
+
+	inc $d020
+	jsr clearscreen
+
+	ldx #0
+drawloop:
 	lda previoussamples,x
 	tay
-	jsr unplotpixel
+	jsr plotpixel
+
 	lda previoussamples2,x
 	tay
-	jsr unplotpixel
+	jsr plotpixel
 
+	dex
+	bne drawloop
 
-         ; select cell modem1 audio in
-         lda #$02
-         sta $d6f4
-         ; get msb of audio sample
-         lda $d6fd
-         lsr
-         tay
-	 sta previoussamples,x
-         jsr plotpixel
+	dec $d020
 
-         ; select microphone audio
-         lda #$0a
-         sta $d6f4
+	; Then read 256 samples
+	ldx #$00
+nextsample:
+	lda $d012
+wait:	cmp $d012
+	beq wait
 
-	 ; shift it left a few bits
-         lda $d6fc
-	 sta samplelo
-	 lda $d6fd
-	 sta samplehi
+	; select cell modem1 audio in
+        lda #$02
+        sta $d6f4
+        ; get msb of audio sample
+        lda $d6fd
+        lsr
+	sta previoussamples2,x
 
-	 asl samplelo
-	 rol samplehi
+        ; select microphone audio
+        lda #$0a
+        sta $d6f4
 
-	 asl samplelo
-	 rol samplehi
+	; shift it left a few bits
+        lda $d6fc
+	sta samplelo
+	lda $d6fd
+	sta samplehi
 
-	 lda samplehi
-	 clc
-	 adc #$80
+	asl samplelo
+	rol samplehi
 
-	 sta previoussamples,x
-	 tay
-	 
-         jsr plotpixel
+	asl samplelo
+	rol samplehi
 
-         ; small delay
-q:       cmp $d012
-         beq q
-	 dey
+	lda samplehi
+	clc
+	adc #$80
 
-         inx
-         bne loop
+	sta previoussamples,x
 
-         jmp loop
+	inx
+	bne nextsample
+	
+	jmp loop
 
 plotpixel:
          ; use $fd and $fe as 16-bit
@@ -234,7 +247,7 @@ bitmapmode:
          sta $d018
          rts
 
-clearscreen:
+clearcolour:
 
          ; clear colour memory
          lda #<$0400
@@ -252,24 +265,32 @@ cl3:      sta ($fd),y
          cmp #>$0800
          bne cl4
 
+clearscreen:
 
-         ; clear bitmap display from
-         ; $2000 to $3fff
-         ldy #0
-         lda #<$2000
-         sta $fd
-         lda #>$2000
-         sta $fe
-cl2:     lda #$00
-cl:      sta ($fd),y
-         iny
-         bne cl
-         inc $fe
-         lda $fe
-         cmp #$40
-         bne cl2
+	lda #>dmalist
+	sta $d701
+	lda #0
+	sta $d702
+	sta $d704
+	lda #<dmalist
+	sta $d705
 
          rts
+
+dmalist:
+		; MEGA65 Enhanced DMA options
+		.byte $0A  ; Request format is F018A
+		.byte $81,$00 ; Destination is in 1st MB
+		.byte $00  ; No more options
+		; copy $0004000-$0007FFF to $FFF8000-$FFFBFFF
+		; F018A DMA list
+		; (MB offsets get set in routine)
+		.byte $03 ; fill + last request in chain
+		.word 8000 ; size of copy is 8000 bytes
+		.byte $00,$00,$00 ; starting at $4000
+		.word $2000 ; destination address is $2000
+		.byte $00   ; of bank $0
+		.word $0000 ; modulo (unused)
 
 
 samplelo:    .byte 0
