@@ -278,7 +278,15 @@ CALL_DIAL rem
 'Dial the number in dnumber$
 if dd=1 then db=4: gosub SWITCH_TO_SCREEN_DEBUG 'enable debugging
 dactive=1: dia=1
+jt%(100)= CALL_DIAL_CALLBACK
 gosub SEND_ATD
+return
+
+CALL_DIAL_CALLBACK rem
+'Result Code received after ATD command was sent
+jt%(100)=0
+if merror=1 then merror=0: gosub CALL_HANGUP: gosub SWITCH_TO_SCREEN_DIALLER 'modem ERROR: we hang-up the call
+if merror=0 then gosub SEND_AT+CLCC 'modem OK: ATD succeeded, dialling...
 return
 
 CALL_ANSWER rem
@@ -300,7 +308,7 @@ gosub SEND_AT+CHUP
 gosub CALL_HANGUP_CLEANUP
 return
 
-CALL_HANGUP_CLEANUP rem 'clean up
+CALL_HANGUP_CLEANUP rem 'clean up after hanging-up
 if db>=4 then db=0: gosub SWITCH_TO_LAST_SCREEN
 dactive=0
 dsta=-1

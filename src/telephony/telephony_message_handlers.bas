@@ -228,7 +228,6 @@ MESSAGE_HANDLER_39 rem
 'Message handler: OK
 MESSAGE_HANDLER_OK rem
 merror=0
-if dia=1 then gosub SEND_AT+CLCC 'ATD succeeded, dialling...
 14099 return
 
 'Message handler: message type 41
@@ -245,7 +244,7 @@ if dactive=0 then dactive=1: gosub SWITCH_TO_SCREEN_CALL 'if not already in-call
 'Message handler: no carrier
 MESSAGE_HANDLER_NO_CARRIER rem
 'TODO: depending on which screen we are, we can set different messages to be displayed to the user when the call is hung up
-if dactive=1 then goto MH_NC_ACTIVE
+if dactive=1 then goto MH_NC_ACTIVE 'check if a call is active
 'else: not in call
 goto MH_NC_END
 
