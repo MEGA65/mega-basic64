@@ -279,7 +279,7 @@ CALL_DIAL rem
 if dd=1 then db=4: gosub SWITCH_TO_SCREEN_DEBUG 'enable debugging
 dactive=1: dia=1
 jt%(100)= CALL_DIAL_CALLBACK
-gosub SEND_ATD
+gosub SEND_ATD 'dial the number
 return
 
 CALL_DIAL_CALLBACK rem

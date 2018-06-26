@@ -33,31 +33,30 @@ MODEM_READY jt%(100)=0: return 'Call-back subroutine used with WAIT_MODEM_READY
 
 SEND_ATD rem
 'place a call by sending ATD (dial)
+'Argument:
+'  dnumber$: the number to dial
 s$="atd"+dnumber$+";"+chr$(13): gosub WRITE_STRING_TO_MODEM
-'we should wait for OK (or ERROR)
 return
 
 SEND_AT+CHUP rem
 'end call by sending AT+CHUP (call hang up)
 s$="at+chup"+chr$(13): gosub WRITE_STRING_TO_MODEM
-'we should wait for OK (or ERROR)
 return
 
 SEND_ATH rem
 'end call by sending ATH (hang up)
 s$="ath"+chr$(13): gosub WRITE_STRING_TO_MODEM
-'we should wait for OK (or ERROR)
 return
 
 SEND_ATA rem
 'answer call by sending ATA (answer)
-s$="ata"+chr$(13): gosub WRITE_STRING_TO_MODEM
-'we should wait for OK (or ERROR)
-' XXX If we send another command immediately, it can make the modem hang up.
-' so wait a little while.
-' XXX we should indeed wait for OK, so we wait no longer than is necessary.
-for i = 1 to 10000: next i
-return
+s$="ata"+chr$(13): gosub WRITE_STRING_TO_MODEM_READY
+'If we send another command immediately, it can make the modem hang up.
+'We have to wait for OK
+jt%(100)= MODEM_READY
+gosub WAIT_MODEM_READY 'wait for modem to be ready (Result Code received)
+if merror=1 then merror=0: gosub CALL_HANGUP: gosub SWITCH_TO_SCREEN_DIALLER: return 'modem ERROR: hang-up the call
+if merror=0 then return 'modem OK: everything is fine, we simply return
 
 SEND_AT+CLCC rem
 'send AT+CLCC (list current calls)
