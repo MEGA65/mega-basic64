@@ -40,7 +40,6 @@ waitingforflyback:
 	cmp $d012
 	bne waitingforflyback
 
-	inc $d020
 	jsr clearscreen
 
 	ldx #0
@@ -56,8 +55,6 @@ drawloop:
 	dex
 	bne drawloop
 
-	dec $d020
-
 	; Then read 256 samples
 	ldx #$00
 nextsample:
@@ -69,8 +66,22 @@ wait:	cmp $d012
         lda #$02
         sta $d6f4
         ; get msb of audio sample
-        lda $d6fd
-        lsr
+
+	; shift it left a few bits
+        lda $d6fc
+	sta samplelo
+	lda $d6fd
+	sta samplehi
+
+	asl samplelo
+	rol samplehi
+
+	asl samplelo
+	rol samplehi
+
+        lda samplehi
+	clc
+	adc #40
 	sta previoussamples2,x
 
         ; select microphone audio
@@ -131,9 +142,6 @@ calculatepixeladdr:
          ; reset our pointer to $0020, to centre in the frame
          lda #<$0020
          sta $fd
-         lda #>$0020
-         sta $fe
-
 
          ; calculate address of pixel
 
@@ -154,9 +162,7 @@ calculatepixeladdr:
 	 clc
 	 adc $fd
          sta $fd
-	 lda $fe
-	 adc #0
-	 sta $fe
+	 php
 
          lda savey
          lsr
@@ -165,7 +171,7 @@ calculatepixeladdr:
          lsr
          lsr
          and #%00000111
-         clc
+         plp
          adc $fe
          sta $fe
 
@@ -182,12 +188,8 @@ calculatepixeladdr:
          ; storing (y and 7)
          lda savey
          and #7
-         clc
-         adc $fd
+	 ora $fd
          sta $fd
-         lda $fe
-         adc #0
-         sta $fe
 
          ; add base of screen to address
          lda $fe
