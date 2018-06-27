@@ -293,7 +293,7 @@ CALL_ANSWER rem
 'Answer an incoming call
 if dd=1 then db=4: gosub SWITCH_TO_SCREEN_DEBUG 'enable debugging
 gosub SEND_ATA
-tc=time
+tc=time 'set the call timer
 return
 
 CALL_HANGUP rem

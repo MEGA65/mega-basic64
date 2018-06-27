@@ -323,7 +323,7 @@ MH_CLCC_DIALLING rem
 if dsta=2 then dr$="dialling..."
 if dsta=3 then dr$="alerting..."
 'call state 0: the call has been established
-if dsta=0 then dr$="": dia=0: tc=time
+if dsta=0 then dr$="": dia=0: tc=time 'reset dialling flag and set the call timer
 goto MH_CLCC_END
 
 MH_CLCC_END rem
