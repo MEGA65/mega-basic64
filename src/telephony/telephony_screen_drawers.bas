@@ -21,7 +21,8 @@ if len(ntype$)=1 then shi=2
 'print the signal level canvas in the status bar
 'print the BER under signal strength
 'xx=28: yy=1: gosub MOVE_CURSOR_XX_YY: print "ber";ber$;
-xx=30: yy=0: gosub MOVE_CURSOR_XX_YY: for i=1 to shi: if shi<>0 then print " ";: next i: print ntype$;: canvas gs%+sl stamp on canvas 0 at 32,0: return
+xx=30: yy=0: gosub MOVE_CURSOR_XX_YY: for i=1 to shi: if shi<>0 then print " ";
+next i: print ntype$;: canvas gs%+sl stamp on canvas 0 at 32,0: return
 
 '=== screen battery icon update ===
 STAMP_BATTERY_ICON shi=0: bls$=""
