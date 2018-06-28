@@ -1,5 +1,4 @@
-SCREEN_HANDLER rem
-if sc=0 then gosub HANDLER_SCREEN_DEBUG
+SCREEN_HANDLER if sc=0 then gosub HANDLER_SCREEN_DEBUG
 if sc=1 then gosub HANDLER_SCREEN_DIALLER
 if sc=2 then gosub HANDLER_SCREEN_CONTACT
 if sc=3 then gosub HANDLER_SCREEN_CALL
@@ -8,20 +7,16 @@ if sc=5 then gosub HANDLER_SCREEN_SMS
 return
 
 
-HANDLER_SCREEN_DEBUG rem
 'keep the ability to hang-up
-u$="": get u$
-if u$="" then return
+HANDLER_SCREEN_DEBUG u$="": get u$: if u$="" then return
 if u$="h" or u$="H" then gosub CALL_HANGUP_ALL: return
 if u$=chr$(19) then db=0: gosub SWITCH_TO_LAST_SCREEN: return
 return
 
 
 '### DIALLER screen handler ###
-HANDLER_SCREEN_DIALLER rem
 'read input chars and update string (phone number)
-u$="": get u$
-gosub POLL_TOUCH_DIALER
+HANDLER_SCREEN_DIALLER u$="": get u$: gosub POLL_TOUCH_DIALER
 
 'We wait for a short timer to expire after pressing a button, then we hide the sprite that makes
 ' the button look pressed.
