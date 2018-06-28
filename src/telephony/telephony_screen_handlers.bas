@@ -9,7 +9,7 @@ return
 
 'keep the ability to hang-up
 HANDLER_SCREEN_DEBUG u$="": get u$: if u$="" then return
-if u$="h" then gosub CALL_HANGUP_ALL: return
+if u$="H" then gosub CALL_HANGUP_ALL: return
 if u$="{home}" then db=0: gosub SWITCH_TO_LAST_SCREEN: return
 return
 
@@ -23,9 +23,9 @@ HANDLER_SCREEN_DIALLER u$="": get u$: gosub POLL_TOUCH_DIALER
 ktmr=ktmr-1: if ktmr<1 then gosub HIDE_SPRITE
 if u$="" then return
 ' Run terminal program for debugging modem communications
-if u$="t" or u$="T" then up=1: su=1: gosub TERMINAL_PROGRAM: gosub SWITCH_TO_SCREEN_DIALLER
+if u$="T" then up=1: su=1: gosub TERMINAL_PROGRAM: gosub SWITCH_TO_SCREEN_DIALLER
 ' Go to SMS screen
-if u$="s" or u$="S" then up=1: su=1: gosub SWITCH_TO_SCREEN_SMS
+if u$="S" then up=1: su=1: gosub SWITCH_TO_SCREEN_SMS
 ' Open the new contact screen with dialled number pre-populated
 if u$="@" then ctrigger=2: cfields$(2)=nb$: gosub SWITCH_TO_SCREEN_CONTACT_EDIT
 'navigation in contact pane
@@ -34,7 +34,7 @@ if u$="{down}" then mdv=centry%: hl%=fn mod(hl%)+1: su=1: uc=1 'Redraw contact l
 if u$="{rght}" and hl%<>0 then cselected%=cindex%(hl%): gosub SWITCH_TO_SCREEN_CONTACT 'Go to contact screen
 'limit length is 18, go to loop start if over it or not enter or backspace
 if u$<>chr$(20) and u$<>chr$(13) and len(nb$)>=19 then return
-if (u$>="0" and u$<="9") or u$="+" or u$="*" or u$="#" or u$="a" or u$="b" or u$="c" or u$="d" then nb$=nb$+u$: u0$=u$: su=1: up=1: ud=1 'request dialpad and number update
+if (u$>="0" and u$<="9") or u$="+" or u$="*" or u$="#" or u$="A" or u$="B" or u$="C" or u$="D" then nb$=nb$+u$: u0$=u$: su=1: up=1: ud=1 'request dialpad and number update
 'these characters don't update the string (for now)
 if u$="-" or u$="/" or u$="=" or u$="<" or u$=">" then  u0$=u$: su=1
 'backspace: remove a character, but only if there's at least one
@@ -43,7 +43,7 @@ if u$=chr$(20) and len(nb$)>=1 then nb$=left$(nb$,len(nb$)-1): u0$=u$: su=1: up=
 'enter: call the dialled number
 if u$=chr$(13) then  u0$=u$: su=1: dnumber$=nb$: gosub SWITCH_TO_SCREEN_CALL: gosub CALL_DIAL
 ' XXX - Debug display dialer interface
-if u$="z" or u$="Z" then su=1: dsta=val(nb$): gosub SWITCH_TO_SCREEN_CALL
+if u$="Z" then su=1: dsta=val(nb$): gosub SWITCH_TO_SCREEN_CALL
 return
 
 
@@ -184,12 +184,12 @@ HS_CE_CLEANUP ctrigger=0: cstatus$="": cfields$(1)="": cfields$(2)="": return 'c
 'update the call timer and timer string
 'handle user actions
 HANDLER_SCREEN_CALL dtmr=time-tc: k=dtmr: gosub REAL_TIME_TO_STRING: dtmr$=s$: u$="": get u$
-if u$="d" then db=1-db: gosub DS_CALL_DB_CLR 'enable call debugging information (appear where SMS should be)
+print "{home}";u$
+if u$="D" then db=1-db: gosub DS_CALL_DB_CLR 'enable call debugging information (appear where SMS should be)
+if u$="H" then u0$=u$: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER
 if dsta=0 goto HS_CALL_ACTIVE
 if dsta=2 or dsta=3 goto HS_CALL_DIALING
 if dsta=4 or dsta=5 goto HS_CALL_RINGING
-'else, we want to always be able to hangup with H
-if u$="h" then  u0$=u$: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER
 return
 
 '=== Call state: active ===
@@ -197,7 +197,7 @@ return
 '   h: hang-up call
 '   TODO: more (mute, speaker, dialpad...)
 '--- Hang-up call (H) ---
-HS_CALL_ACTIVE gosub POLL_TOUCH_CALL_ACTIVE: if u$="h" then  u0$=u$: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER
+HS_CALL_ACTIVE gosub POLL_TOUCH_CALL_ACTIVE: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER
 return
 
 HS_CALL_DIALING rem
@@ -205,9 +205,7 @@ HS_CALL_DIALING rem
 ' Possible actions:
 '   h: hang-up call
 '   TODO: more (mute, speaker, dialpad...)
-gosub POLL_TOUCH_CALL_DIALING
-if u$="h" or u$="H" then  u0$=u$: gosub CALL_HANGUP: gosub SWITCH_TO_SCREEN_DIALLER: return
-return
+gosub POLL_TOUCH_CALL_DIALING: return
 
 '=== Call state: ringing ===
 ' Possible actions:
@@ -215,8 +213,8 @@ return
 '   r: reject call
 '   TODO: more (mute, speaker, dialpad...)
 HS_CALL_RINGING gosub POLL_TOUCH_CALL_INCOMING
-if u$="a" or u$="A" then  u0$=u$: su=1: gosub CALL_ANSWER
-if u$="r" or u$="R" or u$="h" or u$="H" then  u0$=u$: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER
+if u$="A" then  u0$=u$: su=1: gosub CALL_ANSWER
+if u$="R" then  u0$=u$: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER
 return
 
 '### end HANDLER_SCREEN_CALL ###
