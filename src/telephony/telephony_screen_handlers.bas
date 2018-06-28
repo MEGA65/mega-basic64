@@ -63,8 +63,8 @@ goto HS_C_NORMAL
 HS_C_NORMAL if u$="{home}" then u0$=u$: gosub SWITCH_TO_SCREEN_DIALLER 'HOME: go back to dialler
 if u$=c13$ then u0$=u$: dnumber$=pnumber$(cselected%): gosub SWITCH_TO_SCREEN_CALL: gosub CALL_DIAL 'ENTER: call contact
 if u$=chr$(135) and sq=2 then r$=pnumber$(cselected%): gosub GET_SMS_FROM_CONTACT 'F5: refresh SMS from contact
-if u$="e" then u0$=u$: ctrigger=1: gosub SWITCH_TO_SCREEN_CONTACT_EDIT 'E: edit contact
-if u$="m" then u0$=u$: gosub HS_C_BEGIN_WRITING: gosub ERASE_SCREEN: gosub VIRTUAL_KEYBOARD_ENABLE 'M: begin writing SMS
+if u$="E" then u0$=u$: ctrigger=1: gosub SWITCH_TO_SCREEN_CONTACT_EDIT 'E: edit contact
+if u$="M" then u0$=u$: gosub HS_C_BEGIN_WRITING: gosub ERASE_SCREEN: gosub VIRTUAL_KEYBOARD_ENABLE 'M: begin writing SMS
 return
 
 'interaction when writing SMS
@@ -116,7 +116,8 @@ if u$="{left}" then mdv=len(cfields$(hl%))+1: ul%=fn mod(ul%-2)+1
 if u$="{rght}" then mdv=len(cfields$(hl%))+1: ul%=fn mod(ul%)+1
 'Modify the selected field
 if u$=chr$(20) and hl%>0 and ul%>1 then s$=cfields$(hl%): s$=left$(s$, ul%-2)+right$(s$, len(s$)+1-ul%): cfields$(hl%)=s$: ul%=ul%-1
-l=20: if u$<>"" and hl%>0 and ((asc(u$)>=32 and asc(u$)<=95) or (asc(u$)>=193 and asc(u$)<=218)) then s$=cfields$(hl%): gosub STRING_INSERT_CHAR: cfields$(hl%)=s$
+' We have to cascade the IF statements here, because asc("") gives an error
+l=20: if u$<>"" then if hl%>0 and ((asc(u$)>=32 and asc(u$)<=95) or (asc(u$)>=193 and asc(u$)<=218)) then s$=cfields$(hl%): gosub STRING_INSERT_CHAR: cfields$(hl%)=s$
 return
 
 'Insert char c$ in string s$, at position ul%
