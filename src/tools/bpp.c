@@ -155,7 +155,8 @@ void compact_line(char *l)
 
   for(i=0;l[i];i++) {
     if (l[i]=='"') quoteMode^=1;
-    if ((l[i]=='\'') || (l[i]=='#')) commentMode=1;
+    if ((!i) && ((l[i]=='\'') || (l[i]=='#'))) commentMode=1; // ' or # as first character of line
+    if (i && ((!strncmp(" '",&l[i-1],2)) || (!strncmp(" #",&l[i-1],2)))) commentMode=1; // " '" or " #" in line
 
     // Shorten long variable names
     if (shorten_variable_names) {
