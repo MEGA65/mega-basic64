@@ -227,6 +227,17 @@ void compact_line(char *l)
 	return;
 }
 
+int normalise_line(char *line)
+{
+  // Trim leading spaces from line
+  int i;
+  for(i=0;line[i]&&((line[i]==' ')||(line[i]=='\t'));i++) continue;
+  //  if (i) fprintf(stderr,"Line '%s' has %d leading spaces that need to be removed\n",line,i);
+  strcpy(line,&line[i]);
+  return 0;
+  
+}
+
 int main(int argc,char **argv)
 {
 	int i;
@@ -246,11 +257,16 @@ int main(int argc,char **argv)
 		int fl=1;
 		line[0]=0; fgets(line,1024,f);
 		while(line[0]) {
+		  normalise_line(line);
+		  
 			if (line[0]=='#') goto skipline1;
 			if (line[0]=='\'') goto skipline1;
 			if (line[0]=='\t' || (line[0]>='a' && line[0]<='z')) {
-				// Line starts with TAB, so allocate line number
+				// Line starts with TAB, so allocate line number			  
 				line_number++;
+				if (0) fprintf(stderr,"%s:%d:Advanced to line number %d due to leading tab or a-z\n",argv[i],fl,
+					line_number);
+				
 			} else if (line[0]>='0' && line[0]<='9') {
 				// Line with number
 			  int previous_line=line_number;
@@ -273,6 +289,8 @@ int main(int argc,char **argv)
 					errors++;
 				}
 				line_number++;
+				if (0) fprintf(stderr,"%s:%d:Advanced to line number %d due to leading label\n",argv[i],fl,
+					line_number);
 				if (label_count>=MAX_LABELS) {
 					fprintf(stderr,"%s:%d:ERROR: Too many unique labels.\n",argv[i],fl);
 					exit(-3);
@@ -307,6 +325,7 @@ int main(int argc,char **argv)
 		int fl=1;
 		line[0]=0; fgets(line,1024,f);
 		while(line[0]) {
+		  normalise_line(line);
 			if (line[0]=='#') goto skipline2;
 			if (line[0]=='\'') goto skipline2;
 			int outlen=0;
@@ -328,6 +347,8 @@ int main(int argc,char **argv)
 			} else if (line[0]>=' '){
 				// Line with any other printable character (TAB/HT is excluded)
 				line_number++;
+				if (0) fprintf(stderr,"%s:%d:Advanced to line number %d due to leading printable character\n",argv[i],fl,
+					line_number);
 			}
 			
 			int j;
