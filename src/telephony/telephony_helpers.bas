@@ -65,7 +65,7 @@ return
 DRAW_BOX if w<3 or h<3 then return
 xx=x: yy=y: gosub MOVE_CURSOR_XX_YY: if h(0)=0 then print left$(bt$,w-1);"{line-dl}";
 if h(0)=1 then h(0)=0: print left$(ss$,w);
-for i=1 to h-2;print left$(ll$,w)"{down}";:xx=x: yy=y+i
+for i=1 to h-2:print left$(ll$,w)"{down}";:xx=x: yy=y+i
 if h(i)=1 then print " ";mid$(bm$,2,w-2);" ";
 if r(i)=0 and h(i)=0 then print left$(bm$,w-1);"{line-ud}";
 if r(i)=1 and h(i)=0 then print left$(br$,w-1);"{line-udl}";
@@ -202,10 +202,10 @@ SWITCH_SCREEN_INIT if sc<>0 then s2=ls: ls=sc 'don't change the last screen to d
 if sc=0 then ls=s2 'when switching from debug to another screen, set last screen back to the 2nd-last screen
 return
 
- 'enable hardware zoom (795 and 796)
-'use primary keyboard
-'place it at the bottom position
- 'center horizontally (21 centers the vk on the touchscreen)
+'enable hardware zoom (795 and 796)
+ 'use primary keyboard
+ 'place it at the bottom position
+'center horizontally (21 centers the vk on the touchscreen)
  'make it appear
 VIRTUAL_KEYBOARD_ENABLE poke 54795,192:poke 54796,192 :poke 54807,127 :poke 54806,127 :poke 54809,21:poke 54805,255:return
 

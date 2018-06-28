@@ -8,10 +8,10 @@ WRITE_AT_COMMAND_TO_MODEM s$="at"+s$
 WRITE_LINE_TO_MODEM s$=s$+c13$
 ' Fall through to WRITE_STRING_TO_MODEM
 
-WRITE_STRING_TO_MODEM rem
 'Send string s$ to modem
 'Argument:
 '  s$: the string to send to modem
+WRITE_STRING_TO_MODEM rem
 if db>=4 then print "Sent to modem: "+left$(s$, len(s$)-1)
 for i=1 to len(s$): c$=right$(left$(s$,i),1): print#1,c$;: next i: return
 

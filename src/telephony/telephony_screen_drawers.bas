@@ -25,19 +25,10 @@ xx=30: yy=0: gosub MOVE_CURSOR_XX_YY: for i=1 to shi: if shi<>0 then print " ";:
 
 '=== screen battery icon update ===
 STAMP_BATTERY_ICON shi=0: bls$=""
-'btp=100
-if len(str$(int(btp+0.5)))= 4 then shi=0
-'10<=btp<=99
-if len(str$(int(btp+0.5)))= 3 then shi=1
-'0<=btp<=9
-if len(str$(int(btp+0.5)))= 2 then shi=2
-'we add shi spaces at the beginning of the printed string
-'genereate battery level string (e.g.: '100%', ' 75%', '  9%')
-'unexpected length -> unexpected number
-for i=1 to shi: bls$=bls$+" ": next i: bls$=bls$+right$(str$(int(btp+0.5)),3-shi)+"%": if len(str$(int(btp+0.5)))<2 or len(str$(int(btp+0.5)))>4 then bls$="   ?%"
+bls$=right$("    "+str$(int(btp+0.5)),4)+"%"
 'print the battery level string
 'print the battery level canvas in the status bar
-xx=35: yy=0: gosub MOVE_CURSOR_XX_YY: print bls$;: canvas gb%+bl% stamp on canvas 0 at 39,0: return
+xx=34: yy=0: gosub MOVE_CURSOR_XX_YY: print bls$;: canvas gb%+bl% stamp on canvas 0 at 39,0: return
 
 '=== print clock in status bar ===
 PRINT_CLOCK xx=16: yy=0: gosub MOVE_CURSOR_XX_YY
