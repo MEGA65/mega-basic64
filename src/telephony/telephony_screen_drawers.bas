@@ -197,20 +197,18 @@ DS_CALL_DB_CLR xx=5:for yy=7 to 12: gosub MOVE_CURSOR_XX_YY: print left$(ss$,34)
 DS_CALL_ACTIVE ddisplay$="In-call with "+cid$:gosub DS_CALL_DDISPLAY: gosub DS_CALL_ERASE_GP: gosub DS_CALL_TIMER: return
 
 '=== Call state: dialing ===
-DS_CALL_DIALING ddisplay$="Dialling "+dnumber$:if dr$<>"" then ddisplay$=ddisplay$+" ("+dr$+")": gosub DS_CALL_DDISPLAY: gosub DS_CALL_ERASE_TMR:gosub DS_CALL_ERASE_GP: return
+DS_CALL_DIALING ddisplay$="Dialling "+dnumber$:if dr$<>"" then ddisplay$=ddisplay$+" ("+dr$+")": gosub DS_CALL_DDISPLAY:gosub DS_CALL_ERASE_GP: return
 
 '=== Call state: ringing ===
-DS_CALL_RINGING ddisplay$="Incoming call from "+cid$:gosub DS_CALL_DDISPLAY:gosub DS_CALL_ERASE_TMR:xx=0: yy=6: p=0: gosub STAMP_GREENPHONE:return
+DS_CALL_RINGING ddisplay$="Incoming call from "+cid$:gosub DS_CALL_DDISPLAY:xx=0: yy=6: p=0: gosub STAMP_GREENPHONE:return
 
 DS_CALL_DDISPLAY xx=1: yy=3: gosub MOVE_CURSOR_XX_YY: if ddisplay$<>"" then print ddisplay$;
 for j=1 to 38-len(ddisplay$): if len(ddisplay$)<38 then print " ";: next j: return
 
 '=== print call timer ===
-DS_CALL_TIMER xx=0: yy=6: gosub MOVE_CURSOR_XX_YY:print left$(dtmr$,2):yy=7: gosub MOVE_CURSOR_XX_YY:print ":";mid$(dtmr$,4,2): yy=8: gosub MOVE_CURSOR_XX_YY:print ":";right$(dtmr$,2):return
-
-DS_CALL_ERASE_TMR rem
-'erase timer text
-xx=0: for yy=6 to 8:gosub MOVE_CURSOR_XX_YY:print "    ":next:return
+' Why on earth do we need the {up} character here after the second line?
+' but if we don't, then the seconds appears on line lower than it should.
+DS_CALL_TIMER print "{home}{down}{down}{down}{down}{down}{down}"left$(dtmr$,2)" h": print mid$(dtmr$,4,2)" m": print "{up}"right$(dtmr$,2)" s":return
 
 'erase green phone (answer/pick-up)
 DS_CALL_ERASE_GP canvas 0 clr from 0,6 to 4,9:return
