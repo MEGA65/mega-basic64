@@ -197,8 +197,7 @@ return
 '   h: hang-up call
 '   TODO: more (mute, speaker, dialpad...)
 '--- Hang-up call (H) ---
-HS_CALL_ACTIVE gosub POLL_TOUCH_CALL_ACTIVE: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER
-return
+HS_CALL_ACTIVE goto POLL_TOUCH_CALL_ACTIVE
 
 HS_CALL_DIALING rem
 '=== Call state: dialing ===
@@ -226,8 +225,8 @@ dactive=1: dia=1: jt%(100)= CALL_DIAL_CALLBACK: gosub SEND_ATD:return
 
 'Result Code received after ATD command was sent
 CALL_DIAL_CALLBACK jt%(100)=0
+if merror=0 then goto SEND_AT+CLCC 'modem OK: ATD succeeded, dialling...
 if merror=1 then merror=0: gosub CALL_HANGUP: gosub SWITCH_TO_SCREEN_DIALLER 'modem ERROR: we hang-up the call
-if merror=0 then gosub SEND_AT+CLCC 'modem OK: ATD succeeded, dialling...
 return
 
 'Answer an incoming call
