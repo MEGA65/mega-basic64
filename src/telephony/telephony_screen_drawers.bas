@@ -162,7 +162,7 @@ x=4: y=5: w=36: h=9: gosub DRAW_BOX
 
 'TODO: TO OPTIMIZE (do not use MOVE_CURSOR)
 for i=1 to cfields%:xx=6: yy=5+2*i: gosub MOVE_CURSOR_XX_YY:print "{wht}"clabels$(i)+": ";:if hl%=i then print "{yel}";
-s$=cfields$(i): l=34-3-len(clabels$(i)): gosub TRIM_STRING_SPACES: print s$;;xx=6+2+len(clabels$(i)): yy=6+2*i: gosub MOVE_CURSOR_XX_YY: l=34-3-len(clabels$(i)): gosub SPACES: print s$; 'print spaces on the underline line
+s$=cfields$(i): l=34-3-len(clabels$(i)): gosub TRIM_STRING_SPACES: print s$:xx=6+2+len(clabels$(i)): yy=6+2*i: gosub MOVE_CURSOR_XX_YY: l=34-3-len(clabels$(i)): gosub SPACES: print s$ 'print spaces on the underline line
 if hl%=i then xx=6+2+len(clabels$(i))+ul%-1: yy=6+2*i: gosub MOVE_CURSOR_XX_YY: print chr$(182); 'print underline char if the line is hilighted
 next i:return
 return
