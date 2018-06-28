@@ -1,42 +1,30 @@
-SCREEN_DRAWER rem
-if sc<>0 then gosub DRAW_STATUS_BAR
+SCREEN_DRAWER if sc<>0 then gosub DRAW_STATUS_BAR
 if sc=0 then gosub DRAW_SCREEN_DEBUG
 if sc=1 then gosub DRAW_SCREEN_DIALLER
 if sc=2 then gosub DRAW_SCREEN_CONTACT
 if sc=3 then gosub DRAW_SCREEN_CALL
 if sc=4 then gosub DRAW_SCREEN_CONTACT_EDIT
 if sc=5 then gosub DRAW_SCREEN_SMS
-u0$="": us=1
-return
-
-
+u0$="": us=1: return
 
 '### STATUS BAR DRAWER ###
-DRAW_STATUS_BAR rem
-print "{wht}";
-gosub PRINT_NETWORK_NAME: gosub PRINT_CLOCK: gosub STAMP_SIGNAL_ICON: gosub STAMP_BATTERY_ICON
-return
+DRAW_STATUS_BAR print "{wht}";: gosub PRINT_NETWORK_NAME: gosub PRINT_CLOCK:
+gosub STAMP_BATTERY_ICON
+'Fall through to this: gosub STAMP_SIGNAL_ICON: return
 
 '=== screen signal icon update ===
-STAMP_SIGNAL_ICON rem
-shi=0
-if len(ntype$)=3 then shi=0
+STAMP_SIGNAL_ICON shi=0: if len(ntype$)=3 then shi=0
 if len(ntype$)=2 then shi=1
 if len(ntype$)=1 then shi=2
-xx=30: yy=0: gosub MOVE_CURSOR_XX_YY
 'print shi spaces
-for i=1 to shi: if shi<>0 then print " ";: next i
 'print the network type (abbreviation)
-print ntype$;
 'print the signal level canvas in the status bar
-canvas gs%+sl stamp on canvas 0 at 32,0
 'print the BER under signal strength
 'xx=28: yy=1: gosub MOVE_CURSOR_XX_YY: print "ber";ber$;
-return
+xx=30: yy=0: gosub MOVE_CURSOR_XX_YY: for i=1 to shi: if shi<>0 then print " ";: next i: print ntype$;: canvas gs%+sl stamp on canvas 0 at 32,0: return
 
 '=== screen battery icon update ===
-STAMP_BATTERY_ICON rem
-shi=0: bls$=""
+STAMP_BATTERY_ICON shi=0: bls$=""
 'btp=100
 if len(str$(int(btp+0.5)))= 4 then shi=0
 '10<=btp<=99
@@ -44,52 +32,40 @@ if len(str$(int(btp+0.5)))= 3 then shi=1
 '0<=btp<=9
 if len(str$(int(btp+0.5)))= 2 then shi=2
 'we add shi spaces at the beginning of the printed string
-for i=1 to shi: if shi<>0 then bls$=bls$+" ": next i
 'genereate battery level string (e.g.: '100%', ' 75%', '  9%')
-bls$=bls$+right$(str$(int(btp+0.5)),3-shi)+"%"
 'unexpected length -> unexpected number
-if len(str$(int(btp+0.5)))<2 or len(str$(int(btp+0.5)))>4 then bls$="   ?%"
+for i=1 to shi: bls$=bls$+" ": next i: bls$=bls$+right$(str$(int(btp+0.5)),3-shi)+"%": if len(str$(int(btp+0.5)))<2 or len(str$(int(btp+0.5)))>4 then bls$="   ?%"
 'print the battery level string
-xx=35: yy=0: gosub MOVE_CURSOR_XX_YY: print bls$;
 'print the battery level canvas in the status bar
-canvas gb%+bl% stamp on canvas 0 at 39,0
-return
+xx=35: yy=0: gosub MOVE_CURSOR_XX_YY: print bls$;: canvas gb%+bl% stamp on canvas 0 at 39,0: return
 
 '=== print clock in status bar ===
-PRINT_CLOCK rem
+PRINT_CLOCK xx=16: yy=0: gosub MOVE_CURSOR_XX_YY
 't$=time$
-xx=16: yy=0: gosub MOVE_CURSOR_XX_YY
 'print left$(t$,2);":";
 'print mid$(t$,3,2);":";
 'print right$(t$,2);
 'ntm=time-tc
 'dtmr$=""
-gosub CALCULATE_CURRENT_TIME 'returns current time in nrtm
-k=nrtm: gosub REAL_TIME_TO_STRING 'conberts k time to string s$
-print s$
-return
+ 'returns current time in nrtm
+ 'converts k time to string s$
+gosub CALCULATE_CURRENT_TIME: k=nrtm: gosub REAL_TIME_TO_STRING : print s$: return
 
 '=== print network name in status bar ===
-PRINT_NETWORK_NAME rem
-xx=0: yy=0: gosub MOVE_CURSOR_XX_YY
 'limit to 10 characters
-print left$(nname$,12)
-if len(nname$)>12 then print "{elipsis}"
+PRINT_NETWORK_NAME xx=0: yy=0: gosub MOVE_CURSOR_XX_YY: print left$(nname$,12): if len(nname$)>12 then print "{elipsis}"
 return
 
 
 '### DEBUG screen update subroutine ###
-DRAW_SCREEN_DEBUG rem
 'we don't clr or print, and let debug messages be
-return
-
+DRAW_SCREEN_DEBUG return
 
 
 '### DIALLER screen update subroutine ###
-DRAW_SCREEN_DIALLER rem
 'call update subroutines
 'About 25ms?
-if ud then gosub DS_DIALLER_NUMBER: ud=0
+DRAW_SCREEN_DIALLER if ud then gosub DS_DIALLER_NUMBER: ud=0
 'Contact list about 68ms (was 158ms+)
 if uc then gosub DS_DIALLER_CONTACT: uc=0
 'Dial pad takes about 32ms (2 frames) to draw
@@ -97,134 +73,57 @@ if up then gosub DS_DIALLER_DIALPAD: up=0
 return
 
 '=== print dialling field ===
-DS_DIALLER_NUMBER rem
 'draw dialling box
-print "{yel}";
-x=0: y=2: w=21: h=3: gosub DRAW_BOX
-xx=1: yy=3: gosub MOVE_CURSOR_XX_YY
-if nb$<>"" then print nb$;
+DS_DIALLER_NUMBER print "{yel}";: x=0: y=2: w=21: h=3: gosub DRAW_BOX: xx=1: yy=3: gosub MOVE_CURSOR_XX_YY: if nb$<>"" then print nb$;
 'special case: for i=1 to 0 still goes into loop, so if len()=max we don't wanna print a space
-for j=1 to 19-len(nb$): if len(nb$)<19 then print " ";: next j
-return
+for j=1 to 19-len(nb$): if len(nb$)<19 then print " ";: next j: return
 
 '=== draw full-size contact pane ===
-DS_DIALLER_CONTACT rem
 'draw contact pane box
-print "{lblu}";
-x=21: y=2: w=19: h=23: r(2)=1: r(19)=1: gosub DRAW_BOX
-xx=22: yy=3: gosub MOVE_CURSOR_XX_YY: print "    Contacts     ";
+DS_DIALLER_CONTACT print "{lblu}";:x=21: y=2: w=19: h=23: r(2)=1: r(19)=1: gosub DRAW_BOX: xx=22: yy=3: gosub MOVE_CURSOR_XX_YY: print "    Contacts     ";
 'print contact names
-for i=1 to cmaxindex%
-xx=22: yy=4+i: gosub MOVE_CURSOR_XX_YY
-if hl%=i then print "{yel}";
-s$=cpane$(i): l=clngth%: gosub TRIM_STRING_SPACES: print s$;
-print "{lblu}";
-next i
-xx=37:yy=22: p=0: gosub STAMP_SEARCH 'stamp search icon
-return
+for i=1 to cmaxindex%:xx=22: yy=4+i: gosub MOVE_CURSOR_XX_YY:if hl%=i then print "{yel}";
+s$=cpane$(i): l=clngth%: gosub TRIM_STRING_SPACES: print s$"{lblu}";:next i:xx=37:yy=22: p=0: gosub STAMP_SEARCH:return
 
 '=== draw dialpad ===
-DS_DIALLER_DIALPAD rem
 'reinitialize timer for hiding key press
-ktmr=5
+DS_DIALLER_DIALPAD ktmr=5
 '1-9
-for x=1 to 3: for y=1 to 3
-xx=x*5-4: yy=y*4+1
-if val(u0$)=x+(y-1)*3 then p=1: goto T1
-p=0
-T1 gosub STAMP_1_TO_9: next y,x
+p=0: for x=1 to 3: for y=1 to 3: xx=x*5-4: yy=y*4+1: if val(u0$)=x+(y-1)*3 then p=1
+gosub STAMP_1_TO_9: next y,x
 'hash
-xx=1:yy=17
-if u0$="#" then p=1: goto T2
-p=0
-T2 gosub STAMP_HASH
-'0
-xx=6:yy=17
-if u0$="0" then p=1: goto T3
-p=0
-T3 gosub STAMP_0
-'star
-xx=11:yy=17
-if u0$="*" then p=1: goto T4
-p=0
-T4 gosub STAMP_STAR
-'greenphone
-xx=1:yy=21
-if u0$=chr$(13) then p=1: goto T5
-p=0
-T5 gosub STAMP_GREENPHONE
-'plus
-xx=6:yy=21
-if u0$="+" then p=1: goto T6
-p=0
-T6 gosub STAMP_PLUS
-'backspace
-xx=11:yy=21
-if u0$=chr$(20) then p=1: goto T7
-p=0
-T7 gosub STAMP_BACKSPACE
-'minus
-xx=16:yy=9
-if u0$="-" then p=1: goto T8
-p=0
-T8 gosub STAMP_MINUS
-'divide
-xx=16:yy=13
-if u0$="/" then p=1: goto T9
-p=0
-T9 gosub STAMP_DIVIDE
-'equal
-xx=16:yy=17
-if u0$="=" then p=1: goto T10
-p=0
-T10 gosub STAMP_EQUAL
-'new contact
-xx=16:yy=21
-if u0$="@" then p=1: goto T11
-p=0
-T11 gosub STAMP_CONTACT_NEW
-'dual sim
-xx=16:yy=5
-if u0$="<" or u$=">" then p=1: goto T12
-p=0
-T12 gosub STAMP_DUALSIM
-return
-
+p=0: xx=1:yy=17: if u0$="#" then p=1
+gosub STAMP_HASH: xx=6:yy=17: p=0: if u0$="0" then p=1
+gosub STAMP_0: xx=11:yy=17: p=0: if u0$="*" then p=1
+gosub STAMP_STAR:xx=1:yy=21:p=0: if u0$=chr$(13) then p=1
+gosub STAMP_GREENPHONE: xx=6:yy=21:p=0: if u0$="+" then p=1
+gosub STAMP_PLUS: xx=11:yy=21: p=0:if u0$=chr$(20) then p=1
+gosub STAMP_BACKSPACE: xx=16:yy=9:p=0:if u0$="-" then p=1
+gosub STAMP_MINUS: xx=16:yy=13:p=0:if u0$="/" then p=1
+gosub STAMP_DIVIDE:xx=16:yy=17:p=0:if u0$="=" then p=1
+gosub STAMP_EQUAL:xx=16:yy=21:p=0:if u0$="@" then p=1
+gosub STAMP_CONTACT_NEW: xx=16:yy=5: p=0:if u0$="<" or u$=">" then p=1
+gosub STAMP_DUALSIM: return
 
 
 '### CONTACT screen update subroutine ###
-DRAW_SCREEN_CONTACT rem
 'buttons
-xx=0: yy=2: p=0: gosub STAMP_ARROW_BACK 'arrow back
-xx=0: yy=6: p=0: gosub STAMP_GREENPHONE 'greephone
-xx=0: yy=10: p=0: gosub STAMP_COG 'cog
-'contact name/number box
-gosub TRIM_CONTACT_DISPLAY_TEXT
-print "{wht}";
-x=4: y=2: w=36: h=3: gosub DRAW_BOX
-xx=5: yy=3: gosub MOVE_CURSOR_XX_YY
-if cdisplay$<>"" then print cdisplay$;
+DRAW_SCREEN_CONTACT xx=0: yy=2: p=0: gosub STAMP_ARROW_BACK: yy=6: gosub STAMP_GREENPHONE: yy=10: gosub STAMP_COG: gosub TRIM_CONTACT_DISPLAY_TEXT: print "{wht}";:x=4: y=2: w=36: h=3: gosub DRAW_BOX:xx=5: yy=3: gosub MOVE_CURSOR_XX_YY:if cdisplay$<>"" then print cdisplay$;
 if len(cdisplay$)<34 then for j=1 to 34-len(cdisplay$): print " ";: next j
 'SMS box
-print "{wht}";
-x=4: y=5: w=36
-if wsms=0 then h=20: r(2)=1: r(15)=1 'box (when not writing SMS)
+x=4: y=5: w=36: if wsms=0 then h=20: r(2)=1: r(15)=1 'box (when not writing SMS)
 if wsms=1 then h=8: r(3)=1: 'box (when writing SMS)
 gosub DRAW_BOX
 'globe and message buttons
 if wsms=0 then yy=21 'globe and message buttons height
 if wsms=1 then yy=9 'globe and message buttons height
-xx=5: p=0: gosub STAMP_GLOBE 'globe
-xx=35: p=0 'write or send message button
-if wsms=0 then gosub STAMP_MESSAGE 'write message button
+xx=5: p=0: gosub STAMP_GLOBE:xx=35: p=0 :if wsms=0 then gosub STAMP_MESSAGE 'write message button
 if wsms=1 then gosub STAMP_SEND 'send message button
 'SMS box heading w/ status message
-xx=5: yy=6: gosub MOVE_CURSOR_XX_YY: l=34
-if wsms=0 then s$="SMS conversation": if matus$<>"" then s$=s$+" ("+matus$+"{wht})"
+xx=5: yy=6: gosub MOVE_CURSOR_XX_YY: l=34: if wsms=0 then s$="SMS conversation": if matus$<>"" then s$=s$+" ("+matus$+"{wht})"
 if wsms=1 then s$="SMS writing": if watus$<>"" then s$=s$+" ("+watus$+"{wht})"
-gosub TRIM_STRING_SPACES: print s$;
+gosub TRIM_STRING_SPACES: print s$"{wht}";
 'SMS messages
-print "{wht}";
 if wsms=0 and sq=2 then gosub DS_C_PRINT_SMS 'print SMS (if not writing one)
 'Writen SMS message
 l=26
@@ -236,12 +135,7 @@ if len(wsms$)>2*l and len(wsms$)<=3*l then wsms$(0)=left$(wsms$,l): wsms$(1)=mid
 'Print the wsms$ strings on 3 lines:
 if wsms=0 then yy=21: y=21
 if wsms=1 then yy=9: y=9
-xx=9: x=9
-for ii=0 to 2:
-gosub MOVE_CURSOR_XX_YY
-s$=wsms$(ii): gosub TRIM_STRING_SPACES: print s$;
-yy=yy+1
-next ii
+xx=9: x=9: for ii=0 to 2:gosub MOVE_CURSOR_XX_YY: s$=wsms$(ii): gosub TRIM_STRING_SPACES: print s$;:yy=yy+1:next ii
 'Revert the underlined character
 if wsms=1 then mdv=26: k=fn mod(ul%-1): x=x+k: y=y+int((ul%-1)/26): gosub REVERT_CHAR 'revert underlined char
 return
@@ -252,29 +146,16 @@ REVERT_CHAR rem
 mdv=128: poke 1024+y*40+x,fn mod(peek(1024+y*40+x))+128
 return
 
-DS_C_PRINT_SMS rem
 'Displays the Contact's SMS preformatted and stored in the Contact SMS pane array
-print"{wht}";
-xx=5: yy=8: gosub MOVE_CURSOR_XX_YY
-for ii=0 to mmaxpane%-1
-print mpt$(ii);
-print left$(ll$,34);"{down}";
-next ii
-return
+DS_C_PRINT_SMS print"{wht}";:xx=5: yy=8: gosub MOVE_CURSOR_XX_YY:for ii=0 to mmaxpane%-1:print mpt$(ii);left$(ll$,34);"{down}";:next ii:return
 '### end DRAW_SCREEN_CONTACT ###
 
 
 '### CONTACT_EDIT screen update subroutine ###
-DRAW_SCREEN_CONTACT_EDIT rem
 'buttons
-xx=0: yy=2: p=0: gosub STAMP_ARROW_BACK 'arrow back
-xx=0: yy=6: p=0: gosub STAMP_SAVE
-if cselected%>0 then xx=0: yy=10: p=0: gosub STAMP_TRASH_BIN
+DRAW_SCREEN_CONTACT_EDIT xx=0: yy=2: p=0: gosub STAMP_ARROW_BACK: yy=6: gosub STAMP_SAVE:if cselected%>0 then yy=10: gosub STAMP_TRASH_BIN
 'heading box
-print "{wht}";
-x=4: y=2: w=36: h=3: gosub DRAW_BOX
-xx=5: yy=3: gosub MOVE_CURSOR_XX_YY
-s$=""
+print "{wht}";:x=4: y=2: w=36: h=3: gosub DRAW_BOX:xx=5: yy=3: gosub MOVE_CURSOR_XX_YY:s$=""
 if ctrigger=0 then s$="?" 'should not happen
 if ctrigger=1 then s$="Edit contact"
 if ctrigger=2 then s$="New contact"
@@ -282,180 +163,85 @@ if ctrigger=2 then s$="New contact"
 if cstatus$<>"" then s$=s$+" "+cstatus$
 'trim and display heading
 l=34: gosub TRIM_STRING_SPACES: print s$;
-
 'contact fields box
-print "{wht}";
 gosub VIRTUAL_KEYBOARD_IS_ENABLED: if b=1 then h(8)=1
 x=4: y=5: w=36: h=9: gosub DRAW_BOX
 'erase last
 
 'TODO: TO OPTIMIZE (do not use MOVE_CURSOR)
-for i=1 to cfields%
-print "{wht}";
-xx=6: yy=5+2*i: gosub MOVE_CURSOR_XX_YY
-print clabels$(i)+": ";
-if hl%=i then print "{yel}";
-s$=cfields$(i): l=34-3-len(clabels$(i)): gosub TRIM_STRING_SPACES: print s$;
-xx=6+2+len(clabels$(i)): yy=6+2*i: gosub MOVE_CURSOR_XX_YY: l=34-3-len(clabels$(i)): gosub SPACES: print s$; 'print spaces on the underline line
+for i=1 to cfields%:xx=6: yy=5+2*i: gosub MOVE_CURSOR_XX_YY:print "{wht}"clabels$(i)+": ";:if hl%=i then print "{yel}";
+s$=cfields$(i): l=34-3-len(clabels$(i)): gosub TRIM_STRING_SPACES: print s$;;xx=6+2+len(clabels$(i)): yy=6+2*i: gosub MOVE_CURSOR_XX_YY: l=34-3-len(clabels$(i)): gosub SPACES: print s$; 'print spaces on the underline line
 if hl%=i then xx=6+2+len(clabels$(i))+ul%-1: yy=6+2*i: gosub MOVE_CURSOR_XX_YY: print chr$(182); 'print underline char if the line is hilighted
-next i
-
-'xx=0: yy=15: gosub MOVE_CURSOR_XX_YY
+next i:return
 return
 '### end DRAW_SCREEN_CONTACT_EDIT ###
 
 
 '### CALL screen update subroutine ###
-DRAW_SCREEN_CALL rem
 'call status box
-print "{wht}";
-x=0: y=2: w=40: h=3: gosub DRAW_BOX
-
 'common buttons
-xx=0: yy=10: p=0: gosub STAMP_REDPHONE 'redphone
-xx=0: yy=14: p=0: gosub STAMP_COG 'cog
+DRAW_SCREEN_CALL print "{wht}";:x=0: y=2: w=40: h=3: gosub DRAW_BOX
+xx=0: yy=10: p=0: gosub STAMP_REDPHONE: yy=14: gosub STAMP_COG
 'TODO: mute, speakers...
-
 'SMS box
-print "{wht}";
-x=4: y=5: w=36: h=20: r(15)=1: gosub DRAW_BOX
-xx=5: yy=21: p=0: gosub STAMP_GLOBE 'globe
-xx=35: yy=21: p=0: gosub STAMP_MESSAGE 'message
+x=4: y=5: w=36: h=20: r(15)=1: gosub DRAW_BOX: xx=5: yy=21: p=0: gosub STAMP_GLOBE:xx=35: yy=21: p=0: gosub STAMP_MESSAGE 'message
 
 if db=1 then goto DS_CALL_DEBUG
 goto DS_CALL_DSTA
-DS_CALL_DEBUG rem
-xx=5: yy=7: gosub MOVE_CURSOR_XX_YY
-print "Call active=";dactive;"          ";
-xx=5: yy=8: gosub MOVE_CURSOR_XX_YY
-print "Call state=";dsta;"          ";
-xx=5: yy=9: gosub MOVE_CURSOR_XX_YY
-print "Dialing=";dia;"          ";
-xx=5: yy=10: gosub MOVE_CURSOR_XX_YY
-print "cid$=";cid$;"          ";
-xx=5: yy=11: gosub MOVE_CURSOR_XX_YY
-print "dnumber$=";dnumber$;"          ";
-xx=5: yy=12: gosub MOVE_CURSOR_XX_YY
-print "u$=";u$;"          ";
+DS_CALL_DEBUG s10$="          "
+xx=5: yy=7: gosub MOVE_CURSOR_XX_YY:print "Call active="dactive;s10$:yy=8: gosub MOVE_CURSOR_XX_YY:print "Call state=";dsta;s10$:yy=9: gosub MOVE_CURSOR_XX_YY:print "Dialing="dia;s10$:yy=10: gosub MOVE_CURSOR_XX_YY:print "cid$=";cid$;s10$:yy=11: gosub MOVE_CURSOR_XX_YY:print "dnumber$=";dnumber$;s10$:yy=12: gosub MOVE_CURSOR_XX_YY:print "u$="u$;s10$
 
-DS_CALL_DSTA rem
-if dsta=0 goto DS_CALL_ACTIVE
+DS_CALL_DSTA if dsta=0 goto DS_CALL_ACTIVE
 if dsta=2 or dsta=3 goto DS_CALL_DIALING
 if dsta=4 or dsta=5 goto DS_CALL_RINGING
 ddisplay$="Unknown status ("+str$(dsta)+")": gosub DS_CALL_DDISPLAY
-
 return
 
-DS_CALL_DB_CLR rem
-xx=5: yy=7: gosub MOVE_CURSOR_XX_YY
-print left$(ss$,34)
-xx=5: yy=8: gosub MOVE_CURSOR_XX_YY
-print left$(ss$,34)
-xx=5: yy=9: gosub MOVE_CURSOR_XX_YY
-print left$(ss$,34)
-xx=5: yy=10: gosub MOVE_CURSOR_XX_YY
-print left$(ss$,34)
-xx=5: yy=11: gosub MOVE_CURSOR_XX_YY
-print left$(ss$,34)
-xx=5: yy=12: gosub MOVE_CURSOR_XX_YY
-print left$(ss$,34)
+DS_CALL_DB_CLR xx=5:for yy=7 to 12: gosub MOVE_CURSOR_XX_YY: print left$(ss$,34): next yy
 '### end DRAW_SCREEN_CALL ###
 
-
-DS_CALL_ACTIVE rem
 '=== Call state: active ===
-ddisplay$="In-call with "+cid$
-gosub DS_CALL_DDISPLAY
-gosub DS_CALL_ERASE_GP
-gosub DS_CALL_TIMER
-return
 
-DS_CALL_DIALING rem
+DS_CALL_ACTIVE ddisplay$="In-call with "+cid$:gosub DS_CALL_DDISPLAY: gosub DS_CALL_ERASE_GP: gosub DS_CALL_TIMER: return
+
 '=== Call state: dialing ===
-ddisplay$="Dialling "+dnumber$
-if dr$<>"" then ddisplay$=ddisplay$+" ("+dr$+")"
-gosub DS_CALL_DDISPLAY
-gosub DS_CALL_ERASE_TMR
-gosub DS_CALL_ERASE_GP
-return
+DS_CALL_DIALING ddisplay$="Dialling "+dnumber$:if dr$<>"" then ddisplay$=ddisplay$+" ("+dr$+")": gosub DS_CALL_DDISPLAY: gosub DS_CALL_ERASE_TMR:gosub DS_CALL_ERASE_GP: return
 
-DS_CALL_RINGING rem
 '=== Call state: ringing ===
-ddisplay$="Incoming call from "+cid$
-gosub DS_CALL_DDISPLAY
-gosub DS_CALL_ERASE_TMR
-xx=0: yy=6: p=0: gosub STAMP_GREENPHONE 'greenphone to pick up
-return
+DS_CALL_RINGING ddisplay$="Incoming call from "+cid$:gosub DS_CALL_DDISPLAY:gosub DS_CALL_ERASE_TMR:xx=0: yy=6: p=0: gosub STAMP_GREENPHONE:return
 
-DS_CALL_DDISPLAY rem
-xx=1: yy=3: gosub MOVE_CURSOR_XX_YY
-if ddisplay$<>"" then print ddisplay$;
-for j=1 to 38-len(ddisplay$): if len(ddisplay$)<38 then print " ";: next j
-return
+DS_CALL_DDISPLAY xx=1: yy=3: gosub MOVE_CURSOR_XX_YY: if ddisplay$<>"" then print ddisplay$;
+for j=1 to 38-len(ddisplay$): if len(ddisplay$)<38 then print " ";: next j: return
 
 '=== print call timer ===
-DS_CALL_TIMER rem
-xx=0: yy=6: gosub MOVE_CURSOR_XX_YY
-print left$(dtmr$,2);
-xx=0: yy=7: gosub MOVE_CURSOR_XX_YY
-print ":";mid$(dtmr$,4,2);
-xx=1: yy=8: gosub MOVE_CURSOR_XX_YY
-print ":";right$(dtmr$,2);
-return
+DS_CALL_TIMER xx=0: yy=6: gosub MOVE_CURSOR_XX_YY:print left$(dtmr$,2):yy=7: gosub MOVE_CURSOR_XX_YY:print ":";mid$(dtmr$,4,2): yy=8: gosub MOVE_CURSOR_XX_YY:print ":";right$(dtmr$,2):return
 
 DS_CALL_ERASE_TMR rem
 'erase timer text
-xx=0: yy=6: gosub MOVE_CURSOR_XX_YY
-print "    ";
-xx=0: yy=7: gosub MOVE_CURSOR_XX_YY
-print "    ";
-xx=0: yy=8: gosub MOVE_CURSOR_XX_YY
-print "    ";
-return
+xx=0: for yy=6 to 8:gosub MOVE_CURSOR_XX_YY:print "    ";next:return
 
-DS_CALL_ERASE_GP rem
 'erase green phone (answer/pick-up)
-canvas 0 clr from 0,6 to 4,9
-return
+DS_CALL_ERASE_GP canvas 0 clr from 0,6 to 4,9:return
 
 
 '### SMS screen update subroutine ###
-DRAW_SCREEN_SMS rem
 'buttons
-xx=0: yy=2: p=0: gosub STAMP_ARROW_BACK 'arrow back
-'heading box
-print "{wht}";
-x=4: y=2: w=36: h=3: gosub DRAW_BOX
-xx=5: yy=3: gosub MOVE_CURSOR_XX_YY
-s$="All SMS"
 'contact saving status
-if satus$<>"" then s$=s$+" ("+satus$+"{wht})"
+DRAW_SCREEN_SMS xx=0: yy=2: p=0: gosub STAMP_ARROW_BACK print "{wht}":x=4: y=2: w=36: h=3: gosub DRAW_BOX:xx=5: yy=3: gosub MOVE_CURSOR_XX_YY:s$="All SMS":if satus$<>"" then s$=s$+" ("+satus$+"{wht})"
 'trim and display heading
-l=34: gosub TRIM_STRING_SPACES: print s$;
 'contact fields box
-print "{wht}";
-x=0: y=5: w=40: h=20: gosub DRAW_BOX
-'print SMS
-gosub DS_S_PRINT_SMS
-return
+l=34: gosub TRIM_STRING_SPACES: print s$:print "{wht}";
+x=0: y=5: w=40: h=20: gosub DRAW_BOX:gosub DS_S_PRINT_SMS:return
 
-DS_S_PRINT_SMS rem
 'Displays the SMS preformatted and stored in the SMS pane array
-print"{wht}";
-xx=1: yy=6: gosub MOVE_CURSOR_XX_YY
-for ii=0 to smaxpane%-1
-print spt$(ii);
-print left$(ll$,38);"{down}";
-next ii
-return
+DS_S_PRINT_SMS print"{wht}":xx=1: yy=6: gosub MOVE_CURSOR_XX_YY:for ii=0 to smaxpane%-1:print spt$(ii);left$(ll$,38)"{down}":next ii:return
 '### end DRAW_SCREEN_SMS ###
 
 
 '### STAMP SUBROUTINES ###
 'Those subroutines are used to stamp the different buttons/icons
 '   Usage: xx=x: yy=y: p=0: gosub STAMP_ABCD
-STAMP_BUTTON_CANVAS rem
-canvas k stamp on canvas 0 at xx,yy
+STAMP_BUTTON_CANVAS canvas k stamp on canvas 0 at xx,yy
 'TODO: change the appearance of the sprite depending on p
 if p then gosub MOVE_SPRITE_TO_ROW_COLUMN
 return
@@ -463,21 +249,21 @@ return
 STAMP_0 k=gd%: gosub STAMP_BUTTON_CANVAS: return
 STAMP_1_TO_9 k=gd%+x+(y-1)*3: gosub STAMP_BUTTON_CANVAS: return
 STAMP_HASH k=gd%+10: gosub STAMP_BUTTON_CANVAS: return
-STAMP_STAR k=gd%+10+1: gosub STAMP_BUTTON_CANVAS: return
-STAMP_DIVIDE k=gd%+10+2: gosub STAMP_BUTTON_CANVAS: return
-STAMP_MINUS k=gd%+10+3: gosub STAMP_BUTTON_CANVAS: return
-STAMP_PLUS k=gd%+10+4: gosub STAMP_BUTTON_CANVAS: return
-STAMP_EQUAL k=gd%+10+5: gosub STAMP_BUTTON_CANVAS: return
-STAMP_BACKSPACE k=gd%+10+6: gosub STAMP_BUTTON_CANVAS: return
-STAMP_GREENPHONE k=gd%+10+7: gosub STAMP_BUTTON_CANVAS: return
-STAMP_REDPHONE k=gd%+10+8: gosub STAMP_BUTTON_CANVAS: return
-STAMP_DUALSIM k=gd%+10+9: gosub STAMP_BUTTON_CANVAS: return
-STAMP_CONTACT_NEW k=gd%+10+10: gosub STAMP_BUTTON_CANVAS: return
-STAMP_ARROW_BACK k=gd%+10+11: gosub STAMP_BUTTON_CANVAS: return
-STAMP_COG k=gd%+10+12: gosub STAMP_BUTTON_CANVAS: return
-STAMP_TRASH_BIN k=gd%+10+13: gosub STAMP_BUTTON_CANVAS: return
-STAMP_GLOBE k=gd%+10+14: gosub STAMP_BUTTON_CANVAS: return
-STAMP_MESSAGE k=gd%+10+15: gosub STAMP_BUTTON_CANVAS: return
-STAMP_SEND k=gd%+10+16: gosub STAMP_BUTTON_CANVAS: return
-STAMP_SEARCH k=gd%+10+17: gosub STAMP_BUTTON_CANVAS: return
-STAMP_SAVE k=gd%+10+18: gosub STAMP_BUTTON_CANVAS: return
+STAMP_STAR k=gd%+11: gosub STAMP_BUTTON_CANVAS: return
+STAMP_DIVIDE k=gd%+12: gosub STAMP_BUTTON_CANVAS: return
+STAMP_MINUS k=gd%+13: gosub STAMP_BUTTON_CANVAS: return
+STAMP_PLUS k=gd%+14: gosub STAMP_BUTTON_CANVAS: return
+STAMP_EQUAL k=gd%+15: gosub STAMP_BUTTON_CANVAS: return
+STAMP_BACKSPACE k=gd%+16: gosub STAMP_BUTTON_CANVAS: return
+STAMP_GREENPHONE k=gd%+17: gosub STAMP_BUTTON_CANVAS: return
+STAMP_REDPHONE k=gd%+18: gosub STAMP_BUTTON_CANVAS: return
+STAMP_DUALSIM k=gd%+19: gosub STAMP_BUTTON_CANVAS: return
+STAMP_CONTACT_NEW k=gd%+20: gosub STAMP_BUTTON_CANVAS: return
+STAMP_ARROW_BACK k=gd%+21: gosub STAMP_BUTTON_CANVAS: return
+STAMP_COG k=gd%+10+22: gosub STAMP_BUTTON_CANVAS: return
+STAMP_TRASH_BIN k=gd%+23: gosub STAMP_BUTTON_CANVAS: return
+STAMP_GLOBE k=gd%+24: gosub STAMP_BUTTON_CANVAS: return
+STAMP_MESSAGE k=gd%+25: gosub STAMP_BUTTON_CANVAS: return
+STAMP_SEND k=gd%+26: gosub STAMP_BUTTON_CANVAS: return
+STAMP_SEARCH k=gd%+27: gosub STAMP_BUTTON_CANVAS: return
+STAMP_SAVE k=gd%+28: gosub STAMP_BUTTON_CANVAS: return
