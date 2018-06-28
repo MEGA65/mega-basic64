@@ -145,6 +145,7 @@ SMS_TO_SMS_PANE rem
 'Only entries in cache (i.e. with their body in memory) are displayed
 if sused%<=0 then return 'no SMS were loaded from SIM
 kk=0: gosub SMS_GET_MAX_INDEX 'get the maximum index that is used (-> variable k)
+if k<=0 then return 'no entry in SMS index, return
 for ii=k to 0 step -1
 if kk>smaxpane% then return 'don't fill more than smaxpane% (18) lines
 if sidex%(ii)>=0 and stxt$(ii)<>"" then s$=snumber$(ii)+": "+stxt$(ii): l=38: gosub TRIM_STRING_SPACES: gosub RM_STRING_CRLF: spt$(kk)=s$: spi%(kk)=ii: kk=kk+1 'Remove <CR><LF> after having trimmed the string. It should speed up things a bit, since the RM_STRING_CRLF subroutine will go through 38 chars max instead of the whole string

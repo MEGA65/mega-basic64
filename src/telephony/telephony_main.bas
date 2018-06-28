@@ -43,8 +43,10 @@ INIT_END t0=time
 
 '### main loop ###
 MAIN_LOOP rem
-'set loop timer
+
+'set loop timer and increase loop counter
 tl=time : cnt=cnt+1: tt=time-t0: t1=time
+
 '--- call screen handler (get user input, update program state...) ---
 gosub SCREEN_HANDLER: ttmr(1)=ttmr(1)+(time-t1): t1=time
 
@@ -82,8 +84,8 @@ ttmr(4)=ttmr(4)+(time-t1)
 'mdv=1000: if fn mod(cnt+500)=0 then gosub PHONEBOOK_TO_CONTACT_PANE: gosub TRIM_CONTACT_PANE
 
 '--- timing related operation ---
-ttmr(0)=ttmr(0)+(time-tl)
-'update the average
+ttmr(0)=ttmr(0)+(time-tl) 'loop time
+'update the average time for each portion of code
 for i=0 to 10: tavg(i)=ttmr(i)/cnt: next i
 if c5<>0 then tavg(5)=ttmr(5)/c5
 if cnt<>c5 then tavg(6)=ttmr(6)/(cnt-c5)

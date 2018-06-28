@@ -88,6 +88,7 @@ dim wsms$(3) 'An array for displaying the message being written
 thour=0: tmin=0: tsec=0
 thour$="": tmin$="": tsec$=""
 '=== arrays to time different parts of the program ===
+'Index:
 '  0: loop time
 '  1: screen handler
 '  2: screen drawer
@@ -97,6 +98,8 @@ thour$="": tmin$="": tsec$=""
 '  6: screen drawer: no redraw
 '  7: poll modem: line handled
 '  8: screen drawer: no line handle
+dim ttmr(10) 'array containing the total time spent in each step
+dim tavg(10) 'array containing the average time spent in each step
 '======
 't0: time at the beginning of the program
 't1: time at the beginning of a subpart
@@ -106,8 +109,6 @@ thour$="": tmin$="": tsec$=""
 t0=0: t1=0: tl=0: tt=0: tu=0
 'diverse counters
 c5=0: c7=0
-dim ttmr(10) 'array containing the total time spent
-dim tavg(10) 'array containing the average time spent
 return
 
 '=== setup for modem parser ===
