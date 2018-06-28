@@ -153,7 +153,7 @@ next ii
 return
 
 'Empty the SMS pane
-EMPTY_SMS_PANE for ii=0 to smaxpane%-1spt$(ii)="": spi%(ii)=-1: next ii: return
+EMPTY_SMS_PANE for ii=0 to smaxpane%-1: spt$(ii)="": spi%(ii)=-1: next ii: return
 
 SMS_TO_SMS_CONTACT_PANE rem
 'Fill the SMS Contact pane with in-RAM SMS entries, iterating on the array of SMS belonging to the current contact
