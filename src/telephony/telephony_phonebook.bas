@@ -42,6 +42,12 @@ LOAD_PHONEBOOK_CODE rem
 'This subroutine is in another file, which updates are not uploaded to Git. It simply contains the same preceding lines, with private data.
 return
 
+'Update contact pane
+UPDATE_CONTACT_PANE gosub EMPTY_CONTACT_PANE: gosub PHONEBOOK_TO_CONTACT_PANE: gosub TRIM_CONTACT_PANE: return
+
+'Empty the contact pane
+EMPTY_CONTACT_PANE for ii=0 to cmaxindex%: cpane$(ii)="": cindex%(ii)=-1: next ii: return
+
 PHONEBOOK_TO_CONTACT_PANE rem
 'Schedule redraw after
 uc=1: su=1

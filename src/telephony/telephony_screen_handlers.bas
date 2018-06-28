@@ -153,8 +153,8 @@ return
 'Save the edited/created contact to phonebook in RAM
 HS_CE_CONTACT_SAVED if cselected%>0 then pnumber$(cselected%)=cfields$(2): ptxt$(cselected%)=cfields$(1) 'edit contact
 if cselected%=0 then gosub HS_CE_NEW_CONTACT 'new contact
-'update contact pane
-gosub PHONEBOOK_TO_CONTACT_PANE: gosub TRIM_CONTACT_PANE : return
+gosub UPDATE_CONTACT_PANE 'update contact pane
+return
 
 'Create a new contact at the index given to modem for SIM storage
  'unknown number type; TODO: add the type field or auto-determine type
@@ -173,9 +173,10 @@ if merror=0 then gosub HS_CE_CONTACT_DELETED: gosub HS_CE_CLEANUP: gosub SWITCH_
 return
 
 'Contact has been deleted from storage, delete it from RAM
-HS_CE_CONTACT_DELETED pindex%(cselected%)=0: pnumber$(cselected%)="": ptxt$(cselected%)="": ptype%(cselected%)=0: cselected%=0: gosub PHONEBOOK_TO_CONTACT_PANE: gosub TRIM_CONTACT_PANE: return
+HS_CE_CONTACT_DELETED pindex%(cselected%)=0: pnumber$(cselected%)="": ptxt$(cselected%)="": ptype%(cselected%)=0: cselected%=0: gosub UPDATE_CONTACT_PANE: return
 
-HS_CE_CLEANUP ctrigger=0: cstatus$="": cfields$(1)="": cfields$(2)="": return 'clean-up before leaving screen
+'clean-up before leaving screen
+HS_CE_CLEANUP ctrigger=0: cstatus$="": cfields$(1)="": cfields$(2)="": return
 
 '### end HANDLER_SCREEN_CONTACT_EDIT ###
 

@@ -152,12 +152,8 @@ if sidex%(ii)>=0 and stxt$(ii)<>"" then s$=snumber$(ii)+": "+stxt$(ii): l=38: go
 next ii
 return
 
-EMPTY_SMS_PANE rem
 'Empty the SMS pane
-for ii=0 to smaxpane%-1
-spt$(ii)="": spi%(ii)=-1
-next ii
-return
+EMPTY_SMS_PANE for ii=0 to smaxpane%-1spt$(ii)="": spi%(ii)=-1: next ii: return
 
 SMS_TO_SMS_CONTACT_PANE rem
 'Fill the SMS Contact pane with in-RAM SMS entries, iterating on the array of SMS belonging to the current contact
@@ -170,12 +166,8 @@ if mpindex(ii)>=0 then s$=stxt$(mpindex(ii)):l=34: gosub TRIM_STRING_SPACES: gos
 next ii
 return
 
-EMPTY_SMS_CONTACT_PANE rem
 'Empty the Contact SMS pane
-for ii=0 to mmaxpane%-1
-mpt$(ii)="": mpi%(ii)=-1
-next ii
-return
+EMPTY_SMS_CONTACT_PANE for ii=0 to mmaxpane%-1: mpt$(ii)="": mpi%(ii)=-1: next ii: return
 
 
 SEND_SMS rem
