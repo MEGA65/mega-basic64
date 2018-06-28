@@ -69,6 +69,14 @@ int resolve_symbol(char *s,char *o,int *olen)
 {
 	for(int i=0;i<label_count;i++) {
 		if (!strcmp(s,label_names[i])) {
+		  if (olen&&(!(*olen))) {
+		    if (label_lines[i]<line_number) {
+		      fprintf(stderr,"unknown:unknown:ERROR Line numbers went backwards (from %d to %d) at %s\n",
+			      line_number,label_lines[i],s);
+		      errors++;		      
+		    }
+		  }
+		  
 			snprintf(&o[*olen],1023-*olen,"%d",label_lines[i]);
 			*olen=strlen(o);
 			return 0;
@@ -245,7 +253,13 @@ int main(int argc,char **argv)
 				line_number++;
 			} else if (line[0]>='0' && line[0]<='9') {
 				// Line with number
+			  int previous_line=line_number;
 				line_number=atoi(line);
+				if (line_number<previous_line) {
+				  fprintf(stderr,"%s:%d:ERROR Line numbers went backwards (from %d to %d)\n",argv[i],fl,
+					  previous_line,line_number);
+					errors++;
+				}
 				if (line_number>65535) {
 					fprintf(stderr,"%s:%d:ERROR Illegal line number\n",argv[i],fl);
 					errors++;
@@ -304,6 +318,12 @@ int main(int argc,char **argv)
 			
 			if (line[0]>='0' && line[0]<='9') {
 				// Line with number
+			  int previous_line=line_number;
+				if (line_number<previous_line) {
+				  fprintf(stderr,"%s:%d:ERROR Line numbers went backwards (from %d to %d)\n",argv[i],fl,
+					  previous_line,line_number);
+					errors++;
+				}
 				line_number=atoi(line);
 			} else if (line[0]>=' '){
 				// Line with any other printable character (TAB/HT is excluded)
