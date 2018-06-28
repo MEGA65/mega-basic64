@@ -1,22 +1,9 @@
 ' Convert raw touch position to row,column in c1,r1
-TOUCH_TO_ROW_COLUMN rem
-' Get x,y coordinate of touch event
-tx=peek(54969) or ((peek(54971) and 3)*256)
-ty=peek(54970) or ((peek(54971) and 240)*16)
-' convert to approximate row, column
-c1=int((tx-54)/16)
-r1=int((ty-120)/16)
+' Get x,y coordinate of touch event ' convert to approximate row, column ' Debug display of touch info 'print "{home}";c1;",";r1;"   "
+TOUCH_TO_ROW_COLUMN tx=peek(54969) or ((peek(54971) and 3)*256):ty=peek(54970) or ((peek(54971) and 240)*16):c1=int((tx-54)/16):r1=int((ty-120)/16):return
 
-' Debug display of touch info
-'print "{home}";c1;",";r1;"   "
-return
-
-' Check for a touch-release event
-TOUCH_CHECK_FOR_RELEASE rem
-' We trigger touches on release, so we need to watch
-' for a release following a touch
-te=(te*2+(peek(54960) and 1)) and 3
-return
+' Check for a touch-release event ' We trigger touches on release, so we need to watch ' for a release following a touch
+TOUCH_CHECK_FOR_RELEASE te=(te*2+(peek(54960) and 1)) and 3:return
 
 ' Scan the touch screen for call dialing, answering and in-call
 POLL_TOUCH_CALL_ACTIVE rem

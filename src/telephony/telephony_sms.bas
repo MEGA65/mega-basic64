@@ -1,101 +1,68 @@
-SMS_GET_FIRST_EMPTY_INDEX rem
 'Get the first empty index of the SMS storage in RAM
 '   if no empty index, return -1
-k=-1
-for i=0 to slngth%
-if sidex%(i)=-1 then k=i: return
-next i
-return
+SMS_GET_FIRST_EMPTY_INDEX k=-1: for i=0 to slngth%: if sidex%(i)=-1 then k=i: return
+next i: return
 
-SMS_GET_MAX_INDEX rem
 'Get the maximum index filled in the SMS storage in RAM
 '  if no index, return -1
-k=-1
-for i=0 to slngth%
+SMS_GET_MAX_INDEX k=-1: for i=0 to slngth%
 if sidex%(i)<>-1 then k=i
-next i
-return
+next i: return
 
-EMPTY_SMS rem
 ' Delete all SMS from RAM
-for i=0 to slngth%
-sidex%(i)=-1: stxt$(i)="": snumber$(i)="": sd$(i)="": satus%(i)=-1
-next i
-sidex%=-1
-gosub EMPTY_SMS_PANE
-return
+EMPTY_SMS for i=0 to slngth%: sidex%(i)=-1: stxt$(i)="": snumber$(i)="": sd$(i)="": satus%(i)=-1: next i: sidex%=-1: goto EMPTY_SMS_PANE
 
-EMPTY_CONTACT_SMS rem
 'Delete the indices of Contact SMS
-for i=0 to 100
-mpindex(i)=-1
-next i
-gosub EMPTY_SMS_CONTACT_PANE
-mpindex%=-1: mxindex%=-1: mq=0
-return
+EMPTY_CONTACT_SMS for i=0 to 100: mpindex(i)=-1:next i:gosub EMPTY_SMS_CONTACT_PANE:mpindex%=-1: mxindex%=-1: mq=0:return
 
-QUERY_ALL_SMS rem
 'poke 0,64 'for debugging only, far too slow!
-if dd=1 then db=4: gosub SWITCH_TO_SCREEN_DEBUG
+QUERY_ALL_SMS if dd=1 then db=4: gosub SWITCH_TO_SCREEN_DEBUG
 if dd=0 then db=0
-gosub EMPTY_SMS 'empty SMS arrays in memory
-sq=1: satus$="{yel}fetching SMS{elipsis}"
-sx=1 'enable cache mechanism for further SMS
-sidex%=-1 'begin at SIM index 0
-gosub QAS_NEXT
-return
+'empty SMS arrays in memory
+'sx=1 = enable cache mechanism for further SMS
+'sidex% = -1 = begin at SIM index 0
+gosub EMPTY_SMS : sq=1: satus$="{yel}fetching SMS{elipsis}":sx=1:sidex%=-1
+' Fall through to QAS_NEXT
 
-QAS_NEXT rem
-sidex%=sidex%+1 'index initialized at -1 --> begins at 0
+QAS_NEXT sidex%=sidex%+1 'index initialized at -1 --> begins at 0
 if sidex%<sused% then goto QAS_QUERY 'we didn't query all SMS, so we query next one
-jt%(98)=0: gosub QAS_ALL_SMS_LOADED: goto QAS_END 'we queried all SMS, so we go to ALL_SMS_LOADED
+jt%(98)=0: gosub QAS_ALL_SMS_LOADED: return 'we queried all SMS, so we go to ALL_SMS_LOADED
 '--- Query next SMS ---
-QAS_QUERY rem
-if db>=4 then print "SMS";sidex%;"/";sused%-1;":"
-jt%(98)= QAS_CALLBACK: k=sidex%: gosub SEND_AT+CMGR 'set callback and send message
-QAS_END return
+QAS_QUERY if db>=4 then print "SMS";sidex%;"/";sused%-1;":"
+jt%(98)= QAS_CALLBACK: k=sidex%: goto SEND_AT+CMGR 'set callback and send message
 
-QAS_CALLBACK rem
 ' modem sent a response to at+cmgr=<i>
 'NOTE: since we stopped to rely on Result Codes to call our callback, merror cannot longer be used.
-if merror=0 then rem 'gosub SMS_TO_SMS_PANE '1 SMS was successfully retrieved. Updating the SMS pane is time consuming.
-if merror=1 then merror=0: serror=serror+1 'error getting 1 SMS
-gosub QAS_NEXT
-return
+QAS_CALLBACK if merror=1 then merror=0: serror=serror+1 'error getting 1 SMS
+'if merror=0 then rem 'gosub SMS_TO_SMS_PANE '1 SMS was successfully retrieved. Updating the SMS pane is time consuming.
+goto QAS_NEXT
 
-QAS_ALL_SMS_LOADED rem
-if db>=4 then print "All SMS queried!"
+QAS_ALL_SMS_LOADED if db>=4 then print "All SMS queried!"
 'NOTE: since we stopped to rely on Result Codes to call our callback, this serror number cannot be trusted
 if serror>0 then sq=2: satus$="{red}some not fetched!" 'at least 1 error
 if serror=0 then sq=2: satus$="{grn}successfully fetched" 'SMS queried and all received
-serror=0
-sx=0 'disable cache mechanism for further SMS
-gosub SMS_TO_SMS_PANE 'update SMS pane
+'disable cache mechanism for further SMS
+serror=0: sx=0: gosub SMS_TO_SMS_PANE 'update SMS pane
 
 if db>=4 then for ii=0 to sused%-1: print sidex%(ii);" ";snumber$(ii);" ";satus%(ii);" ";stxt$(ii); " "; sd$(ii): gosub WAIT_FOR_KEY_PRESS: next ii
 if db>=4 then gosub WAIT_FOR_KEY_PRESS: db=0: gosub SWITCH_TO_LAST_SCREEN
 'poke 0,65
 return
 
-GET_STATUS_FROM_STRING rem
 'Get SMS status integer from status string
 'Arguments:
 '  s$: the status string, with quotes
 'Returns:
 '  k: the status integer [0-4]
-k=-1
-for i=0 to 4:
-if s$=sus$(i) then k=i: return
-next i
-return
+GET_STATUS_FROM_STRING k=-1: for i=0 to 4:if s$=sus$(i) then k=i: return
+next i:return
 
-GET_SMS_FROM_CONTACT rem
 'Get the SMS from a particular contact
 'Arguments:
 '  r$: the phone number of the contact from whom we want the SMS
 'Returns:
 '  no return (fills the mpindex() array and query SMS missing from cache
-gosub SMS_GET_MAX_INDEX: if k=-1 then return 'no SMS in RAM
+GET_SMS_FROM_CONTACT gosub SMS_GET_MAX_INDEX: if k=-1 then return 'no SMS in RAM
 if dd=1 then db=4: gosub SWITCH_TO_SCREEN_DEBUG: poke 0,64 'for debugging only
 if db>=4 then print "Get SMS from contact "+r$
 '--- Get Contact's SMS indices ---
