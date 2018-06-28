@@ -15,21 +15,14 @@ poke ja,44
 return
 
 SETUP_DRAWING rem 'Prepare strings etc we use when drawing, to make drawing faster
-'box-top line
-bt$="{line-dr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}"
-'box-middle line
-bm$="{line-ud}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}{rght}"
-'box-row line
-br$="{line-udr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}"
-'box-bottom line
-bb$="{line-ur}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}{line-lr}"
-'left line
-ll$="{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}{left}"
-'home-down line
-hd$="{home}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}"
-'space line
-ss$="                                         "
-return
+' bt$ = box-top line
+' bm$ = box-middle line
+' br$ = box-row line
+' bb$ = box-bottom line
+' ll$ = line of cursor lefts
+' hd$ = home, followed by lots of cursor downs
+' ss$ = line of spaces
+ss$="":bt$="{line-dr}": bm$="{line-ud}": br$="{line-udr}":bb$="{line-ur}":ll$="": hd$="{home}": for z = 1 to 40:bt$= bt$ + "{line-lr}": bm$=bm$+"{rght}": br$=br$+"{line-lr}": bb$=bb$+"{line-lr}":ll$=ll$+"{left}":hd$=hd$+"{down}": ss$=ss$+" ": next z: return
 
 
 REMOVE_QUOTES_STRING rem
