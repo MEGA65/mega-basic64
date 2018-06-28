@@ -210,7 +210,7 @@ DS_CALL_TIMER xx=0: yy=6: gosub MOVE_CURSOR_XX_YY:print left$(dtmr$,2):yy=7: gos
 
 DS_CALL_ERASE_TMR rem
 'erase timer text
-xx=0: for yy=6 to 8:gosub MOVE_CURSOR_XX_YY:print "    ";next:return
+xx=0: for yy=6 to 8:gosub MOVE_CURSOR_XX_YY:print "    ":next:return
 
 'erase green phone (answer/pick-up)
 DS_CALL_ERASE_GP canvas 0 clr from 0,6 to 4,9:return
