@@ -22,6 +22,18 @@
 	 lda #$37
 	 sta $0
 
+waitfortouchtoend:
+	 lda $d6b0
+	 and #$03
+	 bne waitfortouchtoend
+
+	 ; also clear out ASCII key stream
+	 lda #$01
+	 sta $d610
+	 lda $d610
+	 ora $d611
+	 bne waitfortouchtoend
+	 
 entry:
 
          jsr bitmapmode
@@ -30,6 +42,41 @@ entry:
 
          ldx #0
 loop:
+
+	lda $d610
+	ora $d611
+	bne inputeventdetected
+
+	lda $d6b0
+	and #$03
+	beq notouchyet
+
+inputeventdetected:
+	; Restore video mode, and exit back to basic
+	lda #$1b
+	sta $d011
+	; reset video bank
+	lda $dd00
+	ora #$03
+	sta $dd00
+	; character set back to $1000
+	lda #$10
+	sta $d069
+
+	; clear screen
+	ldx #0
+	lda #$20
+c1:	sta $0400,x
+	sta $0500,x
+	sta $0600,x
+	sta $0700,x
+	dex
+	bne c1
+
+	cli
+	rts
+
+notouchyet:
 
 waitingforflyback:
 	lda #$ff
