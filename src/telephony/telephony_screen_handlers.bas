@@ -253,7 +253,7 @@ CALL_HANGUP_ALL gosub SEND_AT+CHUP
 ' Fall through to CALL_HANGUP_CLEANUP below, instead of calling: gosub CALL_HANGUP_CLEANUP: return
 
 'clean up after hanging-up
-CALL_HANGUP_CLEANUP if db>=4 then db=0: gosub SWITCH_TO_LAST_SCREEN
+CALL_HANGUP_CLEANUP gosub RINGTONE_OFF: if db>=4 then db=0: gosub SWITCH_TO_LAST_SCREEN
 dactive=0: dsta=-1: cid$="": dr$="": dnumber$="": if dia=1 then dia=0
 tc=0: dtmr=0: dtmr$="000000": return
 

@@ -313,7 +313,9 @@ MH_CLCC_VOICE rem
 su=1
 s$=mf$(6): if mf$(8)<>"" then s$=mf$(8) 'caller id: if contact name is present, use contact name; otherwise, use phone number
 gosub REMOVE_QUOTES_STRING: cid$=s$ 'set caller id (cid$)
-dsta=-1: dsta=val(mf$(3)) 'update call state (dsta)
+' Also start and stop ringtone playing based on call state
+dsta=-1: dsta=val(mf$(3)): if dsta=0 then gosub RINGTONE_ON 'update call state (dsta)
+if dsta <> 0 and dsta <> 4 then gosub RINGTONE_OFF
 
 if dia=1 then goto MH_CLCC_DIALLING 'check if dialling
 goto MH_CLCC_END

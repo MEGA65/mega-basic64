@@ -194,13 +194,13 @@ DS_CALL_DB_CLR xx=5:for yy=7 to 12: gosub MOVE_CURSOR_XX_YY: print left$(ss$,34)
 
 '=== Call state: active ===
 
-DS_CALL_ACTIVE gosub MUSIC_OFF: ddisplay$="In-call with "+cid$:gosub DS_CALL_DDISPLAY: gosub DS_CALL_ERASE_GP: gosub DS_CALL_TIMER: return
+DS_CALL_ACTIVE ddisplay$="In-call with "+cid$:gosub DS_CALL_DDISPLAY: gosub DS_CALL_ERASE_GP: gosub DS_CALL_TIMER: return
 
 '=== Call state: dialing ===
-DS_CALL_DIALING gosub MUSIC_OFF: ddisplay$="Dialling "+dnumber$:if dr$<>"" then ddisplay$=ddisplay$+" ("+dr$+")": gosub DS_CALL_DDISPLAY:gosub DS_CALL_ERASE_GP: return
+DS_CALL_DIALING ddisplay$="Dialling "+dnumber$:if dr$<>"" then ddisplay$=ddisplay$+" ("+dr$+")": gosub DS_CALL_DDISPLAY:gosub DS_CALL_ERASE_GP: return
 
 '=== Call state: ringing ===
-DS_CALL_RINGING gosub MUSIC_ON: ddisplay$="Incoming call from "+cid$:gosub DS_CALL_DDISPLAY:xx=0: yy=6: p=0: gosub STAMP_GREENPHONE:return
+DS_CALL_RINGING gosub RINGTONE_ON: ddisplay$="Incoming call from "+cid$:gosub DS_CALL_DDISPLAY:xx=0: yy=6: p=0: gosub STAMP_GREENPHONE:return
 
 DS_CALL_DDISPLAY xx=1: yy=3: gosub MOVE_CURSOR_XX_YY: if ddisplay$<>"" then print ddisplay$;
 for j=1 to 38-len(ddisplay$): if len(ddisplay$)<38 then print " ";: next j: return

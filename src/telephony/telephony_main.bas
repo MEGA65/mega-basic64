@@ -28,7 +28,7 @@ if db>=4 then print "modem setup is complete"
 'SMS setup
 'define functions (e.g. modulo)
 'turn off debugging information
-gosub SETUP_GUI: gosub SETUP_DRAWING: gosub SETUP_PRESS_SPRITE: gosub SETUP_PHONEBOOK: gosub SETUP_SMS: gosub DEFINE_FUNCTIONS: db=0 
+gosub RINGTONE_OFF: gosub SETUP_GUI: gosub SETUP_DRAWING: gosub SETUP_PRESS_SPRITE: gosub SETUP_PHONEBOOK: gosub SETUP_SMS: gosub DEFINE_FUNCTIONS: db=0 
 '--- switch to correct screen ---
 'if db>0 then gosub SWITCH_TO_SCREEN_DEBUG: goto INIT_END
 'by defaults, start the program on DIALLER screen
