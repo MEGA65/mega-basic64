@@ -25,7 +25,7 @@ if u$="" then return
 ' Run terminal program for debugging modem communications
 if u$="T" then up=1: su=1: gosub TERMINAL_PROGRAM: gosub SWITCH_TO_SCREEN_DIALLER
 ' O key displays oscilloscope like display
-if u$="O" then poke 53280,1: sys 38656: su=1: up=1: uc=1: ud=1
+if u$="O" then sys 38656: su=1: up=1: uc=1: ud=1
 ' Toggle music using M
 if u$="M" then gosub MUSIC_TOGGLE
 ' Go to SMS screen
@@ -194,7 +194,7 @@ print "{home}";u$
 if u$="D" then db=1-db: gosub DS_CALL_DB_CLR 'enable call debugging information (appear where SMS should be)
 if u$="H" then u0$=u$: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER
 ' O key displays oscilloscope like display
-if u$="O" then poke 53280,1: sys 38656: su=1 : up=1: uc=1: ud=1
+if u$="O" then sys 38656: su=1 : up=1: uc=1: ud=1
 ' Toggle music using M
 if u$="M" then gosub MUSIC_TOGGLE
 if dsta=0 goto HS_CALL_ACTIVE
