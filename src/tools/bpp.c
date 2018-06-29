@@ -100,6 +100,7 @@ int notKeyword(char *s)
   if (!strcmp(s,"next")) return 0;
   if (!strcmp(s,"right")) return 0;
   if (!strcmp(s,"str")) return 0;
+  if (!strcmp(s,"sys")) return 0;
   if (!strcmp(s,"to")) return 0;
   if (!strcmp(s,"print")) return 0;
   if (!strcmp(s,"poke")) return 0;
