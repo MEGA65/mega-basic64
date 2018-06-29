@@ -2718,11 +2718,10 @@ raster_irq:
 		;;  being fed register updates at 50MHz, similar to how real SIDs don't
 		;; work at 2MHz.
 		LDZ #$00
-.if 0
-		;; Enable 50MHz fast mode
-		LDA	#$40
-		TRB	$D054
-		TRB	$D031	
+.if 1
+		;; Disable 50MHz fast mode for the music player
+		lda #64
+		sta 0
 .endif		
 		lda $03ff
 		beq nomusic
@@ -2737,6 +2736,8 @@ alreadyplaying:
 nomusic:			
 		
 		;; Enable 50MHz fast mode
+		lda #65
+		sta 0
 		LDA	#$40
 		TSB	$D054
 		TSB	$D031	
