@@ -237,7 +237,7 @@ MESSAGE_HANDLER_41 rem
 'Message handler: incoming call (ring)
 MESSAGE_HANDLER_RING rem
 gosub SEND_AT+CLCC
-if dactive=0 then dactive=1: gosub SWITCH_TO_SCREEN_CALL 'if not already in-call, we set the active call flag
+if dactive=0 then dactive=1: gosub SWITCH_TO_SCREEN_CALL: gosub RINGTONE_ON 'if not already in-call, we set the active call flag
 'else: already in-call
 14299 return
 
@@ -314,8 +314,7 @@ su=1
 s$=mf$(6): if mf$(8)<>"" then s$=mf$(8) 'caller id: if contact name is present, use contact name; otherwise, use phone number
 gosub REMOVE_QUOTES_STRING: cid$=s$ 'set caller id (cid$)
 ' Also start and stop ringtone playing based on call state
-dsta=-1: dsta=val(mf$(3)): if dsta=0 then gosub RINGTONE_ON 'update call state (dsta)
-if dsta <> 0 and dsta <> 4 then gosub RINGTONE_OFF
+dsta=-1: dsta=val(mf$(3)) 'update call state (dsta)
 
 if dia=1 then goto MH_CLCC_DIALLING 'check if dialling
 goto MH_CLCC_END

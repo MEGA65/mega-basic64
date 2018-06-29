@@ -207,14 +207,15 @@ return
 '   h: hang-up call
 '   TODO: more (mute, speaker, dialpad...)
 '--- Hang-up call (H) ---
-HS_CALL_ACTIVE goto POLL_TOUCH_CALL_ACTIVE
+HS_CALL_ACTIVE gosub POLL_TOUCH_CALL_ACTIVE: goto HS_CALL_RINGING
 
 HS_CALL_DIALING rem
 '=== Call state: dialing ===
 ' Possible actions:
 '   h: hang-up call
 '   TODO: more (mute, speaker, dialpad...)
-gosub POLL_TOUCH_CALL_DIALING: return
+gosub POLL_TOUCH_CALL_DIALING
+' Fall through to HS_CALL_RINGING
 
 '=== Call state: ringing ===
 ' Possible actions:
@@ -223,7 +224,7 @@ gosub POLL_TOUCH_CALL_DIALING: return
 '   TODO: more (mute, speaker, dialpad...)
 HS_CALL_RINGING gosub POLL_TOUCH_CALL_INCOMING
 if u$="A" then  u0$=u$: su=1: gosub CALL_ANSWER
-if u$="R" then  u0$=u$: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER
+if u$="R" or u$="H" then  u0$=u$: gosub RINGTONE_OFF: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER
 return
 
 '### end HANDLER_SCREEN_CALL ###
@@ -242,7 +243,7 @@ return
 'Answer an incoming call
 CALL_ANSWER if dd=1 then db=4: gosub SWITCH_TO_SCREEN_DEBUG 'enable debugging
 'answer, and set the call timer
-gosub SEND_ATA: tc=time: return
+gosub RINGTONE_OFF: gosub SEND_ATA: tc=time: return
 
 'Disconnect existing (current) voice or data call
 CALL_HANGUP gosub SEND_ATH: gosub CALL_HANGUP_CLEANUP: return

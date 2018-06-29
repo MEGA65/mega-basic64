@@ -16,8 +16,8 @@ gosub TOUCH_TO_ROW_COLUMN
 ' we save memory by having a single handler, until such time
 ' as we need to split it up.
 'print "{home}{down}"r1;c1
-if r1>6 and r1<10 and c1>-2 and c1<6 then u$="a"
-if r1>10 and r1<14 and c1>-2 and c1<6 then u$="h"
+if r1>6 and r1<10 and c1>-2 and c1<6 then u$="A"
+if r1>10 and r1<14 and c1>-2 and c1<6 then u$="H"
 return
 
 ' Scan the touch screen when displaying a contact

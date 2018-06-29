@@ -189,7 +189,7 @@ if dsta=4 or dsta=5 goto DS_CALL_RINGING
 ddisplay$="Unknown status ("+str$(dsta)+")": gosub DS_CALL_DDISPLAY
 return
 
-DS_CALL_DB_CLR xx=5:for yy=7 to 12: gosub MOVE_CURSOR_XX_YY: print left$(ss$,34): next yy
+DS_CALL_DB_CLR xx=5:for yy=7 to 12: gosub MOVE_CURSOR_XX_YY: print left$(ss$,34): next yy:return
 '### end DRAW_SCREEN_CALL ###
 
 '=== Call state: active ===
@@ -200,10 +200,11 @@ DS_CALL_ACTIVE ddisplay$="In-call with "+cid$:gosub DS_CALL_DDISPLAY: gosub DS_C
 DS_CALL_DIALING ddisplay$="Dialling "+dnumber$:if dr$<>"" then ddisplay$=ddisplay$+" ("+dr$+")": gosub DS_CALL_DDISPLAY:gosub DS_CALL_ERASE_GP: return
 
 '=== Call state: ringing ===
-DS_CALL_RINGING gosub RINGTONE_ON: ddisplay$="Incoming call from "+cid$:gosub DS_CALL_DDISPLAY:xx=0: yy=6: p=0: gosub STAMP_GREENPHONE:return
+DS_CALL_RINGING ddisplay$="Incoming call from "+cid$:gosub DS_CALL_DDISPLAY:xx=0: yy=6: p=0: gosub STAMP_GREENPHONE:return
 
 DS_CALL_DDISPLAY xx=1: yy=3: gosub MOVE_CURSOR_XX_YY: if ddisplay$<>"" then print ddisplay$;
-for j=1 to 38-len(ddisplay$): if len(ddisplay$)<38 then print " ";: next j: return
+for j=1 to 38-len(ddisplay$): if len(ddisplay$)<38 then print " ";: next j
+return
 
 '=== print call timer ===
 ' Why on earth do we need the {up} character here after the second line?
