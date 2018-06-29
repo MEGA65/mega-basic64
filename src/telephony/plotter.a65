@@ -12,6 +12,9 @@ iter1:   .byte 0
          .checkpc 2079
          .advance 2079
 
+	 ; Disable interrupts
+	 sei
+
          ; mega65 knock
          lda #$47
          sta $d02f
@@ -120,16 +123,23 @@ plotpixel:
 
 	 jsr calculatepixeladdr
 
+	 lda #$36
+	 sta $01
+
          ; work out bit of byte to set
          lda savex
          and #7
          tax
          lda bits,x
          ldy #0
+
+	 ; set bit in byte
          ora ($fd),y
          sta ($fd),y
 
-         ; set bit in byte
+	 lda #$37
+	 sta $01
+
 
          ldx savex
          ldy savey
@@ -192,9 +202,10 @@ calculatepixeladdr:
          sta $fd
 
          ; add base of screen to address
+	 ; screen is at $A000-$BFFF
          lda $fe
-         ora #%00100000
-         and #%00111111
+         ora #%10100000
+         and #%10111111
          sta $fe
 
 	 rts
@@ -208,17 +219,22 @@ unplotpixel:
 
 	 jsr calculatepixeladdr
 
+	 lda #$36
+	 sta $01
+
          ; work out bit of byte to unset
          lda savex
          and #7
          tax
          lda bits,x
+         ; set bit in byte
 	 eor #$ff
          ldy #0
          and ($fd),y
          sta ($fd),y
 
-         ; set bit in byte
+	 lda #$37
+	 sta $01
 
          ldx savex
          ldy savey
@@ -243,10 +259,27 @@ bits:
 
 
 bitmapmode:
+
+	; Enable bitmap mode
          lda #$3b
          sta $d011
+	; bitmap is at $2000 + bank address
          lda #25
          sta $d018
+	; bank is $8000-$BFFF
+	 lda $dd00
+	 and #$fc
+	 ora #$01
+	 sta $dd00
+	; Set screen ram back to $0400-$07FF
+	 lda #<$0400
+	 sta $d060
+	 lda #>$0400
+	 sta $d061
+	 lda #$00
+	 sta $d062
+	 sta $d063
+	 
          rts
 
 clearcolour:
@@ -290,7 +323,7 @@ dmalist:
 		.byte $03 ; fill + last request in chain
 		.word 8000 ; size of copy is 8000 bytes
 		.byte $00,$00,$00 ; starting at $4000
-		.word $2000 ; destination address is $2000
+		.word $A000 ; destination address is $A000
 		.byte $00   ; of bank $0
 		.word $0000 ; modulo (unused)
 
