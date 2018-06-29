@@ -74,6 +74,25 @@ init:
 		;; enable wedge
 		jsr 	megabasic_enable
 
+		;; Copy acoustic scope program to $9800-$9FFF, and
+		;; drop top of BASIC down by 2KB to leave space for it.
+		lda #>$9800
+		sta 52
+		sta 56
+
+		ldx #0
+spcopy:		lda scope_program_start,x
+		sta $9800,x
+		lda scope_program_start+$100,x
+		sta $9900,x
+		lda scope_program_start+$200,x
+		sta $9a00,x
+		lda scope_program_start+$300,x
+		sta $9b00,x
+		inx
+		bne spcopy
+		
+		
 		;; Then make the demo tile set available for use
 		jsr 	tileset_point_to_start_of_area
 		jsr 	tileset_install
@@ -151,6 +170,8 @@ c000blockdmalist:
 		.byte $00   ; of bank $0
 		.word $0000 ; modulo (unused)		
 
+scope_program_start:
+		.incbin "bin/scope.prg"
 
 preloaded_tiles:
 		;;	.incbin "bin/megabanner.tiles"

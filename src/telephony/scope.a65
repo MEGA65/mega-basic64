@@ -1,16 +1,5 @@
 
-	.word $0801
-         .org $0801
-
-         .scope
-         .word _next, 10                       ; Next line and current line number
-         .byte $97, "2,0:", $9e, " 2014", $AA, "65",0      ; POKE 2,0 : SYS 2014+65
-_next:   .word 0
-
-iter1:   .byte 0
-
-         .checkpc 2079
-         .advance 2079
+         .org $9800
 
 	 ; Disable interrupts
 	 sei
@@ -27,6 +16,10 @@ iter1:   .byte 0
 	 
 	 ; 50MHz
 	 lda #65
+	 sta $0
+
+	 ; set CPU port DDR
+	 lda #$37
 	 sta $0
 
 entry:
@@ -260,6 +253,14 @@ bits:
 
 bitmapmode:
 
+	; Reset to normal VIC-II video mode
+	LDA #$a8
+	sta $D054
+	lda #$0
+	sta $D031
+	lda #40
+	sta $d058
+
 	; Enable bitmap mode
          lda #$3b
          sta $d011
@@ -335,7 +336,5 @@ samplehi:    .byte 0
 .space previoussamples2 256
 
 
-        .scend
-
-        .outfile "bin/plotter.prg"
+        .outfile "bin/scope.prg"
 

@@ -117,7 +117,7 @@ tools:	$(TOOLS)
 
 telephony:	$(BINDIR)/telephony.prg $(BINDIR)/telephony.tiles
 
-%.o:	%.s	$(BINDIR)/megabanner.tiles	$(BINDIR)/telephony.tiles
+%.o:	%.s	$(BINDIR)/megabanner.tiles	$(BINDIR)/telephony.tiles          $(BINDIR)/scope.prg
 	$(CA65) $< -l $*.list
 
 $(BINDIR)/megabanner.tiles:	$(TOOLDIR)/mktileset $(ASSETS)/mega65_320x64.png
@@ -132,7 +132,7 @@ $(BINDIR)/fonttest.tiles:	$(TOOLDIR)/mktileset
 $(BINDIR)/telephony.tiles:	$(TOOLDIR)/mktileset	$(TELEPHONY_ASSETS)
 	$(TOOLDIR)/mktileset $(BINDIR)/telephony.tiles c64palette $(TELEPHONY_ASSETS)
 
-$(BINDIR)/megabasic64.prg:	$(MEGABASICOBJS) $(BINDIR)/megabanner.tiles
+$(BINDIR)/megabasic64.prg:	$(MEGABASICOBJS) $(BINDIR)/megabanner.tiles $(BINDIR)/scope.prg
 	mkdir -p $(BINDIR)
 	$(LD65) $< --mapfile $*.map -o $(BINDIR)/megabasic64.prg
 
@@ -145,8 +145,8 @@ $(BINDIR)/telephony.prg:	$(BINDIR)/telephony.bas
 $(BINDIR)/vehicle-console.prg:	src/vehicle-console.a65 $(BINDIR)/vehicle_console.tiles
 	$(OPHIS) src/vehicle-console.a65
 
-$(BINDIR)/plotter.prg:	src/telephony/plotter.a65
-	$(OPHIS) src/telephony/plotter.a65
+$(BINDIR)/scope.prg:	src/telephony/scope.a65
+	$(OPHIS) src/telephony/scope.a65
 
 $(TOOLDIR)/bpp:	$(TOOLDIR)/bpp.c Makefile
 	$(CC) $(COPT) -o $(TOOLDIR)/bpp $(TOOLDIR)/bpp.c
