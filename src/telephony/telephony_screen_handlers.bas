@@ -24,6 +24,8 @@ ktmr=ktmr-1: if ktmr<1 then gosub HIDE_SPRITE
 if u$="" then return
 ' Run terminal program for debugging modem communications
 if u$="T" then up=1: su=1: gosub TERMINAL_PROGRAM: gosub SWITCH_TO_SCREEN_DIALLER
+' O key displays oscilloscope like display
+if u$="O" then poke 53280,1: sys 38*1024: su=1: up=1: uc=1: ud=1
 ' Go to SMS screen
 if u$="S" then up=1: su=1: gosub SWITCH_TO_SCREEN_SMS
 ' Open the new contact screen with dialled number pre-populated
@@ -189,6 +191,8 @@ HANDLER_SCREEN_CALL dtmr=time-tc: k=dtmr: gosub REAL_TIME_TO_STRING: dtmr$=s$: u
 print "{home}";u$
 if u$="D" then db=1-db: gosub DS_CALL_DB_CLR 'enable call debugging information (appear where SMS should be)
 if u$="H" then u0$=u$: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER
+' O key displays oscilloscope like display
+if u$="O" then poke 53280,1: sys 38*1024: su=1 : up=1: uc=1: ud=1
 if dsta=0 goto HS_CALL_ACTIVE
 if dsta=2 or dsta=3 goto HS_CALL_DIALING
 if dsta=4 or dsta=5 goto HS_CALL_RINGING
