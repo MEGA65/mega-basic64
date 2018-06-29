@@ -1,26 +1,15 @@
 
-         .org $9800
+         .org $9700
 
 	 ; Disable interrupts
 	 sei
 
-         ; mega65 knock
-         lda #$47
-         sta $d02f
-         lda #$53
-         sta $d02f
-
-	 lda #0
-	 sta $d021
-	 sta $d020
-	 
-	 ; 50MHz
-	 lda #65
-	 sta $0
-
 	 ; set CPU port DDR
 	 lda #$37
 	 sta $0
+;	 lda #$36
+	 dec
+	 sta $1
 
 waitfortouchtoend:
 	 lda $d6b0
@@ -56,9 +45,8 @@ inputeventdetected:
 	lda #$1b
 	sta $d011
 	; reset video bank
-	lda $dd00
-	ora #$03
-	sta $dd00
+	lda #$03
+	tsb $dd00
 	; character set back to $1000
 	lda #$10
 	sta $d069
@@ -73,6 +61,9 @@ c1:	sta $0400,x
 	dex
 	bne c1
 
+	; bank BASIC ROM back in
+	inc $01
+
 	cli
 	rts
 
@@ -82,6 +73,14 @@ waitingforflyback:
 	lda #$ff
 	cmp $d012
 	bne waitingforflyback
+
+	; Play music if required
+	lda $3ff
+	beq nomusic
+
+	jsr $9add
+
+nomusic:
 
 	jsr clearscreen
 
@@ -99,7 +98,7 @@ drawloop:
 	bne drawloop
 
 	; Then read 256 samples
-	ldx #$00
+     ;	ldx #$00
 nextsample:
 	lda $d012
 wait:	cmp $d012
@@ -116,15 +115,9 @@ wait:	cmp $d012
 	lda $d6fd
 	sta samplehi
 
-	asl samplelo
-	rol samplehi
-
-	asl samplelo
-	rol samplehi
-
         lda samplehi
 	clc
-	adc #40
+	adc #$a0
 	sta previoussamples2,x
 
         ; select microphone audio
@@ -163,9 +156,6 @@ plotpixel:
 
 	 jsr calculatepixeladdr
 
-	 lda #$36
-	 sta $01
-
          ; work out bit of byte to set
          lda savex
          and #7
@@ -177,12 +167,7 @@ plotpixel:
          ora ($fd),y
          sta ($fd),y
 
-	 lda #$37
-	 sta $01
-
-
          ldx savex
-         ldy savey
 
          rts
 
@@ -259,9 +244,6 @@ unplotpixel:
 
 	 jsr calculatepixeladdr
 
-	 lda #$36
-	 sta $01
-
          ; work out bit of byte to unset
          lda savex
          and #7
@@ -273,11 +255,7 @@ unplotpixel:
          and ($fd),y
          sta ($fd),y
 
-	 lda #$37
-	 sta $01
-
          ldx savex
-         ldy savey
 
          rts
 
@@ -320,11 +298,10 @@ bitmapmode:
 	 ora #$01
 	 sta $dd00
 	; Set screen ram back to $0400-$07FF
-	 lda #<$0400
-	 sta $d060
 	 lda #>$0400
 	 sta $d061
 	 lda #$00
+	 sta $d060
 	 sta $d062
 	 sta $d063
 	 
@@ -333,11 +310,11 @@ bitmapmode:
 clearcolour:
 
          ; clear colour memory
-         lda #<$0400
-         sta $fd
+         ldy #0
+  ;       ldy #<$0400
+         sty $fd
          lda #>$0400
          sta $fe
-         ldy #0
          ; white pixels, black backgnd
 cl4:      lda #$10
 cl3:      sta ($fd),y
@@ -379,8 +356,30 @@ dmalist:
 samplelo:    .byte 0
 samplehi:    .byte 0
 
-.space previoussamples 256
-.space previoussamples2 256
+previoussamples:
+		.byte "                                "
+		.byte "                                "
+		.byte "                                "
+		.byte "                                "
+		.byte "                                "
+		.byte "                                "
+		.byte "                                "
+		.byte "                                "
+previoussamples2:
+		.byte "                                "
+		.byte "                                "
+		.byte "                                "
+		.byte "                                "
+		.byte "                                "
+		.byte "                                "
+		.byte "                                "
+		.byte "                                "
+
+       			.advance $9add
+			.checkpc $9add
+			.incbin "../../ringtone.bin"
+
+			.checkpc $9fff
 
 
         .outfile "bin/scope.prg"

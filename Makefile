@@ -90,6 +90,7 @@ TELEPHONY_SRCS=	\
 		$(TELEPHONY)/telephony_screen_handlers.bas \
 		$(TELEPHONY)/telephony_message_handlers.bas \
 		$(TELEPHONY)/telephony_sprites.bas \
+		$(TELEPHONY)/telephony_music.bas \
 		$(TELEPHONY)/telephony_autopsy.bas \
 		#$(TELEPHONY)/phonebook_entries.bas \
 
@@ -111,6 +112,12 @@ TOOLS=	\
 		$(TOOLDIR)/bpp
 
 all:	$(TOOLS) $(BINDIR)/MEGABAS.D81
+
+relocated.sid:	ringtone.sid
+	sidreloc -v -z fd-fe -p 9a-9f ringtone.sid relocated.sid
+
+ringtone.bin:	relocated.sid
+	dd if=relocated.sid of=ringtone.bin bs=126 skip=1
 
 # c-programs
 tools:	$(TOOLS)

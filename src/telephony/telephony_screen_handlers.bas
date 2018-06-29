@@ -25,7 +25,9 @@ if u$="" then return
 ' Run terminal program for debugging modem communications
 if u$="T" then up=1: su=1: gosub TERMINAL_PROGRAM: gosub SWITCH_TO_SCREEN_DIALLER
 ' O key displays oscilloscope like display
-if u$="O" then poke 53280,1: sys 38*1024: su=1: up=1: uc=1: ud=1
+if u$="O" then poke 53280,1: sys 38656: su=1: up=1: uc=1: ud=1
+' Toggle music using M
+if u$="M" then gosub MUSIC_TOGGLE
 ' Go to SMS screen
 if u$="S" then up=1: su=1: gosub SWITCH_TO_SCREEN_SMS
 ' Open the new contact screen with dialled number pre-populated
@@ -66,7 +68,7 @@ HS_C_NORMAL if u$="{home}" then u0$=u$: gosub SWITCH_TO_SCREEN_DIALLER 'HOME: go
 if u$=c13$ then u0$=u$: dnumber$=pnumber$(cselected%): gosub SWITCH_TO_SCREEN_CALL: gosub CALL_DIAL 'ENTER: call contact
 if u$=chr$(135) and sq=2 then r$=pnumber$(cselected%): gosub GET_SMS_FROM_CONTACT 'F5: refresh SMS from contact
 if u$="E" then u0$=u$: ctrigger=1: gosub SWITCH_TO_SCREEN_CONTACT_EDIT 'E: edit contact
-if u$="M" then u0$=u$: gosub HS_C_BEGIN_WRITING: gosub ERASE_SCREEN: gosub VIRTUAL_KEYBOARD_ENABLE 'M: begin writing SMS
+if u$="N" then u0$=u$: gosub HS_C_BEGIN_WRITING: gosub ERASE_SCREEN: gosub VIRTUAL_KEYBOARD_ENABLE 'N: begin writing SMS
 return
 
 'interaction when writing SMS
@@ -192,7 +194,9 @@ print "{home}";u$
 if u$="D" then db=1-db: gosub DS_CALL_DB_CLR 'enable call debugging information (appear where SMS should be)
 if u$="H" then u0$=u$: gosub CALL_HANGUP_ALL: gosub SWITCH_TO_SCREEN_DIALLER
 ' O key displays oscilloscope like display
-if u$="O" then poke 53280,1: sys 38*1024: su=1 : up=1: uc=1: ud=1
+if u$="O" then poke 53280,1: sys 38656: su=1 : up=1: uc=1: ud=1
+' Toggle music using M
+if u$="M" then gosub MUSIC_TOGGLE
 if dsta=0 goto HS_CALL_ACTIVE
 if dsta=2 or dsta=3 goto HS_CALL_DIALING
 if dsta=4 or dsta=5 goto HS_CALL_RINGING

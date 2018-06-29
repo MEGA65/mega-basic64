@@ -37,6 +37,10 @@ init:
 		STA	$D02F
 		LDA	#$53
 		STA	$D02F
+
+		;; Start with music disabled
+		lda #$00
+		sta $03ff
 		
 		;; Install $C000 block (and preloaded tiles)
 		;; (This also does most of the work initialising the screen)
@@ -76,23 +80,32 @@ init:
 
 		;; Copy acoustic scope program to $9800-$9FFF, and
 		;; drop top of BASIC down by 2KB to leave space for it.
-		lda #>$9800
+		lda #>$9700
 		sta 52
 		sta 56
 
 		ldx #0
 spcopy:		lda scope_program_start,x
-		sta $9800,x
+		sta $9700,x
 		lda scope_program_start+$100,x
-		sta $9900,x
+		sta $9800,x
 		lda scope_program_start+$200,x
-		sta $9a00,x
+		sta $9900,x
 		lda scope_program_start+$300,x
+		sta $9a00,x
+		lda scope_program_start+$400,x
 		sta $9b00,x
+		lda scope_program_start+$500,x
+		sta $9c00,x
+		lda scope_program_start+$600,x
+		sta $9d00,x
+		lda scope_program_start+$700,x
+		sta $9e00,x
+		lda scope_program_start+$800,x
+		sta $9f00,x
 		inx
 		bne spcopy
-		
-		
+
 		;; Then make the demo tile set available for use
 		jsr 	tileset_point_to_start_of_area
 		jsr 	tileset_install
@@ -117,7 +130,20 @@ spcopy:		lda scope_program_start,x
 
 		;; XXX And setup NMI ($0318) and BRK ($0316) catchers?
 		;; (Model of $FE47 in C64 KERNAL).
-		
+
+		;;  XXX Test simple music player
+.if 0
+		jsr $9b25
+m1:		lda $d012
+		cmp #$ff
+		bne m1
+		jsr $9add
+m2:		lda $d012
+		cmp #$ff
+		beq m2
+		jmp m1		
+.endif
+
 		rts
 
 c000blockdmalist:
@@ -2680,10 +2706,36 @@ raster_irq:
 		;; there is no way to READ that, and thus restore it after.
 
 		PHZ
-		
+
 		;; Remember current speed setting
 		LDA	$D054
 		PHA
+		
+		;;  Play music if enabled
+		;;  (For ringtone in dialer)
+		;;  NOTE: Music must be played at <= 4MHz.
+		;;  I don't really know why, but presumably our soft-sids don't like
+		;;  being fed register updates at 50MHz, similar to how real SIDs don't
+		;; work at 2MHz.
+		LDZ #$00
+.if 0
+		;; Enable 50MHz fast mode
+		LDA	#$40
+		TRB	$D054
+		TRB	$D031	
+.endif		
+		lda $03ff
+		beq nomusic
+		cmp $3fe
+		beq alreadyplaying
+		;; Init tune
+		jsr $9b25
+alreadyplaying:
+		lda $3ff
+		sta $3fe
+		jsr $9add
+nomusic:			
+		
 		;; Enable 50MHz fast mode
 		LDA	#$40
 		TSB	$D054

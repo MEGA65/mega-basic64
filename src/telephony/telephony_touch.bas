@@ -15,6 +15,7 @@ gosub TOUCH_TO_ROW_COLUMN
 ' So far the touch scans for these modes are all common, so
 ' we save memory by having a single handler, until such time
 ' as we need to split it up.
+'print "{home}{down}"r1;c1
 if r1>6 and r1<10 and c1>-2 and c1<6 then u$="a"
 if r1>10 and r1<14 and c1>-2 and c1<6 then u$="h"
 return
@@ -24,6 +25,8 @@ POLL_TOUCH_CONTACT rem
 gosub TOUCH_CHECK_FOR_RELEASE
 if te<>2 then return
 gosub TOUCH_TO_ROW_COLUMN
+'print "{home}{down}        {left}{left}{left}{left}{left}{left}{left}{left}"r1;c1
+if r1>6 and r1<10 and c1>-2 and c1<6 then u$=c13$
 return
 
 ' Scan the touch screen when displaying the contact edit screen

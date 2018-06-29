@@ -163,15 +163,15 @@ if ll=5 then gosub SWITCH_TO_SCREEN_SMS
 ls=s2 : return
 
 '=== switch to screen DEBUG (0) ===
-SWITCH_TO_SCREEN_DEBUG gosub SWITCH_SCREEN_INIT:sc=0:gosub SWITCH_SCREEN_CLEANUP:su=1:return
+SWITCH_TO_SCREEN_DEBUG gosub MUSIC_OFF: gosub SWITCH_SCREEN_INIT:sc=0:gosub SWITCH_SCREEN_CLEANUP:su=1:return
 
 '=== switch to screen DIALLER (1) ===
 'set back previously highlighted contact
 'Mark entire screen as requiring a re-draw
-SWITCH_TO_SCREEN_DIALLER gosub SWITCH_SCREEN_INIT:sc=1:gosub SWITCH_SCREEN_CLEANUP:p=cselected%: gosub PHONEBOOK_TO_CONTACT_PANE_INDEX: hl%=k :su=1: up=1: uc=1: ud=1:return
+SWITCH_TO_SCREEN_DIALLER gosub MUSIC_OFF: gosub SWITCH_SCREEN_INIT:sc=1:gosub SWITCH_SCREEN_CLEANUP:p=cselected%: gosub PHONEBOOK_TO_CONTACT_PANE_INDEX: hl%=k :su=1: up=1: uc=1: ud=1:return
 
 '=== switch to screen CONTACT (2) ===
-SWITCH_TO_SCREEN_CONTACT gosub SWITCH_SCREEN_INIT:sc=2:gosub SWITCH_SCREEN_CLEANUP:su=1:ul%=0:gosub PREP_CONTACT:return
+SWITCH_TO_SCREEN_CONTACT gosub MUSIC_OFF: gosub SWITCH_SCREEN_INIT:sc=2:gosub SWITCH_SCREEN_CLEANUP:su=1:ul%=0:gosub PREP_CONTACT:return
 
 'reinit SMS write status
 PREP_CONTACT watus$="" :if sr%=cselected% then return
@@ -181,7 +181,7 @@ gosub EMPTY_CONTACT_SMS:mq=0: sr%=0:matus$="": return 'reinit SMS Contact status
 SWITCH_TO_SCREEN_CALL gosub SWITCH_SCREEN_INIT:sc=3:gosub SWITCH_SCREEN_CLEANUP:su=1:return
 
 '=== switch to screen CONTACT_EDIT (4) ===
-SWITCH_TO_SCREEN_CONTACT_EDIT gosub SWITCH_SCREEN_INIT:sc=4:gosub SWITCH_SCREEN_CLEANUP:su=1:hl%=0: ul%=0
+SWITCH_TO_SCREEN_CONTACT_EDIT gosub MUSIC_OFF: gosub SWITCH_SCREEN_INIT:sc=4:gosub SWITCH_SCREEN_CLEANUP:su=1:hl%=0: ul%=0
 if ctrigger=1 and cselected%<=0 then stop 'we should have cselected% pointing to the contact to edit
 if ctrigger=1 and cselected%>0 then gosub PREP_EDIT_CONTACT: return
 if ctrigger=2 then cselected%=0
@@ -189,7 +189,7 @@ if ctrigger>2 then stop 'that shouldn't happen
 return
 
 '=== switch to screen SMS (5) ===
-SWITCH_TO_SCREEN_SMS gosub SWITCH_SCREEN_INIT:sc=5:gosub SWITCH_SCREEN_CLEANUP:su=1:gosub SMS_TO_SMS_PANE:return
+SWITCH_TO_SCREEN_SMS gosub MUSIC_OFF: gosub SWITCH_SCREEN_INIT:sc=5:gosub SWITCH_SCREEN_CLEANUP:su=1:gosub SMS_TO_SMS_PANE:return
 
 PREP_EDIT_CONTACT cfields$(1)=ptxt$(cselected%):cfields$(2)=pnumber$(cselected%):return
 

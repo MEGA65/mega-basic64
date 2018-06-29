@@ -81,7 +81,7 @@ s$=cpane$(i): l=clngth%: gosub TRIM_STRING_SPACES: print s$"{lblu}";:next i:xx=3
 'reinitialize timer for hiding key press
 DS_DIALLER_DIALPAD ktmr=5
 '1-9
-p=0: for x=1 to 3: for y=1 to 3: xx=x*5-4: yy=y*4+1: if val(u0$)=x+(y-1)*3 then p=1
+for x=1 to 3: for y=1 to 3: xx=x*5-4: yy=y*4+1: p=0: if val(u0$)=x+(y-1)*3 then p=1
 gosub STAMP_1_TO_9: next y,x
 'hash
 p=0: xx=1:yy=17: if u0$="#" then p=1
@@ -194,13 +194,13 @@ DS_CALL_DB_CLR xx=5:for yy=7 to 12: gosub MOVE_CURSOR_XX_YY: print left$(ss$,34)
 
 '=== Call state: active ===
 
-DS_CALL_ACTIVE ddisplay$="In-call with "+cid$:gosub DS_CALL_DDISPLAY: gosub DS_CALL_ERASE_GP: gosub DS_CALL_TIMER: return
+DS_CALL_ACTIVE gosub MUSIC_OFF: ddisplay$="In-call with "+cid$:gosub DS_CALL_DDISPLAY: gosub DS_CALL_ERASE_GP: gosub DS_CALL_TIMER: return
 
 '=== Call state: dialing ===
-DS_CALL_DIALING ddisplay$="Dialling "+dnumber$:if dr$<>"" then ddisplay$=ddisplay$+" ("+dr$+")": gosub DS_CALL_DDISPLAY:gosub DS_CALL_ERASE_GP: return
+DS_CALL_DIALING gosub MUSIC_OFF: ddisplay$="Dialling "+dnumber$:if dr$<>"" then ddisplay$=ddisplay$+" ("+dr$+")": gosub DS_CALL_DDISPLAY:gosub DS_CALL_ERASE_GP: return
 
 '=== Call state: ringing ===
-DS_CALL_RINGING ddisplay$="Incoming call from "+cid$:gosub DS_CALL_DDISPLAY:xx=0: yy=6: p=0: gosub STAMP_GREENPHONE:return
+DS_CALL_RINGING gosub MUSIC_ON: ddisplay$="Incoming call from "+cid$:gosub DS_CALL_DDISPLAY:xx=0: yy=6: p=0: gosub STAMP_GREENPHONE:return
 
 DS_CALL_DDISPLAY xx=1: yy=3: gosub MOVE_CURSOR_XX_YY: if ddisplay$<>"" then print ddisplay$;
 for j=1 to 38-len(ddisplay$): if len(ddisplay$)<38 then print " ";: next j: return

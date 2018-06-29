@@ -25,5 +25,5 @@ if ( x$1 != x ) then
 endif
 
 make ${megabasic} ${telephony} ${charromfile} && \
-m65 -E -l ${port} -b ${bitfile} -k ${kickupfile} -R ${romfile} -C ${charromfile} -4 -r ${megabasic} && \
-m65 -E -l ${port} -4 -r ${telephony}
+m65 -E -l ${port} -b ${bitfile} -k ${kickupfile} -R ${romfile} -C ${charromfile} -4 -r ${megabasic}  && \
+ m65 -E -l ${port} -4 -r ${telephony}
