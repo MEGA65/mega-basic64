@@ -136,28 +136,29 @@ gf%=1 'Mode for SMS (at+cmGF: Message Format)
 '	1: text mode
 '--- configuration commands ---
 'no echo from modem
-jt%(100)= SETUP_MODEM_STEP2: s$="ate0"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
+print "Initialising 4G module.";
+jt%(100)= SETUP_MODEM_STEP2: s$="e0": gosub WRITE_AT_COMMAND_TO_MODEM: return
 ' NOTE: Changing PCM master/slave mode requires the modem to be physically power cycled
 ' before it takes effect!
 ' Setup modem as PCM audio master, 2MHz, 8KHz 16-bit linear samples
-SETUP_MODEM_STEP2 jt%(100)= SETUP_MODEM_STEP3: s$="at+qdai=1,0,0,4,0"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
+SETUP_MODEM_STEP2 print ".";: jt%(100)= SETUP_MODEM_STEP3: s$="+qdai=1,0,0,4,0": gosub WRITE_AT_COMMAND_TO_MODEM: return
 ' Setup modem as PCM audio slave, 2MHz, 8KHz 16-bit linear samples
-'s$="at+qdai=1,1,0,4,0"+chr$(13): gosub WRITE_STRING_TO_MODEM
+'s$="+qdai=1,1,0,4,0": gosub WRITE_AT_COMMAND_TO_MODEM
 ' Disable audio muting
-SETUP_MODEM_STEP3 jt%(100)= SETUP_MODEM_STEP4: s$="at+cmut=0"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
+SETUP_MODEM_STEP3 print ".";: jt%(100)= SETUP_MODEM_STEP4: s$="+cmut=0": gosub WRITE_AT_COMMAND_TO_MODEM: return
 '--- SMS setup ---
 'Set SMS mode to selected mode (smode%)
-SETUP_MODEM_STEP4 jt%(100)= SETUP_MODEM_STEP5: s$="at+cmgf="+right$(str$(gf%), len(str$(gf%))-1)+chr$(13): gosub WRITE_STRING_TO_MODEM: return
+SETUP_MODEM_STEP4 print ".";: jt%(100)= SETUP_MODEM_STEP5: s$="+cmgf="+right$(str$(gf%), len(str$(gf%))-1): gosub WRITE_AT_COMMAND_TO_MODEM: return
 'Set the memories to use for SMS storage; the memory used is MT (or ME), which has more space'
-SETUP_MODEM_STEP5 jt%(100)= SETUP_MODEM_STEP6: s$="at+cpms="+chr$(34)+"mt"+chr$(34)+","+chr$(34)+"mt"+chr$(34)+","+chr$(34)+"mt"+chr$(34)+chr$(13): gosub WRITE_STRING_TO_MODEM: return
+SETUP_MODEM_STEP5 print ".";: jt%(100)= SETUP_MODEM_STEP6: s$="+cpms="+chr$(34)+"mt"+chr$(34)+","+chr$(34)+"mt"+chr$(34)+","+chr$(34)+"mt"+chr$(34): gosub WRITE_AT_COMMAND_TO_MODEM: return
 'Set the modem to send all fields if in text mode
-SETUP_MODEM_STEP6 if gf%=1 then jt%(100)= SETUP_MODEM_STEP7: s$="at+csdh=1"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
+SETUP_MODEM_STEP6 print ".";: if gf%=1 then jt%(100)= SETUP_MODEM_STEP7: s$="+csdh=1": gosub WRITE_AT_COMMAND_TO_MODEM: return
 goto SETUP_MODEM_STEP7 'if not in text mode
 'Set the reporting mode for SMS
 '+cnmi=2,2,0,0,0: SMS-DELIVERs are routed directly to the TE using unsolicited result code: +CMT
 '+cnmi=2,1,0,0,0 (default): If SMS-DELIVER is stored into ME/TA, indication of the memory location is routed to the TE by using unsolicited result code: +CMTI
 'In the first case, SMS are not stored in SIM storage. We will use the second case.
-SETUP_MODEM_STEP7 jt%(100)= SETUP_MODEM_STEP8: s$="AT+CNMI=2,1,0,0,0"+chr$(13): gosub WRITE_STRING_TO_MODEM: return
+SETUP_MODEM_STEP7 print ".";: jt%(100)= SETUP_MODEM_STEP8: s$="+CNMI=2,1,0,0,0": gosub WRITE_AT_COMMAND_TO_MODEM: return
 '--- End of modem setup ---
 SETUP_MODEM_STEP8 jt%(100)=0
 'poke 0,65
