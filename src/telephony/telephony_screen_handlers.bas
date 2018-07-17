@@ -66,7 +66,7 @@ goto HS_C_NORMAL
 'normal interaction when not writing SMS
 HS_C_NORMAL if u$="{home}" then u0$=u$: gosub SWITCH_TO_SCREEN_DIALLER 'HOME: go back to dialler
 if u$=c13$ then u0$=u$: dnumber$=pnumber$(cselected%): gosub SWITCH_TO_SCREEN_CALL: gosub CALL_DIAL 'ENTER: call contact
-if u$=chr$(135) and sq=2 then r$=pnumber$(cselected%): gosub GET_SMS_FROM_CONTACT 'F5: refresh SMS from contact
+'if u$=chr$(135) and sq=2 then r$=pnumber$(cselected%): gosub GET_SMS_FROM_CONTACT 'F5: refresh SMS from contact
 if u$="E" then u0$=u$: ctrigger=1: gosub SWITCH_TO_SCREEN_CONTACT_EDIT 'E: edit contact
 if u$="N" then u0$=u$: gosub HS_C_BEGIN_WRITING: gosub ERASE_SCREEN: gosub VIRTUAL_KEYBOARD_ENABLE 'N: begin writing SMS
 return
