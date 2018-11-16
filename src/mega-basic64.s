@@ -538,9 +538,10 @@ megabasic_open_vector:
 		STA	$D0EF
 		;; Buffered UART2 = 115200bps
 		;; 50000000/115200=434=$1B2
-		LDA	#<$01B2
+		;; 40000000/115200=347=$15b
+		LDA	#<$015B
 		STA	$D0E6
-		LDA	#>$01B2
+		LDA	#>$015B
 		STA	$D0E7
 		
 		;; return with success
@@ -2227,6 +2228,9 @@ update_viciv_registers:
 		STA	$D058
 		LDA	#>80
 		STA	$D059
+	        ;; But display only 40 per row
+	        LDA	#40
+	        STA	$D05E
 		;; Screen RAM start address ($0000A000)
 		LDA	#$A0
 		STA	$D061
