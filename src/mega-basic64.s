@@ -38,45 +38,32 @@ init:
 		LDA	#$53
 		STA	$D02F
 
+	;;  Make sure correct palette is active
+	;; (working around a bug in the freezer)
+		lda #$FF
+		STA $d070
+	
 		;; Start with music disabled
 		lda #$00
 		sta $03ff
-		
+
+		;; Now patch the screen update by filling the canvas display
+		;; with spaces. The canvas screen is 80*50 * 2 bytes per char,
+		;; so 8000 bytes in total.  We only need to fill the top 25 rows,
+		;; however.
+		LDA	#$20
+		STA $E000
+		STA $E002
+		LDA	#$00
+		STA $E001
+		STA $E003
+	
 		;; Install $C000 block (and preloaded tiles)
 		;; (This also does most of the work initialising the screen)
 		lda 	#>c000blockdmalist
 		sta	$d701
 		lda	#<c000blockdmalist
 		sta	$d705
-		;; Now patch the screen update by filling the canvas display
-		;; with spaces. The canvas screen is 80*50 * 2 bytes per char,
-		;; so 8000 bytes in total.  We only need to fill the top 25 rows,
-		;; however.
-		LDA	#$20
-		LDX	#$00
-@spaceLoop:
-		STA	$E000, X
-		STA	$E100, X
-		STA	$E200, X
-		STA 	$E300, X
-		STA	$E400, X
-		STA	$E500, X
-		STA	$E600, X
-		STA	$E700, X
-		STA	$E800, X
-		STA	$E900, X
-		STA	$EA00, X
-		STA	$EB00, X
-		STA 	$EC00, X
-		STA	$ED00, X
-		STA	$EE00, X
-		STA	$EF00, X
-		INX
-		INX
-		BNE	@spaceLoop
-
-		;; enable wedge
-		jsr 	megabasic_enable
 
 		;; Copy acoustic scope program to $9800-$9FFF, and
 		;; drop top of BASIC down by 2KB to leave space for it.
@@ -84,69 +71,73 @@ init:
 		sta 52
 		sta 56
 
-		ldx #0
-spcopy:		lda scope_program_start,x
-		sta $9700,x
-		lda scope_program_start+$100,x
-		sta $9800,x
-		lda scope_program_start+$200,x
-		sta $9900,x
-		lda scope_program_start+$300,x
-		sta $9a00,x
-		lda scope_program_start+$400,x
-		sta $9b00,x
-		lda scope_program_start+$500,x
-		sta $9c00,x
-		lda scope_program_start+$600,x
-		sta $9d00,x
-		lda scope_program_start+$700,x
-		sta $9e00,x
-		lda scope_program_start+$800,x
-		sta $9f00,x
-		inx
-		bne spcopy
+	lda #$00
+	sta $0801
+	sta $0802
+	lda #<$0801
+	sta 45
+	lda #>$0801
+	sta 46	
+	
+		;; enable wedge
+		jsr 	megabasic_enable
 
 		;; Then make the demo tile set available for use
 		jsr 	tileset_point_to_start_of_area
 		jsr 	tileset_install
 
-		;; Finally, set up the raster interrupt to happen at raster
-		;; $100 (just below bottom of text area).
-		SEI	
-		LDA	#<raster_irq
-		STA	$0314
-		LDA	#>raster_irq
-		STA	$0315		
-		LDA	#$7F
-		STA	$DC0D
-		STA	$DC0E
-		LDA	#$9B
-		STA	$D011
-		LDA	#$00
-		STA	$D012
-		LDA	#$81
-		STA	$D01A
-		CLI
+		;; Jump to final_setup routine which has been copied to $0340
+		jmp $0100
 
-		;; XXX And setup NMI ($0318) and BRK ($0316) catchers?
-		;; (Model of $FE47 in C64 KERNAL).
-
-		;;  XXX Test simple music player
-.if 0
-		jsr $9b25
-m1:		lda $d012
-		cmp #$ff
-		bne m1
-		jsr $9add
-m2:		lda $d012
-		cmp #$ff
-		beq m2
-		jmp m1		
-.endif
-
-		rts
-
+	
 c000blockdmalist:
+
+		;; Clear $A000-$BFFF out	
+		.byte $0A,$00 	; F011A list follows		
+		;; Normal F011A list
+		.byte $07 ; fill + chained
+		.word $C000-$A000 ; size of DMA
+		.word $0000 ; source address = fill value
+		.byte $00   ; of bank $0
+		.word $A000 ; destination address is $A000
+		.byte $00   ; of bank $0
+		.word $0000 ; modulo (unused)
+	
+	        ;; Install 16-bit text mode screen RAM @ $E000
+		;; by copying the template bytes we have written at $E000-$E003
+		.byte $0A,$00 	; F011A list follows
+		;; Normal F011A list
+		.byte $04 ; copy + chained request
+		.word $1ffc ; set size
+		.word $E000
+		.byte $00   ; of bank $0
+		.word $E004
+		.byte $00   ; of bank $1 ( = $12000)
+		.word $0000 ; modulo (unused)		
+
+	        ;; Install scope program and ring tone at $9700-$9FFF
+		.byte $0A,$00 	; F011A list follows
+		;; Normal F011A list
+		.byte $04 ; copy + chained request
+		.word $0900 ; set size
+		.word scope_program_start
+		.byte $00   ; of bank $0
+		.word $9700
+		.byte $00   ; of bank $1 ( = $12000)
+		.word $0000 ; modulo (unused)		
+	
+	        ;; Install final setup routine at $0100-$017F
+		.byte $0A,$00 	; F011A list follows
+		;; Normal F011A list
+		.byte $04 ; copy + chained request
+		.word $0080 ; set size
+		.word final_setup
+		.byte $00   ; of bank $0
+		.word $0100
+		.byte $00   ; of bank $1 ( = $12000)
+		.word $0000 ; modulo (unused)		
+	
+
 		;; Install pre-prepared tileset @ $12000+
 		.byte $0A,$00 	; F011A list follows
 		;; Normal F011A list
@@ -157,19 +148,6 @@ c000blockdmalist:
 		.word $2000 ; destination address is $2000
 		.byte $01   ; of bank $1 ( = $12000)
 		.word $0000 ; modulo (unused)		
-
-		;; Clear $A000-$FFFF out (so that we can put screen data
-		;; at $A000-$BFFF and $E000-$FFFF). This obviously has to
-		;; happen BEFORE we copy our code into $C000 :)
-		.byte $0A,$00 	; F011A list follows		
-		;; Normal F011A list
-		.byte $07 ; fill + chained
-		.word $10000-$A000 ; size of copy 
-		.word $0000 ; source address = fill value
-		.byte $00   ; of bank $0
-		.word $A000 ; destination address is $A000
-		.byte $00   ; of bank $0
-		.word $0000 ; modulo (unused)
 
 		;; Clear colour RAM at $FF80800-$FF847FF to go with the above
 		.byte $81,$FF  	; destination is $FFxxxxx
@@ -184,7 +162,22 @@ c000blockdmalist:
 		.word $0000 ; modulo (unused)
 		;;  Clear option $81 from above
 		.byte $81,$00
-		
+
+		; Install ASCII font
+		.byte $0A    ; Request format is F018A
+		.byte $81,$FF ; destination is $FFxxxxx
+		.byte $00 ; no more options
+		; F018A DMA list
+		.byte $04   	; copy and chained request
+		.word $1000
+		.word ascii_font
+		.byte $00
+		.word $E000
+		.byte $07
+		.word $0000
+		;; Clear option $81 from above
+		.byte $81,$00 ; destination is $00xxxxx
+	
 		;; Copy MEGA BASIC code to $C000+
 		.byte $0A,$00 	; F011A list follows		
 		;; Normal F011A list
@@ -204,7 +197,62 @@ preloaded_tiles:
 		.incbin "bin/telephony.tiles"
 preloaded_tiles_end:	
 		preloaded_tiles_length = preloaded_tiles_end - preloaded_tiles
-		
+	
+filename:	.byte "TELE*",0	
+
+final_setup:	
+	;;  Load telephony program
+	
+	lda #$37
+	sta $01
+
+	ldx #$00
+
+	lda #$05 		; length of filename
+	ldx #<filename
+	ldy #>filename
+	jsr $ffbd
+	lda #$01
+	ldx $ba
+	bne @l2
+	Lda #$08
+@l2:	ldy #$01
+	jsr $ffba
+
+	.if 1
+	lda #$00		
+	jsr $ffd5
+	.endif
+
+	lda #$47
+	sta $d02f
+	lda #$53
+	sta $d02f
+
+	;; Finally, set up the raster interrupt to happen at raster
+		;; $100 (just below bottom of text area).
+		SEI	
+		LDA	#<raster_irq
+		STA	$0314
+		LDA	#>raster_irq
+		STA	$0315		
+		LDA	#$7F
+		STA	$DC0D
+		STA	$DC0E
+		LDA	#$9B
+		STA	$D011
+		LDA	#$00
+		STA	$D012
+		LDA	#$81
+		STA	$D01A
+		CLI
+
+	rts	
+
+ascii_font:
+	.incbin "bin/asciifont.bin"
+
+	
 ;-------------------------------------------------------------------------------
 		;; Routines that get installed at $C000
 ;-------------------------------------------------------------------------------
@@ -1001,16 +1049,16 @@ megabasic_perform_tile:
 		jmp	basic2_main_loop
 
 megabasic_perform_fast:
-		jsr	enable_viciv
+	jsr	enable_viciv
 		LDA	#$40
 		TSB	$D054
 		TSB	d054_bits
 		JMP	basic2_main_loop		
 		
 megabasic_perform_slow:
-		jsr	enable_viciv
-		LDA	#$40
-		TRB	$D054
+	jsr	enable_viciv
+	LDA	#$40
+	TRB	$D054
 		TRB	d054_bits
 		JMP	basic2_main_loop		
 
@@ -2711,6 +2759,8 @@ raster_irq:
 
 		PHZ
 
+		jsr enable_viciv
+	
 		;; Remember current speed setting
 		LDA	$D054
 		PHA
@@ -2722,11 +2772,11 @@ raster_irq:
 		;;  being fed register updates at 50MHz, similar to how real SIDs don't
 		;; work at 2MHz.
 		LDZ #$00
-.if 1
+
 		;; Disable 50MHz fast mode for the music player
 		lda #64
 		sta 0
-.endif		
+
 		lda $03ff
 		beq nomusic
 		cmp $3fe
@@ -2737,13 +2787,15 @@ alreadyplaying:
 		lda $3ff
 		sta $3fe
 		jsr $9add
+
 nomusic:			
-		
+
 		;; Enable 50MHz fast mode
 		lda #65
-		sta 0
-		LDA	#$40
-		TSB	$D054
+		sta 0	
+
+	LDA	#$40
+	TSB	$D054
 		TSB	$D031	
 
 		jsr	update_viciv_registers
